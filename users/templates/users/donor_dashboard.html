@@ -1,187 +1,106 @@
 {% extends "users/base.html" %}
 {% load food_rescue_tags %}
 {% block title %}Donor Dashboard{% endblock %}
-
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
 
-  <!-- Page header -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 au">
     <div>
-      <p class="text-emerald-600 dark:text-emerald-400 text-sm font-semibold
-                uppercase tracking-widest mb-1">Donor Dashboard</p>
-      <h1 class="font-display text-3xl font-bold text-gray-900 dark:text-white">
-        Welcome, {{ profile.full_name|truncatechars:22 }} 👋
-      </h1>
+      <p class="lbl mb-3">Donor Dashboard</p>
+      <h1 class="f-display text-6xl sm:text-7xl leading-none mb-3" style="color:#e8f5ec">WELCOME<br><span class="tg">{{ profile.full_name|truncatechars:18|upper }}</span></h1>
+      <p class="text-sm font-500" style="color:rgba(180,220,190,.55)">You've helped feed <span class="font-700" style="color:#00ff88">{{ meals_saved }}</span> people. Keep going.</p>
     </div>
-    <a href="{% url 'create_donation' %}"
-       class="inline-flex items-center gap-2 px-6 py-3 rounded-xl
-              bg-gradient-to-r from-emerald-500 to-green-600
-              text-white font-semibold shadow-md
-              hover:from-emerald-600 hover:to-green-700 hover:-translate-y-0.5
-              hover:shadow-glow transition duration-200 shrink-0">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-      </svg>
-      Donate Food
+    <a href="{% url 'create_donation' %}" class="btn btn-solid shrink-0" style="padding:.875rem 2rem;font-size:1rem">
+      <svg style="width:16px;height:16px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+      Post Donation
     </a>
   </div>
 
-  <!-- Analytics cards -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-    <!-- Total -->
-    <div class="glass rounded-2xl p-5 shadow-card hover:shadow-card-lg
-                hover:-translate-y-1 transition duration-200">
-      <div class="flex items-start justify-between mb-3">
-        <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/50
-                    flex items-center justify-center text-xl">🍱</div>
-        <span class="text-xs font-medium text-gray-400 uppercase tracking-wide">Total</span>
-      </div>
-      <p class="font-display text-3xl font-bold text-gray-900 dark:text-white">{{ total }}</p>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Donations posted</p>
+  <!-- Stats -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+    {% for s in "1234" %}{% endfor %}
+    <div class="glow-card glass lift au" style="border-radius:16px;padding:1.5rem">
+      <div class="lbl mb-4">Total</div>
+      <div class="f-display text-6xl tg mb-1">{{ total }}</div>
+      <div class="text-sm font-500" style="color:rgba(180,220,190,.5)">Donations posted</div>
+      <div class="mt-4" style="height:2px;background:linear-gradient(90deg,#00ff88,transparent);border-radius:1px"></div>
     </div>
-
-    <!-- Meals saved -->
-    <div class="glass rounded-2xl p-5 shadow-card hover:shadow-card-lg
-                hover:-translate-y-1 transition duration-200">
-      <div class="flex items-start justify-between mb-3">
-        <div class="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/50
-                    flex items-center justify-center text-xl">🍽️</div>
-        <span class="text-xs font-medium text-gray-400 uppercase tracking-wide">Impact</span>
-      </div>
-      <p class="font-display text-3xl font-bold text-gray-900 dark:text-white">{{ meals_saved }}</p>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Meals saved</p>
+    <div class="glow-card glass lift au1" style="border-radius:16px;padding:1.5rem">
+      <div class="lbl mb-4">Impact</div>
+      <div class="f-display text-6xl tg-warm mb-1">{{ meals_saved }}</div>
+      <div class="text-sm font-500" style="color:rgba(180,220,190,.5)">Meals saved</div>
+      <div class="mt-4" style="height:2px;background:linear-gradient(90deg,#f97316,transparent);border-radius:1px"></div>
     </div>
-
-    <!-- Active -->
-    <div class="glass rounded-2xl p-5 shadow-card hover:shadow-card-lg
-                hover:-translate-y-1 transition duration-200">
-      <div class="flex items-start justify-between mb-3">
-        <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50
-                    flex items-center justify-center text-xl">⚡</div>
-        <span class="text-xs font-medium text-gray-400 uppercase tracking-wide">Active</span>
-      </div>
-      <p class="font-display text-3xl font-bold text-gray-900 dark:text-white">{{ active }}</p>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">In progress</p>
+    <div class="glow-card glass lift au2" style="border-radius:16px;padding:1.5rem">
+      <div class="lbl mb-4">Active</div>
+      <div class="f-display text-6xl" style="-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-image:linear-gradient(135deg,#00d4ff,#6366f1)">{{ active }}</div>
+      <div class="text-sm font-500" style="color:rgba(180,220,190,.5)">Live now</div>
+      <div class="mt-4" style="height:2px;background:linear-gradient(90deg,#00d4ff,transparent);border-radius:1px"></div>
     </div>
-
-    <!-- Delivered -->
-    <div class="glass rounded-2xl p-5 shadow-card hover:shadow-card-lg
-                hover:-translate-y-1 transition duration-200">
-      <div class="flex items-start justify-between mb-3">
-        <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/50
-                    flex items-center justify-center text-xl">✅</div>
-        <span class="text-xs font-medium text-gray-400 uppercase tracking-wide">Done</span>
-      </div>
-      <p class="font-display text-3xl font-bold text-gray-900 dark:text-white">{{ delivered }}</p>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Delivered</p>
+    <div class="glow-card glass lift au3" style="border-radius:16px;padding:1.5rem">
+      <div class="lbl mb-4">Delivered</div>
+      <div class="f-display text-6xl tg-purple mb-1">{{ delivered }}</div>
+      <div class="text-sm font-500" style="color:rgba(180,220,190,.5)">Completed</div>
+      <div class="mt-4" style="height:2px;background:linear-gradient(90deg,#a855f7,transparent);border-radius:1px"></div>
     </div>
   </div>
 
-  <!-- Donation list -->
-  <div class="mb-6 flex items-center justify-between">
-    <h2 class="font-display text-xl font-semibold text-gray-900 dark:text-white">
-      My Donations
-    </h2>
-    <span class="text-sm text-gray-400">{{ donations.count }} total</span>
+  <!-- Donations list -->
+  <div class="flex items-center justify-between mb-6 au3">
+    <div>
+      <h2 class="f-display text-3xl tracking-wider" style="color:#e8f5ec">MY DONATIONS</h2>
+      <p class="text-xs font-600 mt-1" style="color:rgba(120,180,140,.4)">{{ donations|length }} TOTAL · NEWEST FIRST</p>
+    </div>
   </div>
 
   {% if donations %}
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div class="space-y-3 au4">
     {% for d in donations %}
-    <div class="group glass rounded-2xl overflow-hidden shadow-card
-                hover:shadow-card-lg hover:-translate-y-1 transition duration-300">
-
-      <!-- Food image -->
-      <div class="relative h-44 bg-gradient-to-br from-emerald-100 to-green-200
-                  dark:from-emerald-900/30 dark:to-green-900/30 overflow-hidden">
-        {% if d.image %}
-          <img src="{{ d.image.url }}" alt="{{ d.food_name }}"
-               class="w-full h-full object-cover group-hover:scale-105 transition duration-500"/>
-        {% else %}
-          <div class="w-full h-full flex items-center justify-center text-6xl">🍱</div>
-        {% endif %}
-        <!-- Status badge -->
-        <div class="absolute top-3 left-3">
-          <span class="px-3 py-1 rounded-full text-xs font-semibold
-                       badge-{{ d.status }}">
-            {{ d.get_status_display }}
-          </span>
-        </div>
-        <!-- Food type -->
-        <div class="absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-semibold
-                    {% if d.food_type == 'veg' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
-          {% if d.food_type == 'veg' %}🟢{% else %}🔴{% endif %}
-        </div>
-      </div>
-
-      <div class="p-5">
-        <h3 class="font-display font-semibold text-gray-900 dark:text-white text-base
-                   mb-3 truncate">{{ d.food_name }}</h3>
-
-        <div class="space-y-1.5 mb-4">
-          <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-            <span>🍽️</span> ~{{ d.quantity }} people
+    <div class="glow-card glass bar-{{ d.status }} transition-all duration-200" style="border-radius:14px;overflow:hidden" onmouseover="this.style.background='rgba(0,255,136,.03)'" onmouseout="this.style.background=''">
+      <div class="flex items-start gap-4 p-5">
+        <div class="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style="{% if d.food_type == 'veg' %}background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.2){% else %}background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2){% endif %}">{% if d.food_type == 'veg' %}🥦{% else %}🍗{% endif %}</div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-3 flex-wrap">
+            <div>
+              <h3 class="font-800 text-base" style="color:#e8f5ec">{{ d.food_name }}</h3>
+              <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1.5">
+                <span class="text-xs font-600" style="color:rgba(180,220,190,.45)">👥 ~{{ d.quantity }} people</span>
+                <span class="text-xs font-600" style="color:rgba(180,220,190,.45)">⏱ {{ d.expiry_time|date:"d M, g:i A" }}</span>
+                <span class="text-xs font-500" style="color:rgba(120,180,140,.4)">📍 {{ d.pickup_address|truncatechars:45 }}</span>
+              </div>
+            </div>
+            <span class="badge badge-{{ d.status }} shrink-0">{{ d.get_status_display }}</span>
           </div>
-          <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-            <span>📍</span>
-            <span class="truncate">{{ d.pickup_address|truncatechars:35 }}</span>
+          {% if d.accepted_by and d.status != 'available' %}
+          <div class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-600" style="background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.15);color:#00ff88">
+            <div style="width:16px;height:16px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#00ff88,#00b868);flex-shrink:0">
+              {% if d.accepted_by.profile.profile_image %}<img src="{{ d.accepted_by.profile.profile_image.url }}" style="width:100%;height:100%;object-fit:cover"/>
+              {% else %}<span style="color:#041209;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;height:100%">{{ d.accepted_by.profile.full_name|first|upper }}</span>{% endif %}
+            </div>
+            🤝 {{ d.accepted_by.profile.full_name }} is handling this
           </div>
-          <div class="flex items-center gap-2 text-xs
-                      {% if d.is_expired %}text-red-500{% else %}text-gray-500 dark:text-gray-400{% endif %}">
-            <span>⏱</span> Expires {{ d.expiry_time|date:"d M, g:i A" }}
-          </div>
+          {% endif %}
         </div>
-
-        <!-- Actions -->
-        <div class="flex items-center gap-2 pt-3 border-t border-gray-100 dark:border-gray-700/50">
-          <a href="{% url 'donation_detail' d.pk %}"
-             class="flex-1 text-center py-2 rounded-lg text-xs font-semibold
-                    bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300
-                    hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition">
-            View
-          </a>
+        <div class="shrink-0 flex flex-col sm:flex-row items-end sm:items-center gap-2">
+          <a href="{% url 'donation_detail' d.pk %}" class="btn btn-ghost !py-2 !px-3" style="font-size:.78rem">View →</a>
           {% if d.status|in_list:"available,expired" %}
-            <a href="{% url 'edit_donation' d.pk %}"
-               class="flex-1 text-center py-2 rounded-lg text-xs font-semibold
-                      bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300
-                      hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-              Edit
-            </a>
-            <form method="post" action="{% url 'cancel_donation' d.pk %}"
-                  onsubmit="return confirm('Cancel this donation?')">
-              {% csrf_token %}
-              <button type="submit"
-                      class="py-2 px-3 rounded-lg text-xs font-semibold
-                             bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400
-                             hover:bg-red-100 transition">
-                ✕
-              </button>
-            </form>
+          <a href="{% url 'edit_donation' d.pk %}" class="btn !py-2 !px-3" style="font-size:.78rem;background:rgba(0,255,136,.08);color:#00ff88;border:1px solid rgba(0,255,136,.2)">Edit</a>
+          <form method="post" action="{% url 'cancel_donation' d.pk %}" onsubmit="return confirm('Cancel this donation?')">{% csrf_token %}
+            <button class="btn btn-danger !py-2 !px-3" style="font-size:.78rem">Cancel</button>
+          </form>
           {% endif %}
         </div>
       </div>
     </div>
     {% endfor %}
   </div>
-
   {% else %}
-  <!-- Empty state -->
-  <div class="glass rounded-3xl p-16 text-center shadow-card">
-    <div class="w-20 h-20 mx-auto rounded-3xl bg-emerald-100 dark:bg-emerald-900/30
-                flex items-center justify-center text-4xl mb-6 animate-float">🍱</div>
-    <h3 class="font-display text-xl font-semibold text-gray-700 dark:text-gray-200 mb-3">
-      No donations yet
-    </h3>
-    <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-xs mx-auto">
-      Post your first surplus food donation and help someone in need today.
-    </p>
-    <a href="{% url 'create_donation' %}"
-       class="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl
-              bg-emerald-500 text-white font-semibold hover:bg-emerald-600
-              hover:-translate-y-0.5 transition duration-200 shadow-md">
-      + Post Your First Donation
-    </a>
+  <div class="glow-card glass text-center au4" style="border-radius:16px;padding:5rem 2rem">
+    <div class="text-5xl mb-5 fy">🍱</div>
+    <h3 class="f-display text-3xl tracking-wider mb-2" style="color:#e8f5ec">NO DONATIONS YET</h3>
+    <p class="text-sm font-500 mb-8 max-w-xs mx-auto" style="color:rgba(180,220,190,.45)">Your first post could feed dozens of people tonight.</p>
+    <a href="{% url 'create_donation' %}" class="btn btn-solid">+ Post Your First Donation</a>
   </div>
   {% endif %}
 </div>

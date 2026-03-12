@@ -156,7 +156,10 @@ def register_view(request):
     if request.user.is_authenticated:
         return _role_redirect(request.user)
 
-    form = UserRegistrationForm(request.POST or None, request.FILES or None)
+    if request.method == 'POST':
+        form = UserRegistrationForm(request.POST, request.FILES)
+    else:
+        form = UserRegistrationForm()
 
     if request.method == "POST" and form.is_valid():
         user = form.save()
@@ -287,7 +290,10 @@ def create_donation(request):
         messages.error(request, "Only donors can post food donations.")
         return redirect("volunteer_dashboard")
 
-    form = FoodDonationForm(request.POST or None, request.FILES or None)
+    if request.method == 'POST':
+        form = FoodDonationForm(request.POST, request.FILES)
+    else:
+        form = FoodDonationForm()
 
     if request.method == "POST" and form.is_valid():
         donation = form.save(commit=False)
@@ -338,11 +344,10 @@ def edit_donation(request, pk):
         )
         return redirect("donation_detail", pk=pk)
 
-    form = FoodDonationForm(
-        request.POST or None,
-        request.FILES or None,
-        instance=donation,
-    )
+    if request.method == 'POST':
+        form = FoodDonationForm(request.POST, request.FILES, instance=donation)
+    else:
+        form = FoodDonationForm(instance=donation)
 
     if request.method == "POST" and form.is_valid():
         updated = form.save(commit=False)
@@ -423,17 +428,22 @@ def volunteer_profile(request):
     """Profile update page for both donors and volunteers."""
     profile = get_object_or_404(UserProfile, user=request.user)
 
-    form = VolunteerProfileUpdateForm(
-        request.POST or None,
-        request.FILES or None,
-        instance=profile,
-        user=request.user,
-    )
-
-    if request.method == "POST" and form.is_valid():
-        form.save()
-        messages.success(request, "Profile updated successfully. ✅")
-        return _role_redirect(request.user)
+    if request.method == "POST":
+        form = VolunteerProfileUpdateForm(
+            request.POST,
+            request.FILES,          # Always pass FILES — never use "or None"
+            instance=profile,
+            user=request.user,
+        )
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profile updated successfully! ✅")
+            return redirect("volunteer_profile")   # Stay on profile so user sees new photo
+    else:
+        form = VolunteerProfileUpdateForm(
+            instance=profile,
+            user=request.user,
+        )
 
     context = {
         "form":    form,
@@ -587,8 +597,11 @@ def cancel_pickup(request, pk):
         FoodDonation,
         pk=pk,
         accepted_by=request.user,
-        status="accepted",
     )
+    # Can only cancel before the food has been handed over (accepted or picked_up)
+    if donation.status not in ("accepted", "picked_up"):
+        messages.error(request, "You can only cancel before the food is on the way.")
+        return redirect("volunteer_dashboard")
 
     donation.status      = "available"
     donation.accepted_by = None
@@ -696,11 +709,10 @@ def mark_delivered(request, pk):
         status="on_the_way",
     )
 
-    form = DeliveryConfirmationForm(
-        request.POST or None,
-        request.FILES or None,
-        instance=donation,
-    )
+    if request.method == 'POST':
+        form = DeliveryConfirmationForm(request.POST, request.FILES, instance=donation)
+    else:
+        form = DeliveryConfirmationForm(instance=donation)
 
     if request.method == "POST" and form.is_valid():
         form.save()   # sets status=delivered, delivery_time=now, saves image

@@ -1,778 +1,540 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth" x-data="themeManager()" :class="{ 'dark': isDark }">
+<html lang="en" x-data="App()" :class="dark?'dark':''">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Food Rescue — Connect surplus food with people in need." />
-  <title>{% block title %}Food Rescue{% endblock %} • Food Rescue</title>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>{% block title %}FoodRescue{% endblock %} · FoodRescue</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>tailwind.config={darkMode:'class'}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cabinet+Grotesk:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<style>
+/* ── RESET & BASE ─────────────────────────────────────────────────────── */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g1:#00ff88;--g2:#00d4ff;--g3:#7c3aed;
+  --surface:rgba(8,20,12,0.85);
+  --border:rgba(0,255,136,0.12);
+  --text-dim:rgba(180,220,190,0.6);
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Cabinet Grotesk',sans-serif;
+  background:#050d07;
+  color:#e8f5ec;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+.dark body,.dark{background:#050d07;color:#e8f5ec}
+html:not(.dark) body{background:#f0faf3;color:#0d1f12}
+html:not(.dark){--surface:rgba(255,255,255,0.82);--border:rgba(0,180,80,0.15);--text-dim:rgba(30,80,50,0.55)}
 
-  <!-- ── Tailwind CDN ─────────────────────────────────────────────────── -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            display: ['"Clash Display"', '"Syne"', 'sans-serif'],
-            body:    ['"DM Sans"', 'sans-serif'],
-            mono:    ['"JetBrains Mono"', 'monospace'],
-          },
-          colors: {
-            brand: {
-              50:  '#f0fdf6',
-              100: '#dcfce9',
-              200: '#bbf7d2',
-              300: '#86efad',
-              400: '#4ade80',
-              500: '#22c55e',
-              600: '#16a34a',
-              700: '#15803d',
-              800: '#166534',
-              900: '#14532d',
-            },
-          },
-          animation: {
-            'fade-in':       'fadeIn 0.4s ease forwards',
-            'slide-up':      'slideUp 0.5s cubic-bezier(.16,1,.3,1) forwards',
-            'slide-down':    'slideDown 0.3s cubic-bezier(.16,1,.3,1) forwards',
-            'scale-in':      'scaleIn 0.25s ease forwards',
-            'pulse-soft':    'pulseSoft 2.5s ease-in-out infinite',
-            'float':         'float 3s ease-in-out infinite',
-            'shimmer':       'shimmer 2s linear infinite',
-          },
-          keyframes: {
-            fadeIn:    { from: { opacity: 0 },                   to: { opacity: 1 } },
-            slideUp:   { from: { opacity: 0, transform: 'translateY(20px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
-            slideDown: { from: { opacity: 0, transform: 'translateY(-12px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
-            scaleIn:   { from: { opacity: 0, transform: 'scale(.95)' }, to: { opacity: 1, transform: 'scale(1)' } },
-            pulseSoft: { '0%,100%': { opacity: 1 }, '50%': { opacity: .6 } },
-            float:     { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-6px)' } },
-            shimmer:   { from: { backgroundPosition: '-200% 0' }, to: { backgroundPosition: '200% 0' } },
-          },
-          boxShadow: {
-            'card':    '0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.07)',
-            'card-lg': '0 4px 6px rgba(0,0,0,.05), 0 12px 40px rgba(0,0,0,.12)',
-            'glow':    '0 0 0 3px rgba(34,197,94,.25)',
-            'glow-lg': '0 0 30px rgba(34,197,94,.2)',
-          },
-        },
-      },
-    }
-  </script>
+/* ── DISPLAY FONT ─────────────────────────────────────────────────────── */
+.f-display{font-family:'Bebas Neue',sans-serif;letter-spacing:.03em}
+.f-mono{font-family:'JetBrains Mono',monospace}
+.f-body{font-family:'Cabinet Grotesk',sans-serif}
 
-  <!-- ── Google Fonts ─────────────────────────────────────────────────── -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+/* ── COSMIC BACKGROUND ────────────────────────────────────────────────── */
+.bg-cosmos{
+  position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
+}
+.bg-cosmos::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 15% 0%,   rgba(0,255,136,.22) 0%,transparent 55%),
+    radial-gradient(ellipse 60% 40% at 90% 10%,  rgba(0,212,255,.15) 0%,transparent 50%),
+    radial-gradient(ellipse 70% 45% at 60% 100%, rgba(124,58,237,.18) 0%,transparent 55%),
+    radial-gradient(ellipse 50% 35% at 5%  80%,  rgba(0,255,136,.1)  0%,transparent 45%);
+}
+html:not(.dark) .bg-cosmos::before{
+  background:
+    radial-gradient(ellipse 80% 50% at 15% 0%,   rgba(34,197,94,.25) 0%,transparent 55%),
+    radial-gradient(ellipse 60% 40% at 90% 10%,  rgba(14,165,233,.15)0%,transparent 50%),
+    radial-gradient(ellipse 70% 45% at 60% 100%, rgba(139,92,246,.12)0%,transparent 55%),
+    radial-gradient(ellipse 50% 35% at 5%  80%,  rgba(34,197,94,.1)  0%,transparent 45%);
+}
 
-  <!-- ── Alpine.js (no-build interactivity) ─────────────────────────── -->
-  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+/* Floating orbs */
+.orb{
+  position:absolute;border-radius:50%;filter:blur(80px);
+  animation:orbFloat var(--d,20s) ease-in-out infinite var(--delay,0s);
+  will-change:transform;
+}
+.orb-1{width:600px;height:600px;top:-200px;left:-200px;background:radial-gradient(circle,rgba(0,255,136,.35),transparent 70%);--d:22s}
+.orb-2{width:500px;height:500px;top:30%;right:-180px;background:radial-gradient(circle,rgba(0,212,255,.25),transparent 70%);--d:18s;--delay:-8s}
+.orb-3{width:450px;height:450px;bottom:-150px;left:30%;background:radial-gradient(circle,rgba(124,58,237,.28),transparent 70%);--d:26s;--delay:-14s}
+html:not(.dark) .orb-1{background:radial-gradient(circle,rgba(34,197,94,.3),transparent 70%)}
+html:not(.dark) .orb-2{background:radial-gradient(circle,rgba(14,165,233,.2),transparent 70%)}
+html:not(.dark) .orb-3{background:radial-gradient(circle,rgba(139,92,246,.2),transparent 70%)}
+@keyframes orbFloat{
+  0%,100%{transform:translate(0,0) scale(1)}
+  33%{transform:translate(30px,-40px) scale(1.06)}
+  66%{transform:translate(-20px,25px) scale(.95)}
+}
 
-  <!-- ── Base styles ──────────────────────────────────────────────────── -->
-  <style>
-    /* Fonts */
-    body { font-family: 'DM Sans', sans-serif; }
-    h1,h2,h3,.font-display { font-family: 'Syne', sans-serif; }
+/* Grid perspective floor */
+.grid-floor{
+  position:fixed;bottom:0;left:0;right:0;height:320px;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(0,255,136,.07) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,255,136,.07) 1px,transparent 1px);
+  background-size:55px 55px;
+  transform:perspective(500px) rotateX(70deg) translateY(80px);
+  transform-origin:bottom center;
+  mask-image:linear-gradient(to bottom,transparent 0%,rgba(0,0,0,.6) 70%,black 100%);
+}
+html:not(.dark) .grid-floor{
+  background-image:
+    linear-gradient(rgba(34,197,94,.08) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(34,197,94,.08) 1px,transparent 1px);
+  background-size:55px 55px;
+}
 
-    /* Smooth theme transition */
-    *, *::before, *::after {
-      transition-property: background-color, border-color, color;
-      transition-duration: 200ms;
-      transition-timing-function: ease;
-    }
-    /* Override transition for animations that shouldn't inherit it */
-    [class*="animate-"], button, a { transition-property: all; }
+/* Particle dots */
+.particles{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.particles::after{
+  content:'';position:absolute;inset:0;
+  background-image:
+    radial-gradient(rgba(0,255,136,.6) 1px,transparent 1px),
+    radial-gradient(rgba(0,212,255,.4) 1px,transparent 1px);
+  background-size:120px 120px, 200px 200px;
+  background-position:0 0, 60px 60px;
+  animation:particleDrift 40s linear infinite;
+}
+html:not(.dark) .particles::after{
+  background-image:
+    radial-gradient(rgba(34,197,94,.5) 1px,transparent 1px),
+    radial-gradient(rgba(14,165,233,.3) 1px,transparent 1px);
+  background-size:120px 120px, 200px 200px;
+}
+@keyframes particleDrift{from{background-position:0 0,60px 60px}to{background-position:120px 120px,180px 180px}}
 
-    /* Custom scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #d1fae5; border-radius: 99px; }
-    .dark ::-webkit-scrollbar-thumb { background: #166534; }
+/* ── GLASSMORPHISM ────────────────────────────────────────────────────── */
+.glass{
+  background:var(--surface);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid var(--border);
+  box-shadow:
+    0 4px 24px rgba(0,0,0,.35),
+    0 1px 0 rgba(0,255,136,.08) inset,
+    0 -1px 0 rgba(0,0,0,.3) inset;
+}
+html:not(.dark) .glass{
+  box-shadow:
+    0 4px 24px rgba(0,0,0,.08),
+    0 1px 0 rgba(255,255,255,.9) inset,
+    0 -1px 0 rgba(0,0,0,.04) inset;
+}
+.nav-glass{
+  background:rgba(5,13,7,.92);
+  backdrop-filter:blur(28px) saturate(200%);
+  -webkit-backdrop-filter:blur(28px) saturate(200%);
+  border-bottom:1px solid rgba(0,255,136,.1);
+  box-shadow:0 1px 0 rgba(0,255,136,.06),0 8px 32px rgba(0,0,0,.4);
+}
+html:not(.dark) .nav-glass{
+  background:rgba(240,250,243,.94);
+  border-bottom:1px solid rgba(34,197,94,.15);
+  box-shadow:0 1px 0 rgba(34,197,94,.08),0 4px 20px rgba(0,0,0,.05);
+}
 
-    /* Gradient text utility */
-    .text-gradient {
-      background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #0d9488 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
+/* ── 3D LIFT CARDS ────────────────────────────────────────────────────── */
+.lift{
+  transform-style:preserve-3d;
+  transition:transform .4s cubic-bezier(.175,.885,.32,1.275),box-shadow .4s ease;
+  position:relative;
+}
+.lift:hover{
+  transform:translateY(-10px) rotateX(5deg) rotateY(-3deg) scale(1.03);
+  box-shadow:
+    0 32px 64px rgba(0,0,0,.5),
+    0 8px 24px rgba(0,255,136,.2),
+    0 0 0 1px rgba(0,255,136,.2);
+}
+html:not(.dark) .lift:hover{
+  box-shadow:
+    0 32px 64px rgba(0,0,0,.12),
+    0 8px 24px rgba(34,197,94,.15),
+    0 0 0 1px rgba(34,197,94,.2);
+}
 
-    /* Mesh background */
-    .bg-mesh {
-      background-color: #f0fdf6;
-      background-image:
-        radial-gradient(at 20% 10%, rgba(134,239,172,.35) 0px, transparent 55%),
-        radial-gradient(at 80% 5%,  rgba(20,184,166,.18) 0px, transparent 50%),
-        radial-gradient(at 50% 90%, rgba(34,197,94,.15)  0px, transparent 60%);
-    }
-    .dark .bg-mesh {
-      background-color: #030f07;
-      background-image:
-        radial-gradient(at 20% 10%, rgba(22,101,52,.4)  0px, transparent 55%),
-        radial-gradient(at 80% 5%,  rgba(13,148,136,.2) 0px, transparent 50%),
-        radial-gradient(at 50% 90%, rgba(21,128,61,.2)  0px, transparent 60%);
-    }
+/* Floating shadow beneath card */
+.lift::after{
+  content:'';position:absolute;bottom:-14px;left:5%;right:5%;height:20px;
+  border-radius:50%;background:rgba(0,255,136,.2);
+  filter:blur(16px);opacity:0;
+  transition:opacity .4s ease,bottom .4s ease;z-index:-1;
+}
+.lift:hover::after{opacity:1;bottom:-18px}
+html:not(.dark) .lift::after{background:rgba(34,197,94,.15)}
 
-    /* Glassmorphism card */
-    .glass {
-      background: rgba(255,255,255,.7);
-      backdrop-filter: blur(12px) saturate(180%);
-      -webkit-backdrop-filter: blur(12px) saturate(180%);
-      border: 1px solid rgba(255,255,255,.6);
-    }
-    .dark .glass {
-      background: rgba(15,30,20,.7);
-      border: 1px solid rgba(255,255,255,.06);
-    }
+/* ── GLOW BORDER CARDS ────────────────────────────────────────────────── */
+.glow-card{position:relative;border-radius:16px}
+.glow-card::before{
+  content:'';position:absolute;inset:-1px;border-radius:inherit;
+  background:linear-gradient(135deg,rgba(0,255,136,.5),rgba(0,212,255,.2) 40%,transparent 70%);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;
+  pointer-events:none;z-index:1;
+}
+html:not(.dark) .glow-card::before{
+  background:linear-gradient(135deg,rgba(34,197,94,.4),rgba(14,165,233,.15) 40%,transparent 70%);
+}
 
-    /* Navbar glass */
-    .navbar-glass {
-      background: rgba(255,255,255,.85);
-      backdrop-filter: blur(16px) saturate(200%);
-      -webkit-backdrop-filter: blur(16px) saturate(200%);
-      border-bottom: 1px solid rgba(34,197,94,.1);
-    }
-    .dark .navbar-glass {
-      background: rgba(3,15,7,.85);
-      border-bottom: 1px solid rgba(34,197,94,.08);
-    }
+/* ── GRADIENT TEXT ────────────────────────────────────────────────────── */
+.tg{background:linear-gradient(135deg,#00ff88,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.tg-warm{background:linear-gradient(135deg,#f97316,#ef4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.tg-purple{background:linear-gradient(135deg,#a855f7,#6366f1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+html:not(.dark) .tg{background:linear-gradient(135deg,#059669,#0891b2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 
-    /* Status badge colours */
-    .badge-available  { background:#dcfce7; color:#15803d; }
-    .badge-accepted   { background:#fef9c3; color:#a16207; }
-    .badge-picked_up  { background:#dbeafe; color:#1d4ed8; }
-    .badge-on_the_way { background:#ede9fe; color:#6d28d9; }
-    .badge-delivered  { background:#f3f4f6; color:#374151; }
-    .badge-expired    { background:#fee2e2; color:#b91c1c; }
-    .badge-cancelled  { background:#fee2e2; color:#b91c1c; }
+/* ── SHINE SWEEP ──────────────────────────────────────────────────────── */
+.shine{position:relative;overflow:hidden}
+.shine::after{
+  content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);
+  transform:skewX(-20deg);animation:shineSweep 5s ease-in-out infinite;
+}
+@keyframes shineSweep{0%,100%{left:-100%}50%{left:140%}}
 
-    .dark .badge-available  { background:rgba(21,128,61,.25);  color:#86efac; }
-    .dark .badge-accepted   { background:rgba(161,98,7,.25);   color:#fde68a; }
-    .dark .badge-picked_up  { background:rgba(29,78,216,.25);  color:#93c5fd; }
-    .dark .badge-on_the_way { background:rgba(109,40,217,.25); color:#c4b5fd; }
-    .dark .badge-delivered  { background:rgba(55,65,81,.35);   color:#d1d5db; }
-    .dark .badge-expired    { background:rgba(185,28,28,.25);  color:#fca5a5; }
-    .dark .badge-cancelled  { background:rgba(185,28,28,.25);  color:#fca5a5; }
+/* ── NEON BUTTONS ─────────────────────────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+  border-radius:10px;font-weight:700;font-size:.875rem;
+  transition:all .2s cubic-bezier(.175,.885,.32,1.275);
+  cursor:pointer;border:none;outline:none;white-space:nowrap;
+  font-family:'Cabinet Grotesk',sans-serif;
+}
+.btn-neon{
+  padding:.75rem 1.75rem;
+  background:linear-gradient(135deg,rgba(0,255,136,.15),rgba(0,212,255,.1));
+  color:#00ff88;
+  border:1px solid rgba(0,255,136,.4);
+  box-shadow:0 0 20px rgba(0,255,136,.15),0 4px 12px rgba(0,0,0,.3),inset 0 1px 0 rgba(0,255,136,.15);
+  text-shadow:0 0 10px rgba(0,255,136,.5);
+}
+.btn-neon:hover{
+  background:linear-gradient(135deg,rgba(0,255,136,.25),rgba(0,212,255,.15));
+  border-color:rgba(0,255,136,.7);
+  box-shadow:0 0 30px rgba(0,255,136,.3),0 6px 20px rgba(0,0,0,.4),inset 0 1px 0 rgba(0,255,136,.2);
+  transform:translateY(-2px) scale(1.02);
+  text-shadow:0 0 16px rgba(0,255,136,.8);
+}
+.btn-neon:active{transform:translateY(0) scale(.99)}
+html:not(.dark) .btn-neon{
+  background:linear-gradient(135deg,rgba(34,197,94,.12),rgba(14,165,233,.08));
+  color:#059669;border-color:rgba(34,197,94,.35);
+  box-shadow:0 0 16px rgba(34,197,94,.12),0 4px 12px rgba(0,0,0,.06),inset 0 1px 0 rgba(255,255,255,.8);
+  text-shadow:none;
+}
+html:not(.dark) .btn-neon:hover{
+  background:linear-gradient(135deg,rgba(34,197,94,.2),rgba(14,165,233,.1));
+  border-color:rgba(34,197,94,.6);box-shadow:0 0 24px rgba(34,197,94,.2),0 6px 16px rgba(0,0,0,.08);
+}
+.btn-solid{
+  padding:.75rem 1.75rem;
+  background:linear-gradient(135deg,#00ff88,#00c969);
+  color:#041209;
+  box-shadow:0 0 24px rgba(0,255,136,.4),0 4px 12px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.3);
+}
+.btn-solid:hover{
+  background:linear-gradient(135deg,#1affa0,#00e07a);
+  transform:translateY(-2px) scale(1.02);
+  box-shadow:0 0 36px rgba(0,255,136,.5),0 8px 20px rgba(0,0,0,.35);
+}
+html:not(.dark) .btn-solid{
+  background:linear-gradient(135deg,#22c55e,#059669);color:#fff;
+  box-shadow:0 4px 14px rgba(34,197,94,.35),0 1px 3px rgba(0,0,0,.1);
+}
+html:not(.dark) .btn-solid:hover{box-shadow:0 8px 24px rgba(34,197,94,.45)}
+.btn-ghost{
+  padding:.75rem 1.75rem;
+  background:rgba(255,255,255,.04);
+  color:rgba(180,220,190,.8);
+  border:1px solid rgba(255,255,255,.1);
+}
+.btn-ghost:hover{background:rgba(255,255,255,.08);color:#e8f5ec;border-color:rgba(255,255,255,.2);transform:translateY(-1px)}
+html:not(.dark) .btn-ghost{background:rgba(0,0,0,.03);color:#374151;border-color:rgba(0,0,0,.1)}
+html:not(.dark) .btn-ghost:hover{background:rgba(0,0,0,.06);color:#111827}
+.btn-danger{
+  padding:.625rem 1.25rem;
+  background:rgba(239,68,68,.1);color:#f87171;
+  border:1px solid rgba(239,68,68,.25);font-size:.8rem;
+}
+.btn-danger:hover{background:rgba(239,68,68,.18);transform:translateY(-1px)}
+html:not(.dark) .btn-danger{background:rgba(239,68,68,.08);color:#dc2626;border-color:rgba(239,68,68,.2)}
 
-    /* Shimmer loading skeleton */
-    .skeleton {
-      background: linear-gradient(90deg, #f0fdf4 25%, #dcfce7 50%, #f0fdf4 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-    }
-    .dark .skeleton {
-      background: linear-gradient(90deg, #0f1f12 25%, #14532d 50%, #0f1f12 75%);
-      background-size: 200% 100%;
-    }
+/* ── INPUTS ───────────────────────────────────────────────────────────── */
+.inp{
+  width:100%;padding:.7rem 1rem;border-radius:10px;
+  background:rgba(0,255,136,.04);
+  border:1.5px solid rgba(0,255,136,.18);
+  color:#e8f5ec;font-size:.875rem;outline:none;
+  font-family:'Cabinet Grotesk',sans-serif;
+  transition:border-color .15s,box-shadow .15s,background .15s;
+}
+.inp::placeholder{color:rgba(180,220,190,.4)}
+.inp:focus{
+  border-color:rgba(0,255,136,.55);
+  background:rgba(0,255,136,.07);
+  box-shadow:0 0 0 3px rgba(0,255,136,.12),0 0 16px rgba(0,255,136,.08);
+}
+html:not(.dark) .inp{
+  background:rgba(255,255,255,.8);border-color:rgba(34,197,94,.2);color:#1f2937;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.04);
+}
+html:not(.dark) .inp::placeholder{color:#9ca3af}
+html:not(.dark) .inp:focus{
+  border-color:rgba(34,197,94,.5);background:rgba(255,255,255,.95);
+  box-shadow:0 0 0 3px rgba(34,197,94,.1);
+}
+textarea.inp{resize:vertical;min-height:80px}
+select.inp{cursor:pointer}
 
-    /* Page enter animation */
-    .page-enter { animation: slideUp 0.45s cubic-bezier(.16,1,.3,1) both; }
+/* ── STATUS BADGES ────────────────────────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;gap:.3rem;padding:.25rem .75rem;border-radius:999px;font-size:.72rem;font-weight:700;letter-spacing:.03em}
+.badge-available{background:rgba(0,255,136,.12);color:#00ff88;border:1px solid rgba(0,255,136,.3)}
+.badge-accepted{background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.3)}
+.badge-picked_up{background:rgba(96,165,250,.1);color:#60a5fa;border:1px solid rgba(96,165,250,.3)}
+.badge-on_the_way{background:rgba(167,139,250,.1);color:#a78bfa;border:1px solid rgba(167,139,250,.3)}
+.badge-delivered{background:rgba(148,163,184,.08);color:#94a3b8;border:1px solid rgba(148,163,184,.2)}
+.badge-expired{background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.3)}
+.badge-cancelled{background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.3)}
+html:not(.dark) .badge-available{background:rgba(34,197,94,.1);color:#15803d;border-color:rgba(34,197,94,.25)}
+html:not(.dark) .badge-accepted{background:rgba(234,179,8,.1);color:#854d0e;border-color:rgba(234,179,8,.25)}
+html:not(.dark) .badge-picked_up{background:rgba(59,130,246,.1);color:#1d4ed8;border-color:rgba(59,130,246,.25)}
+html:not(.dark) .badge-on_the_way{background:rgba(139,92,246,.1);color:#5b21b6;border-color:rgba(139,92,246,.25)}
+html:not(.dark) .badge-delivered{background:rgba(71,85,105,.08);color:#475569;border-color:rgba(71,85,105,.15)}
+html:not(.dark) .badge-expired{background:rgba(239,68,68,.08);color:#b91c1c;border-color:rgba(239,68,68,.2)}
+html:not(.dark) .badge-cancelled{background:rgba(239,68,68,.08);color:#b91c1c;border-color:rgba(239,68,68,.2)}
 
-    /* Notification dot pulse */
-    .notif-dot {
-      animation: pulseSoft 2s ease-in-out infinite;
-    }
-  </style>
+/* ── ACCENT LEFT BAR ──────────────────────────────────────────────────── */
+.bar-available{border-left:3px solid #00ff88}
+.bar-accepted{border-left:3px solid #fbbf24}
+.bar-picked_up{border-left:3px solid #60a5fa}
+.bar-on_the_way{border-left:3px solid #a78bfa}
+.bar-delivered{border-left:3px solid rgba(148,163,184,.5)}
+.bar-expired{border-left:3px solid #f87171}
+.bar-cancelled{border-left:3px solid #f87171}
+html:not(.dark) .bar-available{border-left-color:#22c55e}
+html:not(.dark) .bar-accepted{border-left-color:#eab308}
+html:not(.dark) .bar-picked_up{border-left-color:#3b82f6}
+html:not(.dark) .bar-on_the_way{border-left-color:#8b5cf6}
+html:not(.dark) .bar-expired{border-left-color:#ef4444}
+html:not(.dark) .bar-cancelled{border-left-color:#ef4444}
 
-  {% block extra_head %}{% endblock %}
+/* ── LABELS ───────────────────────────────────────────────────────────── */
+.lbl{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(120,180,140,.6)}
+html:not(.dark) .lbl{color:rgba(40,80,55,.45)}
+
+/* ── ANIMATIONS ───────────────────────────────────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes sd{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glowPulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.au {animation:fadeUp .55s cubic-bezier(.16,1,.3,1) both}
+.au1{animation:fadeUp .55s cubic-bezier(.16,1,.3,1) .07s both}
+.au2{animation:fadeUp .55s cubic-bezier(.16,1,.3,1) .14s both}
+.au3{animation:fadeUp .55s cubic-bezier(.16,1,.3,1) .22s both}
+.au4{animation:fadeUp .55s cubic-bezier(.16,1,.3,1) .3s both}
+.ai{animation:fadeIn .4s ease both}
+.asd{animation:sd .22s cubic-bezier(.16,1,.3,1) both}
+.gp{animation:glowPulse 2.4s ease-in-out infinite}
+.fy{animation:floatY 3.5s ease-in-out infinite}
+
+/* ── SCROLLBAR ────────────────────────────────────────────────────────── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,255,136,.25);border-radius:99px}
+html:not(.dark) ::-webkit-scrollbar-thumb{background:rgba(34,197,94,.3)}
+
+/* ── DIVIDER ──────────────────────────────────────────────────────────── */
+.divider{height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,136,.2),transparent)}
+html:not(.dark) .divider{background:linear-gradient(90deg,transparent,rgba(34,197,94,.2),transparent)}
+</style>
+{% block extra_head %}{% endblock %}
 </head>
 
-<body class="bg-mesh min-h-screen text-gray-800 dark:text-gray-100 antialiased"
-      x-init="init()">
+<body>
+<!-- Scene layers (fixed, z-0) -->
+<div class="bg-cosmos" aria-hidden="true">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+<div class="grid-floor" aria-hidden="true"></div>
+<div class="particles" aria-hidden="true"></div>
 
-  <!-- ════════════════════════════════════════════════════════════════════
-       NAVBAR
-  ════════════════════════════════════════════════════════════════════ -->
-  <nav class="navbar-glass sticky top-0 z-50"
-       x-data="notificationManager()">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6">
-      <div class="flex items-center justify-between h-16">
+<!-- ═══ NAVBAR ════════════════════════════════════════════════════════ -->
+<nav class="nav-glass sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 h-15 flex items-center justify-between gap-4" style="height:60px">
 
-        <!-- Logo -->
-        <a href="{% url 'landing' %}"
-           class="flex items-center gap-2.5 group shrink-0">
-          <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-green-600
-                      flex items-center justify-center shadow-md
-                      group-hover:scale-110 group-hover:rotate-3 transition duration-300">
-            <span class="text-white text-base leading-none">🍱</span>
-          </div>
-          <span class="font-display font-700 text-lg tracking-tight
-                       text-gray-900 dark:text-white
-                       group-hover:text-emerald-600 dark:group-hover:text-emerald-400
-                       transition duration-200">
-            Food<span class="text-gradient">Rescue</span>
-          </span>
-        </a>
+    <a href="{% url 'landing' %}" class="flex items-center gap-2.5 shrink-0 group">
+      <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm shine" style="background:linear-gradient(135deg,rgba(0,255,136,.3),rgba(0,212,255,.2));border:1px solid rgba(0,255,136,.4);box-shadow:0 0 14px rgba(0,255,136,.2);transition:all .3s ease" onmouseover="this.style.transform='scale(1.12) rotate(8deg)'" onmouseout="this.style.transform=''">🍱</div>
+      <span class="f-display text-xl tracking-widest" style="color:#00ff88;text-shadow:0 0 20px rgba(0,255,136,.4)">FOOD</span><span class="f-display text-xl tracking-widest text-white dark:text-white" style="color:#e8f5ec">RESCUE</span>
+    </a>
 
-        <!-- Desktop nav links -->
-        <div class="hidden md:flex items-center gap-1">
-          <a href="{% url 'impact_feed' %}"
-             class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium
-                    text-gray-600 dark:text-gray-300
-                    hover:text-emerald-600 dark:hover:text-emerald-400
-                    hover:bg-emerald-50 dark:hover:bg-emerald-900/30
-                    transition duration-200">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                    d="M13 10V3L4 14h7v7l9-11h-7z"/>
-            </svg>
-            Impact Feed
-          </a>
-
-          {% if user.is_authenticated %}
-            {% if user.profile.role == 'donor' %}
-              <a href="{% url 'donor_dashboard' %}"
-                 class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium
-                        text-gray-600 dark:text-gray-300
-                        hover:text-emerald-600 dark:hover:text-emerald-400
-                        hover:bg-emerald-50 dark:hover:bg-emerald-900/30
-                        transition duration-200">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                        d="M4 6h16M4 10h16M4 14h8"/>
-                </svg>
-                Dashboard
-              </a>
-              <a href="{% url 'create_donation' %}"
-                 class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium
-                        bg-emerald-500 text-white hover:bg-emerald-600
-                        shadow-sm hover:shadow-glow
-                        transition duration-200">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 4v16m8-8H4"/>
-                </svg>
-                Donate Food
-              </a>
-            {% else %}
-              <a href="{% url 'volunteer_dashboard' %}"
-                 class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium
-                        text-gray-600 dark:text-gray-300
-                        hover:text-emerald-600 dark:hover:text-emerald-400
-                        hover:bg-emerald-50 dark:hover:bg-emerald-900/30
-                        transition duration-200">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                        d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                </svg>
-                Dashboard
-              </a>
-            {% endif %}
-          {% endif %}
-        </div>
-
-        <!-- Right controls -->
-        <div class="flex items-center gap-1 sm:gap-2">
-
-          <!-- Theme toggle -->
-          <button @click="toggleTheme()"
-                  class="relative w-9 h-9 flex items-center justify-center rounded-lg
-                         text-gray-500 dark:text-gray-400
-                         hover:text-emerald-600 dark:hover:text-emerald-400
-                         hover:bg-emerald-50 dark:hover:bg-emerald-900/30
-                         transition duration-200"
-                  title="Toggle dark mode"
-                  aria-label="Toggle dark mode">
-            <!-- Sun icon (shown in dark) -->
-            <svg x-show="isDark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
-            </svg>
-            <!-- Moon icon (shown in light) -->
-            <svg x-show="!isDark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-            </svg>
-          </button>
-
-          {% if user.is_authenticated %}
-            <!-- Notifications -->
-            <div class="relative" x-data="notificationManager()" x-init="init()">
-              <button @click="open = !open; if(open) fetchNotifications()"
-                      @click.outside="open = false"
-                      class="relative w-9 h-9 flex items-center justify-center rounded-lg
-                             text-gray-500 dark:text-gray-400
-                             hover:text-emerald-600 dark:hover:text-emerald-400
-                             hover:bg-emerald-50 dark:hover:bg-emerald-900/30
-                             transition duration-200"
-                      aria-label="Notifications">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-                </svg>
-                <!-- Unread badge -->
-                <span x-show="unreadCount > 0"
-                      x-text="unreadCount > 9 ? '9+' : unreadCount"
-                      class="notif-dot absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1
-                             flex items-center justify-center
-                             bg-red-500 text-white text-[10px] font-bold
-                             rounded-full leading-none">
-                </span>
-              </button>
-
-              <!-- Dropdown panel -->
-              <div x-show="open"
-                   x-transition:enter="transition ease-out duration-200"
-                   x-transition:enter-start="opacity-0 scale-95 -translate-y-2"
-                   x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                   x-transition:leave="transition ease-in duration-150"
-                   x-transition:leave-start="opacity-100 scale-100"
-                   x-transition:leave-end="opacity-0 scale-95"
-                   class="absolute right-0 mt-2 w-80 glass rounded-2xl shadow-card-lg
-                          overflow-hidden z-50 border border-emerald-100/60 dark:border-emerald-900/40">
-
-                <!-- Header -->
-                <div class="flex items-center justify-between px-4 py-3
-                            border-b border-gray-100 dark:border-gray-700/50">
-                  <span class="text-sm font-semibold text-gray-700 dark:text-gray-200
-                               font-display">
-                    Notifications
-                  </span>
-                  <button @click="markAllRead()"
-                          x-show="unreadCount > 0"
-                          class="text-xs text-emerald-600 dark:text-emerald-400
-                                 hover:text-emerald-700 font-medium transition">
-                    Mark all read
-                  </button>
-                </div>
-
-                <!-- List -->
-                <div class="max-h-80 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-700/30">
-                  <template x-if="notifications.length === 0">
-                    <div class="flex flex-col items-center justify-center py-10 text-gray-400">
-                      <span class="text-3xl mb-2">🔔</span>
-                      <p class="text-sm">No new notifications</p>
-                    </div>
-                  </template>
-                  <template x-for="n in notifications" :key="n.id">
-                    <a :href="n.donation_id ? '/donation/' + n.donation_id + '/' : '#'"
-                       class="flex gap-3 px-4 py-3 hover:bg-emerald-50/70 dark:hover:bg-emerald-900/20
-                              transition duration-150 group">
-                      <div class="shrink-0 w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50
-                                  flex items-center justify-center text-base mt-0.5">
-                        <span x-text="notifIcon(n.type)"></span>
-                      </div>
-                      <div class="min-w-0">
-                        <p class="text-sm text-gray-700 dark:text-gray-200 leading-snug"
-                           x-text="n.message"></p>
-                        <p class="text-xs text-gray-400 mt-1" x-text="n.created_at"></p>
-                      </div>
-                    </a>
-                  </template>
-                </div>
-              </div>
-            </div>
-
-            <!-- Profile menu -->
-            <div class="relative" x-data="{ open: false }">
-              <button @click="open = !open"
-                      @click.outside="open = false"
-                      class="flex items-center gap-2 pl-1 pr-2 py-1 rounded-xl
-                             hover:bg-gray-100 dark:hover:bg-gray-800
-                             transition duration-200 group">
-                <!-- Avatar -->
-                <div class="w-8 h-8 rounded-lg overflow-hidden ring-2 ring-emerald-200
-                            dark:ring-emerald-800 group-hover:ring-emerald-400 transition">
-                  {% if user.profile.profile_image %}
-                    <img src="{{ user.profile.profile_image.url }}"
-                         alt="{{ user.profile.full_name }}"
-                         class="w-full h-full object-cover" />
-                  {% else %}
-                    <div class="w-full h-full bg-gradient-to-br from-emerald-400 to-green-600
-                                flex items-center justify-center">
-                      <span class="text-white text-sm font-bold">
-                        {{ user.profile.full_name|first|upper }}
-                      </span>
-                    </div>
-                  {% endif %}
-                </div>
-                <!-- Name (desktop) -->
-                <span class="hidden sm:block text-sm font-medium
-                             text-gray-700 dark:text-gray-200 max-w-[100px] truncate">
-                  {{ user.profile.full_name|truncatechars:14 }}
-                </span>
-                <svg class="w-3.5 h-3.5 text-gray-400 transition duration-200"
-                     :class="{ 'rotate-180': open }"
-                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-                </svg>
-              </button>
-
-              <!-- Dropdown -->
-              <div x-show="open"
-                   x-transition:enter="transition ease-out duration-200"
-                   x-transition:enter-start="opacity-0 scale-95 -translate-y-2"
-                   x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                   x-transition:leave="transition ease-in duration-150"
-                   x-transition:leave-start="opacity-100"
-                   x-transition:leave-end="opacity-0 scale-95"
-                   class="absolute right-0 mt-2 w-56 glass rounded-2xl shadow-card-lg
-                          overflow-hidden z-50 border border-gray-100/80 dark:border-gray-700/40">
-
-                <!-- User info header -->
-                <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700/50">
-                  <p class="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">
-                    {{ user.profile.full_name }}
-                  </p>
-                  <p class="text-xs text-gray-400 truncate mt-0.5">{{ user.email }}</p>
-                  <span class="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full text-xs
-                               font-medium
-                               {% if user.profile.role == 'donor' %}
-                                 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300
-                               {% else %}
-                                 bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300
-                               {% endif %}">
-                    {% if user.profile.role == 'donor' %}🍱 Donor{% else %}🤝 Volunteer{% endif %}
-                  </span>
-                </div>
-
-                <!-- Menu items -->
-                <div class="py-1.5">
-                  {% if user.profile.role == 'donor' %}
-                    <a href="{% url 'donor_dashboard' %}"
-                       class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700
-                              dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30
-                              hover:text-emerald-700 dark:hover:text-emerald-300 transition">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
-                      </svg>
-                      My Dashboard
-                    </a>
-                    <a href="{% url 'create_donation' %}"
-                       class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700
-                              dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30
-                              hover:text-emerald-700 dark:hover:text-emerald-300 transition">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M12 4v16m8-8H4"/>
-                      </svg>
-                      Donate Food
-                    </a>
-                  {% else %}
-                    <a href="{% url 'volunteer_dashboard' %}"
-                       class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700
-                              dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30
-                              hover:text-emerald-700 dark:hover:text-emerald-300 transition">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                              d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
-                      </svg>
-                      My Dashboard
-                    </a>
-                  {% endif %}
-
-                  <a href="{% url 'volunteer_profile' %}"
-                     class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700
-                            dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30
-                            hover:text-emerald-700 dark:hover:text-emerald-300 transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                    </svg>
-                    Edit Profile
-                  </a>
-
-                  <a href="{% url 'impact_feed' %}"
-                     class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700
-                            dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30
-                            hover:text-emerald-700 dark:hover:text-emerald-300 transition">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                            d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                    </svg>
-                    Impact Feed
-                  </a>
-
-                  <div class="border-t border-gray-100 dark:border-gray-700/50 mt-1.5 pt-1.5">
-                    <a href="{% url 'logout' %}"
-                       class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-500
-                              dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20
-                              transition">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                      </svg>
-                      Sign Out
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-          {% else %}
-            <!-- Guest buttons -->
-            <a href="{% url 'login' %}"
-               class="hidden sm:inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium
-                      text-gray-600 dark:text-gray-300
-                      hover:text-emerald-600 dark:hover:text-emerald-400
-                      hover:bg-emerald-50 dark:hover:bg-emerald-900/30
-                      transition duration-200">
-              Sign In
-            </a>
-            <a href="{% url 'register' %}"
-               class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium
-                      bg-emerald-500 text-white hover:bg-emerald-600
-                      shadow-sm hover:shadow-glow transition duration-200">
-              Get Started
-            </a>
-          {% endif %}
-
-          <!-- Mobile menu button -->
-          <button class="md:hidden w-9 h-9 flex items-center justify-center rounded-lg
-                         text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-                  @click="mobileOpen = !mobileOpen"
-                  x-data
-                  aria-label="Menu">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M4 6h16M4 12h16M4 18h16"/>
-            </svg>
-          </button>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- Mobile nav drawer -->
-    <div x-data="{ mobileOpen: false }"
-         x-show="mobileOpen"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 -translate-y-2"
-         x-transition:enter-end="opacity-100 translate-y-0"
-         class="md:hidden border-t border-gray-100 dark:border-gray-700/50 px-4 py-3 space-y-1">
-      <a href="{% url 'impact_feed' %}"
-         class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium
-                text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30
-                hover:text-emerald-600 transition">
-        ⚡ Impact Feed
-      </a>
+    <div class="hidden md:flex items-center gap-1 flex-1 justify-center">
+      <a href="{% url 'impact_feed' %}" class="px-4 py-2 rounded-lg text-sm font-600 transition-all" style="color:rgba(180,220,190,.7)" onmouseover="this.style.color='#00ff88';this.style.background='rgba(0,255,136,.06)'" onmouseout="this.style.color='rgba(180,220,190,.7)';this.style.background=''">⚡ Impact</a>
       {% if user.is_authenticated %}
         {% if user.profile.role == 'donor' %}
-          <a href="{% url 'donor_dashboard' %}"
-             class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium
-                    text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30
-                    hover:text-emerald-600 transition">
-            📊 My Dashboard
-          </a>
-          <a href="{% url 'create_donation' %}"
-             class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium
-                    bg-emerald-500 text-white hover:bg-emerald-600 transition">
-            + Donate Food
-          </a>
+          <a href="{% url 'donor_dashboard' %}" class="px-4 py-2 rounded-lg text-sm font-600 transition-all" style="color:rgba(180,220,190,.7)" onmouseover="this.style.color='#00ff88';this.style.background='rgba(0,255,136,.06)'" onmouseout="this.style.color='rgba(180,220,190,.7)';this.style.background=''">Dashboard</a>
+          <a href="{% url 'create_donation' %}" class="btn btn-neon !py-2 !px-4 text-sm ml-2">+ Donate Food</a>
         {% else %}
-          <a href="{% url 'volunteer_dashboard' %}"
-             class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium
-                    text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30
-                    hover:text-emerald-600 transition">
-            📋 My Dashboard
-          </a>
+          <a href="{% url 'volunteer_dashboard' %}" class="px-4 py-2 rounded-lg text-sm font-600 transition-all" style="color:rgba(180,220,190,.7)" onmouseover="this.style.color='#00ff88';this.style.background='rgba(0,255,136,.06)'" onmouseout="this.style.color='rgba(180,220,190,.7)';this.style.background=''">Dashboard</a>
         {% endif %}
-        <a href="{% url 'volunteer_profile' %}"
-           class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium
-                  text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30
-                  hover:text-emerald-600 transition">
-          👤 Profile
-        </a>
-        <a href="{% url 'logout' %}"
-           class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium
-                  text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
-          → Sign Out
-        </a>
-      {% else %}
-        <a href="{% url 'login' %}"
-           class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium
-                  text-gray-700 dark:text-gray-300 hover:bg-emerald-50 transition">
-          Sign In
-        </a>
-        <a href="{% url 'register' %}"
-           class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium
-                  bg-emerald-500 text-white hover:bg-emerald-600 transition">
-          Get Started
-        </a>
       {% endif %}
     </div>
-  </nav>
 
-  <!-- ════════════════════════════════════════════════════════════════════
-       DJANGO MESSAGES
-  ════════════════════════════════════════════════════════════════════ -->
-  {% if messages %}
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-2"
-         x-data
-         x-init="setTimeout(() => $el.style.opacity = 0, 4500);
-                 setTimeout(() => $el.remove(), 5000)"
-         style="transition: opacity 0.5s ease">
-      {% for message in messages %}
-        <div class="flex items-start gap-3 px-4 py-3 rounded-xl text-sm font-medium
-                    shadow-card animate-slide-down
-                    {% if message.tags == 'error' %}
-                      bg-red-50 text-red-700 border border-red-200
-                      dark:bg-red-900/30 dark:text-red-300 dark:border-red-800/50
-                    {% elif message.tags == 'warning' %}
-                      bg-amber-50 text-amber-700 border border-amber-200
-                      dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800/50
-                    {% elif message.tags == 'success' %}
-                      bg-emerald-50 text-emerald-700 border border-emerald-200
-                      dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800/50
-                    {% else %}
-                      bg-blue-50 text-blue-700 border border-blue-200
-                      dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800/50
-                    {% endif %}">
-          <span class="text-base shrink-0">
-            {% if message.tags == 'error' %}❌
-            {% elif message.tags == 'warning' %}⚠️
-            {% elif message.tags == 'success' %}✅
-            {% else %}ℹ️{% endif %}
-          </span>
-          {{ message }}
-        </div>
-      {% endfor %}
-    </div>
-  {% endif %}
+    <div class="flex items-center gap-2">
+      <!-- Theme toggle -->
+      <button @click="toggleTheme()" class="w-9 h-9 flex items-center justify-center rounded-xl transition-all" style="color:rgba(0,255,136,.7);border:1px solid rgba(0,255,136,.15)" onmouseover="this.style.background='rgba(0,255,136,.08)';this.style.borderColor='rgba(0,255,136,.35)'" onmouseout="this.style.background='';this.style.borderColor='rgba(0,255,136,.15)'">
+        <svg x-show="dark" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
+        <svg x-show="!dark" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+      </button>
 
-  <!-- ════════════════════════════════════════════════════════════════════
-       MAIN CONTENT
-  ════════════════════════════════════════════════════════════════════ -->
-  <main class="page-enter">
-    {% block content %}{% endblock %}
-  </main>
-
-  <!-- ════════════════════════════════════════════════════════════════════
-       FOOTER
-  ════════════════════════════════════════════════════════════════════ -->
-  <footer class="mt-24 border-t border-emerald-100/60 dark:border-emerald-900/30">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <!-- Brand -->
-        <div class="flex items-center gap-2">
-          <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-400 to-green-600
-                      flex items-center justify-center">
-            <span class="text-white text-sm">🍱</span>
+      {% if user.is_authenticated %}
+        <!-- Notifications -->
+        <div class="relative" x-data="Notif()" x-init="boot()">
+          <button @click="open=!open;if(open)load()" @click.outside="open=false"
+                  class="relative w-9 h-9 flex items-center justify-center rounded-xl transition-all" style="color:rgba(0,255,136,.7);border:1px solid rgba(0,255,136,.15)" onmouseover="this.style.background='rgba(0,255,136,.08)'" onmouseout="this.style.background=''">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+            <span x-show="n>0" x-text="n>9?'9+':n" class="gp absolute -top-1 -right-1 min-w-[18px] h-[18px] px-0.5 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-800 leading-none" style="box-shadow:0 0 8px rgba(239,68,68,.6)"></span>
+          </button>
+          <div x-show="open" class="asd absolute right-0 mt-2 w-80 glass rounded-2xl shadow-2xl overflow-hidden z-50">
+            <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--border)">
+              <span class="f-display text-sm tracking-wider" style="color:#00ff88">NOTIFICATIONS</span>
+              <button x-show="n>0" @click="readAll()" class="text-xs font-600 transition" style="color:rgba(0,255,136,.6)" onmouseover="this.style.color='#00ff88'" onmouseout="this.style.color='rgba(0,255,136,.6)'">Mark all read</button>
+            </div>
+            <div class="max-h-72 overflow-y-auto">
+              <template x-if="items.length===0"><div class="py-10 text-center text-sm" style="color:rgba(180,220,190,.4)"><div class="text-2xl mb-2 fy">🔔</div>All caught up!</div></template>
+              <template x-for="i in items" :key="i.id">
+                <a :href="i.donation_id?`/donation/${i.donation_id}/`:'#'" class="flex gap-3 px-4 py-3 transition-all" style="border-bottom:1px solid rgba(0,255,136,.04)" onmouseover="this.style.background='rgba(0,255,136,.04)'" onmouseout="this.style.background=''">
+                  <span class="text-lg shrink-0" x-text="ico(i.type)"></span>
+                  <div><p class="text-xs leading-snug" style="color:rgba(220,240,225,.85)" x-text="i.message"></p><p class="text-[11px] mt-0.5" style="color:rgba(120,180,140,.5)" x-text="i.created_at"></p></div>
+                </a>
+              </template>
+            </div>
           </div>
-          <span class="font-display font-semibold text-gray-700 dark:text-gray-300">
-            Food<span class="text-gradient">Rescue</span>
-          </span>
         </div>
-        <!-- Links -->
-        <div class="flex items-center gap-6 text-sm text-gray-400">
-          <a href="{% url 'impact_feed' %}"
-             class="hover:text-emerald-500 transition">Impact</a>
-          <a href="{% url 'register' %}"
-             class="hover:text-emerald-500 transition">Join</a>
-          <a href="{% url 'login' %}"
-             class="hover:text-emerald-500 transition">Sign In</a>
+
+        <!-- Profile dropdown -->
+        <div class="relative" x-data="{o:false}">
+          <button @click="o=!o" @click.outside="o=false"
+                  class="flex items-center gap-2 px-2 py-1.5 rounded-xl transition-all" style="border:1px solid rgba(0,255,136,.12)" onmouseover="this.style.background='rgba(0,255,136,.06)'" onmouseout="this.style.background=''">
+            <div style="width:28px;height:28px;border-radius:8px;overflow:hidden;border:1.5px solid rgba(0,255,136,.4);box-shadow:0 0 8px rgba(0,255,136,.2);flex-shrink:0">
+              {% if user.profile.profile_image %}<img src="{{ user.profile.profile_image.url }}" alt="" style="width:100%;height:100%;object-fit:cover"/>
+              {% else %}<div style="width:100%;height:100%;background:linear-gradient(135deg,#00ff88,#00b868);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#041209">{{ user.profile.full_name|first|upper }}</div>{% endif %}
+            </div>
+            <span class="hidden sm:block text-sm font-600 max-w-[80px] truncate" style="color:rgba(220,240,225,.85)">{{ user.profile.full_name|truncatechars:11 }}</span>
+            <svg class="w-3 h-3 transition" :class="{'rotate-180':o}" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:rgba(0,255,136,.5)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+          <div x-show="o" class="asd absolute right-0 mt-2 w-52 glass rounded-2xl shadow-2xl overflow-hidden z-50">
+            <div class="px-4 py-3" style="border-bottom:1px solid var(--border)">
+              <p class="text-sm font-700 truncate" style="color:#e8f5ec">{{ user.profile.full_name }}</p>
+              <p class="text-xs truncate mt-0.5" style="color:rgba(120,180,140,.5)">{{ user.email }}</p>
+              <span class="inline-block mt-1.5 px-2 py-0.5 rounded-full text-xs font-700" style="{% if user.profile.role == 'donor' %}background:rgba(0,255,136,.12);color:#00ff88;border:1px solid rgba(0,255,136,.25){% else %}background:rgba(96,165,250,.1);color:#60a5fa;border:1px solid rgba(96,165,250,.25){% endif %}">
+                {% if user.profile.role == 'donor' %}🍱 Donor{% else %}🤝 Volunteer{% endif %}
+              </span>
+            </div>
+            <div class="py-1">
+              {% if user.profile.role == 'donor' %}
+                <a href="{% url 'donor_dashboard' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm transition-all" style="color:rgba(180,220,190,.75)" onmouseover="this.style.background='rgba(0,255,136,.06)';this.style.color='#00ff88'" onmouseout="this.style.background='';this.style.color='rgba(180,220,190,.75)'">📊 Dashboard</a>
+                <a href="{% url 'create_donation' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm transition-all" style="color:rgba(180,220,190,.75)" onmouseover="this.style.background='rgba(0,255,136,.06)';this.style.color='#00ff88'" onmouseout="this.style.background='';this.style.color='rgba(180,220,190,.75)'">🍱 Donate Food</a>
+              {% else %}
+                <a href="{% url 'volunteer_dashboard' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm transition-all" style="color:rgba(180,220,190,.75)" onmouseover="this.style.background='rgba(0,255,136,.06)';this.style.color='#00ff88'" onmouseout="this.style.background='';this.style.color='rgba(180,220,190,.75)'">📋 Dashboard</a>
+              {% endif %}
+              <a href="{% url 'volunteer_profile' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm transition-all" style="color:rgba(180,220,190,.75)" onmouseover="this.style.background='rgba(0,255,136,.06)';this.style.color='#00ff88'" onmouseout="this.style.background='';this.style.color='rgba(180,220,190,.75)'">👤 Edit Profile</a>
+              <a href="{% url 'impact_feed' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm transition-all" style="color:rgba(180,220,190,.75)" onmouseover="this.style.background='rgba(0,255,136,.06)';this.style.color='#00ff88'" onmouseout="this.style.background='';this.style.color='rgba(180,220,190,.75)'">⚡ Impact Feed</a>
+              <div style="border-top:1px solid rgba(239,68,68,.15)" class="pt-1 mt-1">
+                <a href="{% url 'logout' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm transition-all" style="color:#f87171" onmouseover="this.style.background='rgba(239,68,68,.08)'" onmouseout="this.style.background=''">→ Sign Out</a>
+              </div>
+            </div>
+          </div>
         </div>
-        <!-- Copy -->
-        <p class="text-xs text-gray-400">
-          © {% now "Y" %} Food Rescue · Reducing waste, feeding lives
-        </p>
-      </div>
+      {% else %}
+        <a href="{% url 'login' %}" class="hidden sm:block px-4 py-2 rounded-lg text-sm font-600 transition-all" style="color:rgba(0,255,136,.6)" onmouseover="this.style.color='#00ff88'" onmouseout="this.style.color='rgba(0,255,136,.6)'">Sign In</a>
+        <a href="{% url 'register' %}" class="btn btn-solid !py-2 !px-4 text-sm">Get Started</a>
+      {% endif %}
+
+      <button class="md:hidden w-9 h-9 flex items-center justify-center rounded-xl" style="color:rgba(0,255,136,.7);border:1px solid rgba(0,255,136,.15)" x-data @click="$dispatch('mob')">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
     </div>
-  </footer>
+  </div>
 
-  <!-- ════════════════════════════════════════════════════════════════════
-       SCRIPTS
-  ════════════════════════════════════════════════════════════════════ -->
-  <script>
-    /* ── Theme Manager ─────────────────────────────────────────────── */
-    function themeManager() {
-      return {
-        isDark: false,
-        init() {
-          const stored = localStorage.getItem('fr-theme');
-          if (stored) {
-            this.isDark = stored === 'dark';
-          } else {
-            this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          }
-          // Watch system changes
-          window.matchMedia('(prefers-color-scheme: dark)')
-            .addEventListener('change', e => {
-              if (!localStorage.getItem('fr-theme')) this.isDark = e.matches;
-            });
-        },
-        toggleTheme() {
-          this.isDark = !this.isDark;
-          localStorage.setItem('fr-theme', this.isDark ? 'dark' : 'light');
-        },
-      }
-    }
+  <!-- Mobile nav -->
+  <div x-data="{o:false}" @mob.window="o=!o" x-show="o" class="md:hidden px-4 py-3 space-y-1" style="border-top:1px solid rgba(0,255,136,.08)">
+    <a href="{% url 'impact_feed' %}" class="block px-3 py-2.5 rounded-xl text-sm font-600" style="color:rgba(180,220,190,.75)">⚡ Impact Feed</a>
+    {% if user.is_authenticated %}
+      {% if user.profile.role == 'donor' %}<a href="{% url 'donor_dashboard' %}" class="block px-3 py-2.5 rounded-xl text-sm font-600" style="color:rgba(180,220,190,.75)">📊 Dashboard</a><a href="{% url 'create_donation' %}" class="block px-3 py-2.5 rounded-xl text-sm font-700 btn btn-neon text-center" style="display:block">+ Donate Food</a>
+      {% else %}<a href="{% url 'volunteer_dashboard' %}" class="block px-3 py-2.5 rounded-xl text-sm font-600" style="color:rgba(180,220,190,.75)">📋 Dashboard</a>{% endif %}
+      <a href="{% url 'volunteer_profile' %}" class="block px-3 py-2.5 rounded-xl text-sm font-600" style="color:rgba(180,220,190,.75)">👤 Profile</a>
+      <a href="{% url 'logout' %}" class="block px-3 py-2.5 rounded-xl text-sm font-600" style="color:#f87171">→ Sign Out</a>
+    {% else %}
+      <a href="{% url 'login' %}" class="block px-3 py-2.5 rounded-xl text-sm font-600" style="color:rgba(180,220,190,.75)">Sign In</a>
+      <a href="{% url 'register' %}" class="block btn btn-solid text-center">Get Started</a>
+    {% endif %}
+  </div>
+</nav>
 
-    /* ── Notification Manager ──────────────────────────────────────── */
-    function notificationManager() {
-      return {
-        open:         false,
-        notifications: [],
-        unreadCount:  {{ unread|default:0 }},
-        _pollTimer:   null,
+<!-- Flash messages -->
+{% if messages %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-2 relative z-10 au"
+     x-data x-init="setTimeout(()=>{$el.style.opacity=0;$el.style.transition='opacity .5s'},4500);setTimeout(()=>$el.remove(),5000)">
+  {% for msg in messages %}
+  <div class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-600 shadow-lg glass"
+       style="{% if msg.tags == 'error' %}border-color:rgba(248,113,113,.3);color:#f87171{% elif msg.tags == 'warning' %}border-color:rgba(251,191,36,.3);color:#fbbf24{% elif msg.tags == 'success' %}border-color:rgba(0,255,136,.3);color:#00ff88{% else %}border-color:rgba(96,165,250,.3);color:#60a5fa{% endif %}">
+    {% if msg.tags == 'error' %}❌{% elif msg.tags == 'warning' %}⚠️{% elif msg.tags == 'success' %}✅{% else %}ℹ️{% endif %} {{ msg }}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
 
-        init() {
-          // Fetch unread count immediately on page load
-          this.refreshCount();
-          // Poll every 30 seconds so badge stays live without refresh
-          this._pollTimer = setInterval(() => this.refreshCount(), 30000);
-        },
+<main class="relative z-10">{% block content %}{% endblock %}</main>
 
-        async refreshCount() {
-          // Lightweight count-only fetch to keep badge updated
-          try {
-            const res  = await fetch("{% url 'notifications_json' %}");
-            const data = await res.json();
-            this.unreadCount = data.unread;
-            // If dropdown is open, refresh the list too
-            if (this.open) {
-              this.notifications = data.notifications;
-            }
-          } catch (e) { /* silent — network may be offline */ }
-        },
+<footer class="relative z-10 mt-24" style="border-top:1px solid rgba(0,255,136,.08)">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-2.5">
+      <div class="w-6 h-6 rounded-lg flex items-center justify-center text-xs shine" style="background:linear-gradient(135deg,rgba(0,255,136,.25),rgba(0,212,255,.15));border:1px solid rgba(0,255,136,.3)">🍱</div>
+      <span class="f-display text-sm tracking-widest" style="color:#00ff88">FOOD</span><span class="f-display text-sm tracking-widest" style="color:rgba(220,240,225,.6)">RESCUE</span>
+    </div>
+    <div class="flex gap-6 text-xs font-600" style="color:rgba(120,180,140,.45)">
+      <a href="{% url 'impact_feed' %}" onmouseover="this.style.color='#00ff88'" onmouseout="this.style.color='rgba(120,180,140,.45)'" class="transition-colors">Impact</a>
+      <a href="{% url 'register' %}" onmouseover="this.style.color='#00ff88'" onmouseout="this.style.color='rgba(120,180,140,.45)'" class="transition-colors">Join</a>
+      <a href="{% url 'login' %}" onmouseover="this.style.color='#00ff88'" onmouseout="this.style.color='rgba(120,180,140,.45)'" class="transition-colors">Sign In</a>
+    </div>
+    <p class="text-xs font-500" style="color:rgba(120,180,140,.35)">© {% now "Y" %} FoodRescue · Zero waste, maximum impact</p>
+  </div>
+</footer>
 
-        async fetchNotifications() {
-          try {
-            const res  = await fetch("{% url 'notifications_json' %}");
-            const data = await res.json();
-            this.notifications = data.notifications;
-            this.unreadCount   = data.unread;
-          } catch (e) {
-            console.warn('Could not load notifications', e);
-          }
-        },
-
-        async markAllRead() {
-          try {
-            await fetch("{% url 'mark_notifications_read' %}", {
-              method: 'POST',
-              headers: { 'X-CSRFToken': getCookie('csrftoken') },
-            });
-            this.unreadCount  = 0;
-            this.notifications = [];
-          } catch (e) {
-            console.warn('Could not mark notifications read', e);
-          }
-        },
-
-        notifIcon(type) {
-          const map = {
-            accepted:     '✅',
-            cancelled:    '⚠️',
-            new_donation: '🍱',
-            picked_up:    '📦',
-            on_the_way:   '🚗',
-            delivered:    '🎉',
-          };
-          return map[type] || '🔔';
-        },
-      }
-    }
-
-    /* ── CSRF helper ───────────────────────────────────────────────── */
-    function getCookie(name) {
-      const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
-      return v ? v[2] : null;
-    }
-  </script>
-
-  {% block extra_js %}{% endblock %}
+<script>
+function App(){
+  return{
+    dark:true,
+    init(){
+      const s=localStorage.getItem('fr-theme');
+      if(s==='light') this.dark=false;
+      else if(s==='dark') this.dark=true;
+      else this.dark=!window.matchMedia('(prefers-color-scheme:light)').matches;
+    },
+    toggleTheme(){this.dark=!this.dark;localStorage.setItem('fr-theme',this.dark?'dark':'light')},
+  }
+}
+function Notif(){
+  return{
+    open:false,n:{{ unread|default:0 }},items:[],
+    boot(){this.poll();setInterval(()=>this.poll(),30000)},
+    async poll(){try{const d=await(await fetch("{% url 'notifications_json' %}")).json();this.n=d.unread;if(this.open)this.items=d.notifications}catch(e){}},
+    async load(){try{const d=await(await fetch("{% url 'notifications_json' %}")).json();this.items=d.notifications;this.n=d.unread}catch(e){}},
+    async readAll(){try{await fetch("{% url 'mark_notifications_read' %}",{method:'POST',headers:{'X-CSRFToken':csrf()}});this.n=0;this.items=[]}catch(e){}},
+    ico(t){return{accepted:'✅',cancelled:'⚠️',new_donation:'🍱',picked_up:'📦',on_the_way:'🚗',delivered:'🎉'}[t]||'🔔'},
+  }
+}
+function csrf(){const m=document.cookie.match('(^|;) ?csrftoken=([^;]*)(;|$)');return m?m[2]:''}
+</script>
+{% block extra_js %}{% endblock %}
 </body>
 </html>

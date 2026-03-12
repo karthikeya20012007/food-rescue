@@ -1,139 +1,87 @@
 {% extends "users/base.html" %}
 {% block title %}Volunteer Dashboard{% endblock %}
-
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
 
-  <!-- Header -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
+  <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 au">
     <div>
-      <p class="text-blue-600 dark:text-blue-400 text-sm font-semibold uppercase tracking-widest mb-1">
-        Volunteer Dashboard
-      </p>
-      <h1 class="font-display text-3xl font-bold text-gray-900 dark:text-white">
-        Welcome, {{ profile.full_name|truncatechars:22 }} 🤝
-      </h1>
+      <p class="lbl mb-3">Volunteer Dashboard</p>
+      <h1 class="f-display text-6xl sm:text-7xl leading-none mb-3" style="color:#e8f5ec">READY<br><span style="-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-image:linear-gradient(135deg,#00d4ff,#a855f7)">{{ profile.full_name|truncatechars:18|upper }}</span></h1>
+      <p class="text-sm font-500" style="color:rgba(180,220,190,.55)">{% if total_pickups %}You've delivered <span class="font-700" style="color:#00d4ff">{{ meals_delivered }} meals</span> across {{ total_pickups }} pickups.{% else %}Accept your first pickup below and start making an impact.{% endif %}</p>
     </div>
-    <a href="{% url 'impact_feed' %}"
-       class="inline-flex items-center gap-2 px-5 py-3 rounded-xl
-              bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300
-              font-medium text-sm hover:bg-blue-100 transition shrink-0">
-      ⚡ View Impact Feed
-    </a>
+    <a href="{% url 'impact_feed' %}" class="btn btn-ghost shrink-0">⚡ View Impact Feed</a>
   </div>
 
-  <!-- Analytics -->
-  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-    <div class="glass rounded-2xl p-5 shadow-card hover:-translate-y-1 transition duration-200">
-      <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50
-                  flex items-center justify-center text-xl mb-3">🚴</div>
-      <p class="font-display text-3xl font-bold text-gray-900 dark:text-white">{{ total_pickups }}</p>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Total Pickups</p>
+  <!-- Stats -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+    <div class="glow-card glass lift au" style="border-radius:16px;padding:1.5rem">
+      <div class="lbl mb-4">Total</div>
+      <div class="f-display text-6xl mb-1" style="-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-image:linear-gradient(135deg,#00d4ff,#6366f1)">{{ total_pickups }}</div>
+      <div class="text-sm font-500" style="color:rgba(180,220,190,.5)">Pickups done</div>
+      <div class="mt-4" style="height:2px;background:linear-gradient(90deg,#00d4ff,transparent);border-radius:1px"></div>
     </div>
-    <div class="glass rounded-2xl p-5 shadow-card hover:-translate-y-1 transition duration-200">
-      <div class="w-10 h-10 rounded-xl bg-orange-100 dark:bg-orange-900/50
-                  flex items-center justify-center text-xl mb-3">🍽️</div>
-      <p class="font-display text-3xl font-bold text-gray-900 dark:text-white">{{ meals_delivered }}</p>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Meals Delivered</p>
+    <div class="glow-card glass lift au1" style="border-radius:16px;padding:1.5rem">
+      <div class="lbl mb-4">Impact</div>
+      <div class="f-display text-6xl tg-warm mb-1">{{ meals_delivered }}</div>
+      <div class="text-sm font-500" style="color:rgba(180,220,190,.5)">Meals delivered</div>
+      <div class="mt-4" style="height:2px;background:linear-gradient(90deg,#f97316,transparent);border-radius:1px"></div>
     </div>
-    <div class="glass rounded-2xl p-5 shadow-card hover:-translate-y-1 transition duration-200">
-      <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/50
-                  flex items-center justify-center text-xl mb-3">⚡</div>
-      <p class="font-display text-3xl font-bold text-gray-900 dark:text-white">{{ active_deliveries }}</p>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Active</p>
+    <div class="glow-card glass lift au2" style="border-radius:16px;padding:1.5rem">
+      <div class="lbl mb-4">Active</div>
+      <div class="f-display text-6xl tg mb-1">{{ active_deliveries }}</div>
+      <div class="text-sm font-500" style="color:rgba(180,220,190,.5)">In progress</div>
+      <div class="mt-4" style="height:2px;background:linear-gradient(90deg,#00ff88,transparent);border-radius:1px"></div>
     </div>
-    <div class="glass rounded-2xl p-5 shadow-card hover:-translate-y-1 transition duration-200">
-      <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/50
-                  flex items-center justify-center text-xl mb-3">✅</div>
-      <p class="font-display text-3xl font-bold text-gray-900 dark:text-white">{{ completed }}</p>
-      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Completed</p>
+    <div class="glow-card glass lift au3" style="border-radius:16px;padding:1.5rem">
+      <div class="lbl mb-4">Done</div>
+      <div class="f-display text-6xl tg-purple mb-1">{{ completed }}</div>
+      <div class="text-sm font-500" style="color:rgba(180,220,190,.5)">Completed</div>
+      <div class="mt-4" style="height:2px;background:linear-gradient(90deg,#a855f7,transparent);border-radius:1px"></div>
     </div>
   </div>
 
-  <!-- My Active Pickups -->
+  <!-- Active pickups -->
   {% if my_pickups %}
-  <div class="mb-10">
-    <h2 class="font-display text-xl font-semibold text-gray-900 dark:text-white mb-5">
-      My Active Pickups
-    </h2>
+  <div class="mb-12 au2">
+    <div class="flex items-center gap-3 mb-6">
+      <h2 class="f-display text-3xl tracking-wider" style="color:#e8f5ec">ACTIVE PICKUPS</h2>
+      <span class="badge" style="background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.3)">{{ my_pickups|length }} active</span>
+    </div>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
       {% for d in my_pickups %}
-      <div class="group glass rounded-2xl overflow-hidden shadow-card
-                  hover:shadow-card-lg hover:-translate-y-1 transition duration-300
-                  border-l-4
-                  {% if d.status == 'accepted' %}border-yellow-400
-                  {% elif d.status == 'picked_up' %}border-blue-400
-                  {% else %}border-purple-400{% endif %}">
-
+      <div class="glow-card glass lift" style="border-radius:16px;overflow:hidden">
+        <div style="height:2px;background:{% if d.status == 'accepted' %}linear-gradient(90deg,#fbbf24,#f97316){% elif d.status == 'picked_up' %}linear-gradient(90deg,#60a5fa,#6366f1){% else %}linear-gradient(90deg,#a78bfa,#ec4899){% endif %}"></div>
         <div class="p-5">
-          <div class="flex items-start justify-between mb-3">
-            <h3 class="font-display font-semibold text-gray-900 dark:text-white truncate mr-2">
-              {{ d.food_name }}
-            </h3>
-            <span class="shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold
-                         badge-{{ d.status }}">
-              {{ d.get_status_display }}
-            </span>
+          <div class="flex items-start justify-between gap-2 mb-4">
+            <div>
+              <h3 class="font-800 text-base" style="color:#e8f5ec">{{ d.food_name }}</h3>
+              <p class="text-xs font-500 mt-0.5" style="color:rgba(120,180,140,.45)">by {{ d.donor.profile.full_name|default:d.donor.username }}</p>
+            </div>
+            <span class="badge badge-{{ d.status }} shrink-0">{{ d.get_status_display }}</span>
           </div>
-
-          <div class="space-y-1.5 mb-4 text-sm text-gray-500 dark:text-gray-400">
-            <div class="flex items-center gap-2">
-              <span>🍽️</span> ~{{ d.quantity }} people
-            </div>
-            <div class="flex items-start gap-2">
-              <span class="shrink-0 mt-0.5">📍</span>
-              <span class="line-clamp-2 text-xs">{{ d.pickup_address }}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span>⏱</span>
-              <span class="text-xs">Expires {{ d.expiry_time|date:"d M, g:i A" }}</span>
-            </div>
+          <div class="space-y-2 mb-5">
+            <div class="flex items-center gap-2 text-xs font-500" style="color:rgba(180,220,190,.5)"><span>🍽️</span>~{{ d.quantity }} people</div>
+            <div class="flex items-start gap-2 text-xs font-500" style="color:rgba(180,220,190,.5)"><span class="shrink-0">📍</span><span style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ d.pickup_address }}</span></div>
+            <div class="flex items-center gap-2 text-xs font-500" style="color:rgba(180,220,190,.5)"><span>⏱</span>{{ d.expiry_time|date:"d M, g:i A" }}</div>
           </div>
-
-          <!-- Action buttons -->
-          <div class="flex flex-wrap gap-2 pt-3 border-t border-gray-100 dark:border-gray-700/50">
-            <a href="{{ d.google_maps_url }}" target="_blank"
-               class="flex-1 text-center py-2 px-3 rounded-lg text-xs font-semibold
-                      bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300
-                      hover:bg-blue-100 transition">
-              📍 Maps
-            </a>
-
+          <div class="flex flex-wrap gap-2 pt-4" style="border-top:1px solid rgba(0,255,136,.08)">
+            <a href="{{ d.google_maps_url }}" target="_blank" class="btn !py-2 !px-3" style="font-size:.78rem;background:rgba(96,165,250,.1);color:#60a5fa;border:1px solid rgba(96,165,250,.2)">📍 Navigate</a>
             {% if d.status == 'accepted' %}
-              <form method="post" action="{% url 'mark_picked_up' d.pk %}">
-                {% csrf_token %}
-                <button class="py-2 px-3 rounded-lg text-xs font-semibold
-                               bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700
-                               dark:text-emerald-300 hover:bg-emerald-100 transition">
-                  📦 Picked Up
-                </button>
+              <form method="post" action="{% url 'mark_picked_up' d.pk %}">{% csrf_token %}
+                <button class="btn !py-2 !px-3" style="font-size:.78rem;background:rgba(0,255,136,.1);color:#00ff88;border:1px solid rgba(0,255,136,.2)">📦 Picked Up</button>
               </form>
-              <form method="post" action="{% url 'cancel_pickup' d.pk %}"
-                    onsubmit="return confirm('Cancel this pickup?')">
-                {% csrf_token %}
-                <button class="py-2 px-3 rounded-lg text-xs font-semibold
-                               bg-red-50 dark:bg-red-900/30 text-red-500 hover:bg-red-100 transition">
-                  ✕
-                </button>
+              <form method="post" action="{% url 'cancel_pickup' d.pk %}" x-data onsubmit="return confirm('Cancel this pickup? It will return to available.')">{% csrf_token %}
+                <button class="btn btn-danger !py-2 !px-3" style="font-size:.78rem">✕ Cancel Pickup</button>
               </form>
-
             {% elif d.status == 'picked_up' %}
-              <form method="post" action="{% url 'mark_on_the_way' d.pk %}">
-                {% csrf_token %}
-                <button class="py-2 px-3 rounded-lg text-xs font-semibold
-                               bg-purple-50 dark:bg-purple-900/30 text-purple-700
-                               dark:text-purple-300 hover:bg-purple-100 transition">
-                  🚗 On The Way
-                </button>
+              <form method="post" action="{% url 'mark_on_the_way' d.pk %}">{% csrf_token %}
+                <button class="btn !py-2 !px-3" style="font-size:.78rem;background:rgba(167,139,250,.1);color:#a78bfa;border:1px solid rgba(167,139,250,.2)">🚗 On The Way</button>
               </form>
-
+              <form method="post" action="{% url 'cancel_pickup' d.pk %}" x-data onsubmit="return confirm('Cancel? Donation returns to available.')">{% csrf_token %}
+                <button class="btn btn-danger !py-2 !px-3" style="font-size:.78rem">✕ Cancel</button>
+              </form>
             {% elif d.status == 'on_the_way' %}
-              <a href="{% url 'mark_delivered' d.pk %}"
-                 class="py-2 px-3 rounded-lg text-xs font-semibold
-                        bg-gray-100 dark:bg-gray-800 text-gray-700
-                        dark:text-gray-300 hover:bg-gray-200 transition">
-                ✅ Mark Delivered
-              </a>
+              <a href="{% url 'mark_delivered' d.pk %}" class="btn btn-solid !py-2 !px-3" style="font-size:.78rem">✅ Mark Delivered</a>
             {% endif %}
           </div>
         </div>
@@ -144,214 +92,91 @@
   {% endif %}
 
   <!-- Filter bar -->
-  <div class="mb-6" x-data="distanceFilter()">
-
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
-      <h2 class="font-display text-xl font-semibold text-gray-900 dark:text-white">
-        Available Donations
-        {% if distance_applied %}
-          <span class="text-sm font-normal text-emerald-600 dark:text-emerald-400 ml-2">
-            · within {{ distance_km }} km
-          </span>
-        {% endif %}
-      </h2>
+  <div class="mb-6 au3" x-data="DF()">
+    <div class="flex items-center justify-between flex-wrap gap-3 mb-5">
+      <div>
+        <h2 class="f-display text-3xl tracking-wider" style="color:#e8f5ec">AVAILABLE NOW</h2>
+        <p class="text-xs font-600 mt-1" style="color:rgba(120,180,140,.4)">{{ available_donations|length }} DONATIONS WAITING{% if distance_applied %} · WITHIN {{ distance_km }} KM{% endif %}</p>
+      </div>
     </div>
-
-    <form method="get" id="filter-form" class="flex flex-wrap items-center gap-2">
-
-      <!-- Hidden GPS fields populated by JS -->
-      <input type="hidden" name="vol_lat" id="vol_lat" value="{{ request.GET.vol_lat }}"/>
-      <input type="hidden" name="vol_lng" id="vol_lng" value="{{ request.GET.vol_lng }}"/>
-
-      <!-- Search — submit on Enter (default), no button needed -->
-      <input type="text" name="search" value="{{ search }}"
-             placeholder="🔍 Search food or area…"
-             class="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700
-                    bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300
-                    focus:outline-none focus:ring-2 focus:ring-emerald-400
-                    placeholder-gray-400 dark:placeholder-gray-600 w-44"/>
-
-      <!-- Food type — auto-submits on change -->
-      <select name="food_type"
-              onchange="document.getElementById('filter-form').submit()"
-              class="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700
-                     bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300
-                     focus:outline-none focus:ring-2 focus:ring-emerald-400 cursor-pointer">
-        <option value="all"     {% if food_type == 'all' %}selected{% endif %}>🍽 All Types</option>
-        <option value="veg"     {% if food_type == 'veg' %}selected{% endif %}>🟢 Veg Only</option>
+    <form method="get" id="ff" class="flex flex-wrap items-center gap-2.5">
+      <input type="hidden" name="vol_lat" id="vla" value="{{ request.GET.vol_lat }}"/>
+      <input type="hidden" name="vol_lng" id="vln" value="{{ request.GET.vol_lng }}"/>
+      <input type="text" name="search" value="{{ search }}" placeholder="🔍 Search…" class="inp" style="width:160px;padding:.5rem .875rem"/>
+      <select name="food_type" onchange="document.getElementById('ff').submit()" class="inp" style="width:auto;padding:.5rem .875rem">
+        <option value="all" {% if food_type == 'all' %}selected{% endif %}>🍽 All Types</option>
+        <option value="veg" {% if food_type == 'veg' %}selected{% endif %}>🟢 Veg</option>
         <option value="non_veg" {% if food_type == 'non_veg' %}selected{% endif %}>🔴 Non-Veg</option>
       </select>
-
-      <!-- Distance — auto-submits; requests GPS first if needed -->
-      <select name="distance"
-              id="distance-select"
-              @change="handleDistanceChange($event)"
-              class="px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700
-                     bg-white dark:bg-gray-800 text-sm text-gray-700 dark:text-gray-300
-                     focus:outline-none focus:ring-2 focus:ring-emerald-400 cursor-pointer">
-        <option value="all" {% if distance_km == 'all' %}selected{% endif %}>📍 Any Distance</option>
-        <option value="1"   {% if distance_km == '1' %}selected{% endif %}>Within 1 km</option>
-        <option value="2"   {% if distance_km == '2' %}selected{% endif %}>Within 2 km</option>
-        <option value="5"   {% if distance_km == '5' %}selected{% endif %}>Within 5 km</option>
-        <option value="10"  {% if distance_km == '10' %}selected{% endif %}>Within 10 km</option>
+      <select name="distance" id="ds" @change="hd($event)" class="inp" style="width:auto;padding:.5rem .875rem">
+        <option value="all" {% if distance_km == 'all' %}selected{% endif %}>📍 Any distance</option>
+        <option value="1"   {% if distance_km == '1'   %}selected{% endif %}>Within 1 km</option>
+        <option value="2"   {% if distance_km == '2'   %}selected{% endif %}>Within 2 km</option>
+        <option value="5"   {% if distance_km == '5'   %}selected{% endif %}>Within 5 km</option>
+        <option value="10"  {% if distance_km == '10'  %}selected{% endif %}>Within 10 km</option>
       </select>
-
-      <!-- GPS status indicator -->
-      <span x-show="gpsStatus !== ''"
-            x-text="gpsStatus"
-            :class="gpsError ? 'text-red-500' : 'text-emerald-600 dark:text-emerald-400'"
-            class="text-xs font-medium"></span>
-
-      <!-- Clear filters link -->
-      {% if food_type != 'all' or search or distance_km != 'all' %}
-      <a href="{% url 'volunteer_dashboard' %}"
-         class="text-xs text-gray-400 hover:text-red-500 transition ml-1">
-        ✕ Clear
-      </a>
-      {% endif %}
-
+      <span x-show="msg" x-text="msg" :style="err?'color:#f87171':'color:#00ff88'" class="text-xs font-700"></span>
+      {% if food_type != 'all' or search or distance_km != 'all' %}<a href="{% url 'volunteer_dashboard' %}" class="text-xs font-700 transition" style="color:rgba(248,113,113,.6)" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='rgba(248,113,113,.6)'">✕ Clear</a>{% endif %}
     </form>
   </div>
 
-  <!-- Available donations grid -->
+  <!-- Available donation cards -->
   {% if available_donations %}
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 au4">
     {% for d in available_donations %}
-    <div class="group glass rounded-2xl overflow-hidden shadow-card
-                hover:shadow-card-lg hover:-translate-y-1.5 transition duration-300">
-
-      <div class="relative h-44 bg-gradient-to-br from-emerald-100 to-green-200
-                  dark:from-emerald-900/30 dark:to-green-900/30 overflow-hidden">
-        {% if d.image %}
-          <img src="{{ d.image.url }}" alt="{{ d.food_name }}"
-               class="w-full h-full object-cover group-hover:scale-105 transition duration-500"/>
-        {% else %}
-          <div class="w-full h-full flex items-center justify-center text-6xl">🍱</div>
-        {% endif %}
-        <div class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-semibold
-                    badge-available">Available</div>
-        <div class="absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-semibold
-                    {% if d.food_type == 'veg' %}bg-green-100 text-green-700{% else %}bg-red-100 text-red-700{% endif %}">
-          {% if d.food_type == 'veg' %}🟢 Veg{% else %}🔴 Non-Veg{% endif %}
+    <div class="glow-card glass lift" style="border-radius:16px;overflow:hidden">
+      <!-- Food type header -->
+      <div class="px-5 py-4" style="background:{% if d.food_type == 'veg' %}rgba(0,255,136,.05){% else %}rgba(248,113,113,.05){% endif %};border-bottom:1px solid {% if d.food_type == 'veg' %}rgba(0,255,136,.12){% else %}rgba(248,113,113,.12){% endif %}">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style="background:{% if d.food_type == 'veg' %}rgba(0,255,136,.12){% else %}rgba(248,113,113,.12){% endif %}">{% if d.food_type == 'veg' %}🥦{% else %}🍗{% endif %}</div>
+            <div>
+              <h3 class="font-800 text-base" style="color:#e8f5ec;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ d.food_name }}</h3>
+              <p class="text-xs font-500 mt-0.5" style="color:rgba(120,180,140,.45)">by {{ d.donor.profile.full_name|default:d.donor.username }}</p>
+            </div>
+          </div>
+          <span class="badge badge-{% if d.food_type == 'veg' %}available{% else %}expired{% endif %}" style="{% if d.food_type == 'veg' %}background:rgba(0,255,136,.1);color:#00ff88;border-color:rgba(0,255,136,.25){% else %}background:rgba(248,113,113,.1);color:#f87171;border-color:rgba(248,113,113,.25){% endif %}">{% if d.food_type == 'veg' %}🟢 Veg{% else %}🔴 Non-Veg{% endif %}</span>
         </div>
-        <!-- Urgency indicator -->
-        {% if d.expiry_time %}
-        <div class="absolute bottom-0 left-0 right-0 h-1
-                    bg-gradient-to-r from-emerald-400 to-green-500"></div>
-        {% endif %}
       </div>
-
       <div class="p-5">
-        <h3 class="font-display font-semibold text-gray-900 dark:text-white text-base
-                   mb-1 truncate">{{ d.food_name }}</h3>
-        <p class="text-xs text-gray-400 mb-3">
-          by {{ d.donor.profile.full_name|default:d.donor.username }}
-        </p>
-
-        <div class="space-y-1.5 mb-4">
-          <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-            <span>🍽️</span> ~{{ d.quantity }} people
+        <div class="space-y-3 mb-5">
+          <div class="flex items-center gap-3">
+            <span class="lbl" style="width:60px;flex-shrink:0">Serves</span>
+            <span class="text-sm font-700" style="color:#e8f5ec">~{{ d.quantity }} people</span>
           </div>
-          <div class="flex items-start gap-2 text-xs text-gray-500 dark:text-gray-400">
-            <span class="shrink-0 mt-0.5">📍</span>
-            <span class="line-clamp-2">{{ d.pickup_address }}</span>
+          <div class="flex items-start gap-3">
+            <span class="lbl" style="width:60px;flex-shrink:0;margin-top:2px">Location</span>
+            <span class="text-sm font-500" style="color:rgba(180,220,190,.65);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ d.pickup_address }}</span>
           </div>
-          <div class="flex items-center gap-2 text-xs
-                      {% if d.is_expired %}text-red-500 font-semibold{% else %}text-gray-500 dark:text-gray-400{% endif %}">
-            <span>⏱</span> Expires {{ d.expiry_time|date:"d M, g:i A" }}
+          <div class="flex items-center gap-3">
+            <span class="lbl" style="width:60px;flex-shrink:0">Expires</span>
+            <span class="text-sm font-600 {% if d.is_expired %}text-red-400{% endif %}" style="color:{% if d.is_expired %}#f87171{% else %}rgba(180,220,190,.65){% endif %}">{{ d.expiry_time|date:"d M, g:i A" }}</span>
           </div>
+          {% if d._distance_km %}
+          <div class="flex items-center gap-3">
+            <span class="lbl" style="width:60px;flex-shrink:0">Distance</span>
+            <span class="text-sm font-700" style="color:#00d4ff">{{ d._distance_km }} km</span>
+          </div>
+          {% endif %}
         </div>
-
-        <form method="post" action="{% url 'accept_pickup' d.pk %}"
-              class="pt-3 border-t border-gray-100 dark:border-gray-700/50">
-          {% csrf_token %}
-          <button type="submit"
-                  class="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600
-                         text-white text-sm font-semibold
-                         hover:from-emerald-600 hover:to-green-700 hover:-translate-y-0.5
-                         hover:shadow-glow transition duration-200 shadow-sm">
-            Accept Pickup 🚴
-          </button>
+        <form method="post" action="{% url 'accept_pickup' d.pk %}">{% csrf_token %}
+          <button type="submit" class="btn btn-solid w-full justify-center">Accept Pickup 🚴</button>
         </form>
       </div>
     </div>
     {% endfor %}
   </div>
-
   {% else %}
-  <div class="glass rounded-3xl p-16 text-center shadow-card">
-    <div class="w-20 h-20 mx-auto rounded-3xl bg-blue-100 dark:bg-blue-900/30
-                flex items-center justify-center text-4xl mb-6 animate-float">🔍</div>
-    <h3 class="font-display text-xl font-semibold text-gray-700 dark:text-gray-200 mb-3">
-      No donations available right now
-    </h3>
-    <p class="text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
-      {% if search or food_type != 'all' %}
-        Try adjusting your filters.
-      {% else %}
-        Check back soon — donors post food throughout the day.
-      {% endif %}
-    </p>
+  <div class="glow-card glass text-center au4" style="border-radius:16px;padding:5rem 2rem">
+    <div class="text-5xl mb-5 fy">🔍</div>
+    <h3 class="f-display text-3xl tracking-wider mb-2" style="color:#e8f5ec">NOTHING AVAILABLE</h3>
+    <p class="text-sm font-500 max-w-sm mx-auto" style="color:rgba(180,220,190,.45)">{% if search or food_type != 'all' or distance_km != 'all' %}Try adjusting your filters.{% else %}Donors post food throughout the day — check back soon.{% endif %}</p>
   </div>
   {% endif %}
 </div>
 {% endblock %}
-
 {% block extra_js %}
 <script>
-  function distanceFilter() {
-    return {
-      gpsStatus: '',
-      gpsError:  false,
-
-      handleDistanceChange(e) {
-        const val = e.target.value;
-        if (val === 'all') {
-          // Clear GPS fields and submit immediately
-          document.getElementById('vol_lat').value = '';
-          document.getElementById('vol_lng').value = '';
-          document.getElementById('filter-form').submit();
-          return;
-        }
-        // Need GPS coordinates — request them first
-        const latField = document.getElementById('vol_lat');
-        const lngField = document.getElementById('vol_lng');
-
-        // If we already have coords from a previous selection, just submit
-        if (latField.value && lngField.value) {
-          document.getElementById('filter-form').submit();
-          return;
-        }
-
-        if (!navigator.geolocation) {
-          this.gpsStatus = '❌ GPS not supported';
-          this.gpsError  = true;
-          e.target.value = 'all';
-          return;
-        }
-
-        this.gpsStatus = '📡 Getting your location…';
-        this.gpsError  = false;
-
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            latField.value = pos.coords.latitude.toFixed(6);
-            lngField.value = pos.coords.longitude.toFixed(6);
-            this.gpsStatus = '📍 Location found!';
-            // Small delay so user sees confirmation, then submit
-            setTimeout(() => {
-              document.getElementById('filter-form').submit();
-            }, 600);
-          },
-          () => {
-            this.gpsStatus = '❌ Could not get location. Allow GPS access and try again.';
-            this.gpsError  = true;
-            e.target.value = 'all';
-          },
-          { enableHighAccuracy: true, timeout: 10000 }
-        );
-      },
-    }
-  }
+function DF(){return{msg:'',err:false,hd(e){const v=e.target.value,la=document.getElementById('vla'),ln=document.getElementById('vln');if(v==='all'){la.value='';ln.value='';document.getElementById('ff').submit();return}if(la.value&&ln.value){document.getElementById('ff').submit();return}if(!navigator.geolocation){this.msg='❌ GPS unavailable';this.err=true;e.target.value='all';return}this.msg='📡 Getting location…';this.err=false;navigator.geolocation.getCurrentPosition(p=>{la.value=p.coords.latitude.toFixed(6);ln.value=p.coords.longitude.toFixed(6);this.msg='📍 Found!';setTimeout(()=>document.getElementById('ff').submit(),500)},()=>{this.msg='❌ Location denied';this.err=true;e.target.value='all'},{enableHighAccuracy:true,timeout:10000})}}}
 </script>
 {% endblock %}

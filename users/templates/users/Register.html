@@ -1,182 +1,109 @@
 {% extends "users/base.html" %}
 {% block title %}Create Account{% endblock %}
-
 {% block content %}
-<div class="min-h-[80vh] flex items-center justify-center px-4 sm:px-6 py-12">
-  <div class="w-full max-w-lg">
-    <div class="glass rounded-3xl shadow-card-lg p-8 md:p-10 animate-slide-up">
+<div class="flex items-center justify-center px-4 sm:px-6 py-12">
+  <div class="w-full max-w-lg au">
 
-      <!-- Heading -->
-      <div class="text-center mb-8">
-        <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-emerald-400 to-green-600
-                    flex items-center justify-center text-3xl shadow-lg mb-5 animate-float">
-          🌱
+    <div class="gcard glass shadow-2xl overflow-hidden">
+      <div class="h-1.5 bg-gradient-to-r from-emerald-400 via-green-500 to-teal-500"></div>
+
+      <div class="p-8 sm:p-10">
+        <div class="text-center mb-8">
+          <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center text-3xl shadow-lg mb-5" style="box-shadow:0 8px 24px rgba(34,197,94,.35)">🌱</div>
+          <h1 class="font-display text-2xl font-800 text-gray-900 dark:text-white">Join FoodRescue</h1>
+          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1.5">Choose your role and start making an impact today</p>
         </div>
-        <h1 class="font-display text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          Join Food Rescue
-        </h1>
-        <p class="text-gray-500 dark:text-gray-400 text-sm">
-          Choose your role and start making an impact
+
+        <form method="post" enctype="multipart/form-data" class="space-y-5" novalidate>
+          {% csrf_token %}
+
+          <!-- Role selector -->
+          <div>
+            <label class="block text-xs font-700 uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-2.5">I want to join as</label>
+            <div class="grid grid-cols-2 gap-3" x-data="{role:'donor'}">
+              <label class="relative cursor-pointer">
+                <input type="radio" name="role" value="donor" class="sr-only peer" x-model="role" checked/>
+                <div class="flex flex-col items-center gap-2 p-4 rounded-2xl transition duration-200
+                            border-2 border-gray-200 dark:border-gray-700
+                            peer-checked:border-emerald-500 peer-checked:bg-emerald-50 dark:peer-checked:border-emerald-500 dark:peer-checked:bg-emerald-900/25
+                            hover:border-emerald-300">
+                  <span class="text-3xl">🍱</span>
+                  <span class="text-sm font-700 text-gray-800 dark:text-gray-200">Food Donor</span>
+                  <span class="text-xs text-gray-400 text-center">Post surplus food</span>
+                </div>
+              </label>
+              <label class="relative cursor-pointer">
+                <input type="radio" name="role" value="volunteer" class="sr-only peer" x-model="role"/>
+                <div class="flex flex-col items-center gap-2 p-4 rounded-2xl transition duration-200
+                            border-2 border-gray-200 dark:border-gray-700
+                            peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:border-blue-500 dark:peer-checked:bg-blue-900/25
+                            hover:border-blue-300">
+                  <span class="text-3xl">🤝</span>
+                  <span class="text-sm font-700 text-gray-800 dark:text-gray-200">Volunteer</span>
+                  <span class="text-xs text-gray-400 text-center">Pick up &amp; deliver</span>
+                </div>
+              </label>
+            </div>
+            {% if form.role.errors %}<p class="mt-1.5 text-xs text-red-500">{{ form.role.errors.0 }}</p>{% endif %}
+          </div>
+
+          <div>
+            <label class="block text-xs font-700 uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1.5">Full Name <span class="text-red-400 normal-case font-400">*</span></label>
+            {{ form.full_name }}
+            {% if form.full_name.errors %}<p class="mt-1.5 text-xs text-red-500">{{ form.full_name.errors.0 }}</p>{% endif %}
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-700 uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1.5">Email <span class="text-red-400 normal-case font-400">*</span></label>
+              {{ form.email }}
+              {% if form.email.errors %}<p class="mt-1.5 text-xs text-red-500">{{ form.email.errors.0 }}</p>{% endif %}
+            </div>
+            <div>
+              <label class="block text-xs font-700 uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1.5">Phone</label>
+              {{ form.phone }}
+              {% if form.phone.errors %}<p class="mt-1.5 text-xs text-red-500">{{ form.phone.errors.0 }}</p>{% endif %}
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-700 uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1.5">City</label>
+              {{ form.city }}
+            </div>
+            <div>
+              <label class="block text-xs font-700 uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1.5">Organization <span class="font-400 normal-case text-gray-400">(optional)</span></label>
+              {{ form.organization_name }}
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-700 uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1.5">Password <span class="text-red-400 normal-case font-400">*</span></label>
+              {{ form.password }}
+              {% if form.password.errors %}<p class="mt-1.5 text-xs text-red-500">{{ form.password.errors.0 }}</p>{% endif %}
+            </div>
+            <div>
+              <label class="block text-xs font-700 uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1.5">Confirm Password <span class="text-red-400 normal-case font-400">*</span></label>
+              {{ form.confirm_password }}
+              {% if form.confirm_password.errors %}<p class="mt-1.5 text-xs text-red-500">{{ form.confirm_password.errors.0 }}</p>{% endif %}
+            </div>
+          </div>
+
+          {% if form.non_field_errors %}
+          <div class="px-4 py-3 rounded-xl bg-red-50 dark:bg-red-950/40 text-sm text-red-600 dark:text-red-400" style="border:1px solid rgba(239,68,68,.2)">
+            {% for err in form.non_field_errors %}<p>❌ {{ err }}</p>{% endfor %}
+          </div>
+          {% endif %}
+
+          <button type="submit" class="btn-primary w-full justify-center py-3.5 text-base mt-2">Create My Account 🚀</button>
+        </form>
+
+        <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
+          Already have an account?
+          <a href="{% url 'login' %}" class="text-emerald-600 dark:text-emerald-400 font-600 hover:underline">Sign In</a>
         </p>
       </div>
-
-      <form method="post" enctype="multipart/form-data" class="space-y-5" novalidate>
-        {% csrf_token %}
-
-        <!-- Role selector -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-            I want to join as
-          </label>
-          <div class="grid grid-cols-2 gap-3" x-data="{ role: 'donor' }">
-            <label class="relative cursor-pointer">
-              <input type="radio" name="role" value="donor" class="sr-only peer"
-                     x-model="role" checked />
-              <div class="flex flex-col items-center gap-2 p-4 rounded-2xl border-2
-                          border-gray-200 dark:border-gray-700
-                          peer-checked:border-emerald-500 peer-checked:bg-emerald-50
-                          dark:peer-checked:border-emerald-500 dark:peer-checked:bg-emerald-900/30
-                          hover:border-emerald-300 transition duration-200">
-                <span class="text-3xl">🍱</span>
-                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Food Donor
-                </span>
-                <span class="text-xs text-gray-400 text-center">
-                  Post surplus food
-                </span>
-              </div>
-            </label>
-            <label class="relative cursor-pointer">
-              <input type="radio" name="role" value="volunteer" class="sr-only peer"
-                     x-model="role" />
-              <div class="flex flex-col items-center gap-2 p-4 rounded-2xl border-2
-                          border-gray-200 dark:border-gray-700
-                          peer-checked:border-blue-500 peer-checked:bg-blue-50
-                          dark:peer-checked:border-blue-500 dark:peer-checked:bg-blue-900/30
-                          hover:border-blue-300 transition duration-200">
-                <span class="text-3xl">🤝</span>
-                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Volunteer
-                </span>
-                <span class="text-xs text-gray-400 text-center">
-                  Pickup &amp; deliver
-                </span>
-              </div>
-            </label>
-          </div>
-          {% if form.role.errors %}
-            <p class="mt-1.5 text-xs text-red-500">{{ form.role.errors.0 }}</p>
-          {% endif %}
-        </div>
-
-        <!-- Full name -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Full Name <span class="text-red-400">*</span>
-          </label>
-          {{ form.full_name }}
-          {% if form.full_name.errors %}
-            <p class="mt-1.5 text-xs text-red-500">{{ form.full_name.errors.0 }}</p>
-          {% endif %}
-        </div>
-
-        <!-- Email + Phone row -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Email <span class="text-red-400">*</span>
-            </label>
-            {{ form.email }}
-            {% if form.email.errors %}
-              <p class="mt-1.5 text-xs text-red-500">{{ form.email.errors.0 }}</p>
-            {% endif %}
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Phone
-            </label>
-            {{ form.phone }}
-            {% if form.phone.errors %}
-              <p class="mt-1.5 text-xs text-red-500">{{ form.phone.errors.0 }}</p>
-            {% endif %}
-          </div>
-        </div>
-
-        <!-- City + Org row -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              City
-            </label>
-            {{ form.city }}
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Organization <span class="text-gray-400 text-xs">(optional)</span>
-            </label>
-            {{ form.organization_name }}
-          </div>
-        </div>
-
-        <!-- Password row -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Password <span class="text-red-400">*</span>
-            </label>
-            {{ form.password }}
-            {% if form.password.errors %}
-              <p class="mt-1.5 text-xs text-red-500">{{ form.password.errors.0 }}</p>
-            {% endif %}
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-              Confirm Password <span class="text-red-400">*</span>
-            </label>
-            {{ form.confirm_password }}
-            {% if form.confirm_password.errors %}
-              <p class="mt-1.5 text-xs text-red-500">{{ form.confirm_password.errors.0 }}</p>
-            {% endif %}
-          </div>
-        </div>
-
-        <!-- Profile photo -->
-        <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-            Profile Photo <span class="text-gray-400 text-xs">(optional)</span>
-          </label>
-          {{ form.profile_image }}
-        </div>
-
-        <!-- Non-field errors -->
-        {% if form.non_field_errors %}
-          <div class="px-4 py-3 rounded-xl bg-red-50 dark:bg-red-900/30
-                      border border-red-200 dark:border-red-800/50
-                      text-sm text-red-600 dark:text-red-400">
-            {% for err in form.non_field_errors %}
-              <p>❌ {{ err }}</p>
-            {% endfor %}
-          </div>
-        {% endif %}
-
-        <!-- Submit -->
-        <button type="submit"
-                class="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600
-                       text-white font-semibold text-base
-                       hover:from-emerald-600 hover:to-green-700
-                       hover:shadow-glow hover:-translate-y-0.5
-                       active:translate-y-0 transition duration-200 shadow-md mt-2">
-          Create My Account 🚀
-        </button>
-      </form>
-
-      <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
-        Already have an account?
-        <a href="{% url 'login' %}"
-           class="text-emerald-600 dark:text-emerald-400 font-medium hover:underline">
-          Sign In
-        </a>
-      </p>
     </div>
   </div>
 </div>
