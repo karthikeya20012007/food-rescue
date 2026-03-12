@@ -21,3 +21,11 @@ db.sqlite3
 
 # Windows
 Thumbs.db
+
+# Ignore uploaded media files
+media/delivery_images/*
+media/profile_images/*
+
+# Keep the folders themselves
+!media/delivery_images/.gitkeep
+!media/profile_images/.gitkeep
