@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth" x-data="themeManager()" :class="{ 'dark': isDark }">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Food Rescue — Connect surplus food with people in need." />
+  <title>{% block title %}Food Rescue{% endblock %} • Food Rescue</title>
+
+  <!-- ── Tailwind CDN ─────────────────────────────────────────────────── -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['"Clash Display"', '"Syne"', 'sans-serif'],
+            body:    ['"DM Sans"', 'sans-serif'],
+            mono:    ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50:  '#f0fdf6',
+              100: '#dcfce9',
+              200: '#bbf7d2',
+              300: '#86efad',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            },
+          },
+          animation: {
+            'fade-in':       'fadeIn 0.4s ease forwards',
+            'slide-up':      'slideUp 0.5s cubic-bezier(.16,1,.3,1) forwards',
+            'slide-down':    'slideDown 0.3s cubic-bezier(.16,1,.3,1) forwards',
+            'scale-in':      'scaleIn 0.25s ease forwards',
+            'pulse-soft':    'pulseSoft 2.5s ease-in-out infinite',
+            'float':         'float 3s ease-in-out infinite',
+            'shimmer':       'shimmer 2s linear infinite',
+          },
+          keyframes: {
+            fadeIn:    { from: { opacity: 0 },                   to: { opacity: 1 } },
+            slideUp:   { from: { opacity: 0, transform: 'translateY(20px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
+            slideDown: { from: { opacity: 0, transform: 'translateY(-12px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
+            scaleIn:   { from: { opacity: 0, transform: 'scale(.95)' }, to: { opacity: 1, transform: 'scale(1)' } },
+            pulseSoft: { '0%,100%': { opacity: 1 }, '50%': { opacity: .6 } },
+            float:     { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-6px)' } },
+            shimmer:   { from: { backgroundPosition: '-200% 0' }, to: { backgroundPosition: '200% 0' } },
+          },
+          boxShadow: {
+            'card':    '0 1px 3px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.07)',
+            'card-lg': '0 4px 6px rgba(0,0,0,.05), 0 12px 40px rgba(0,0,0,.12)',
+            'glow':    '0 0 0 3px rgba(34,197,94,.25)',
+            'glow-lg': '0 0 30px rgba(34,197,94,.2)',
+          },
+        },
+      },
+    }
+  </script>
+
+  <!-- ── Google Fonts ─────────────────────────────────────────────────── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- ── Alpine.js (no-build interactivity) ─────────────────────────── -->
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <!-- ── Base styles ──────────────────────────────────────────────────── -->
+  <style>
+    /* Fonts */
+    body { font-family: 'DM Sans', sans-serif; }
+    h1,h2,h3,.font-display { font-family: 'Syne', sans-serif; }
+
+    /* Smooth theme transition */
+    *, *::before, *::after {
+      transition-property: background-color, border-color, color;
+      transition-duration: 200ms;
+      transition-timing-function: ease;
+    }
+    /* Override transition for animations that shouldn't inherit it */
+    [class*="animate-"], button, a { transition-property: all; }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #d1fae5; border-radius: 99px; }
+    .dark ::-webkit-scrollbar-thumb { background: #166534; }
+
+    /* Gradient text utility */
+    .text-gradient {
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #0d9488 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* Mesh background */
+    .bg-mesh {
+      background-color: #f0fdf6;
+      background-image:
+        radial-gradient(at 20% 10%, rgba(134,239,172,.35) 0px, transparent 55%),
+        radial-gradient(at 80% 5%,  rgba(20,184,166,.18) 0px, transparent 50%),
+        radial-gradient(at 50% 90%, rgba(34,197,94,.15)  0px, transparent 60%);
+    }
+    .dark .bg-mesh {
+      background-color: #030f07;
+      background-image:
+        radial-gradient(at 20% 10%, rgba(22,101,52,.4)  0px, transparent 55%),
+        radial-gradient(at 80% 5%,  rgba(13,148,136,.2) 0px, transparent 50%),
+        radial-gradient(at 50% 90%, rgba(21,128,61,.2)  0px, transparent 60%);
+    }
+
+    /* Glassmorphism card */
+    .glass {
+      background: rgba(255,255,255,.7);
+      backdrop-filter: blur(12px) saturate(180%);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      border: 1px solid rgba(255,255,255,.6);
+    }
+    .dark .glass {
+      background: rgba(15,30,20,.7);
+      border: 1px solid rgba(255,255,255,.06);
+    }
+
+    /* Navbar glass */
+    .navbar-glass {
+      background: rgba(255,255,255,.85);
+      backdrop-filter: blur(16px) saturate(200%);
+      -webkit-backdrop-filter: blur(16px) saturate(200%);
+      border-bottom: 1px solid rgba(34,197,94,.1);
+    }
+    .dark .navbar-glass {
+      background: rgba(3,15,7,.85);
+      border-bottom: 1px solid rgba(34,197,94,.08);
+    }
+
+    /* Status badge colours */
+    .badge-available  { background:#dcfce7; color:#15803d; }
+    .badge-accepted   { background:#fef9c3; color:#a16207; }
+    .badge-picked_up  { background:#dbeafe; color:#1d4ed8; }
+    .badge-on_the_way { background:#ede9fe; color:#6d28d9; }
+    .badge-delivered  { background:#f3f4f6; color:#374151; }
+    .badge-expired    { background:#fee2e2; color:#b91c1c; }
+    .badge-cancelled  { background:#fee2e2; color:#b91c1c; }
+
+    .dark .badge-available  { background:rgba(21,128,61,.25);  color:#86efac; }
+    .dark .badge-accepted   { background:rgba(161,98,7,.25);   color:#fde68a; }
+    .dark .badge-picked_up  { background:rgba(29,78,216,.25);  color:#93c5fd; }
+    .dark .badge-on_the_way { background:rgba(109,40,217,.25); color:#c4b5fd; }
+    .dark .badge-delivered  { background:rgba(55,65,81,.35);   color:#d1d5db; }
+    .dark .badge-expired    { background:rgba(185,28,28,.25);  color:#fca5a5; }
+    .dark .badge-cancelled  { background:rgba(185,28,28,.25);  color:#fca5a5; }
+
+    /* Shimmer loading skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, #f0fdf4 25%, #dcfce7 50%, #f0fdf4 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+    .dark .skeleton {
+      background: linear-gradient(90deg, #0f1f12 25%, #14532d 50%, #0f1f12 75%);
+      background-size: 200% 100%;
+    }
+
+    /* Page enter animation */
+    .page-enter { animation: slideUp 0.45s cubic-bezier(.16,1,.3,1) both; }
+
+    /* Notification dot pulse */
+    .notif-dot {
+      animation: pulseSoft 2s ease-in-out infinite;
+    }
+  </style>
+
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-mesh min-h-screen text-gray-800 dark:text-gray-100 antialiased"
+      x-init="init()">
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       NAVBAR
+  ════════════════════════════════════════════════════════════════════ -->
+  <nav class="navbar-glass sticky top-0 z-50"
+       x-data="notificationManager()">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6">
+      <div class="flex items-center justify-between h-16">
+
+        <!-- Logo -->
+        <a href="{% url 'landing' %}"
+           class="flex items-center gap-2.5 group shrink-0">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-400 to-green-600
+                      flex items-center justify-center shadow-md
+                      group-hover:scale-110 group-hover:rotate-3 transition duration-300">
+            <span class="text-white text-base leading-none">🍱</span>
+          </div>
+          <span class="font-display font-700 text-lg tracking-tight
+                       text-gray-900 dark:text-white
+                       group-hover:text-emerald-600 dark:group-hover:text-emerald-400
+                       transition duration-200">
+            Food<span class="text-gradient">Rescue</span>
+          </span>
+        </a>
+
+        <!-- Desktop nav links -->
+        <div class="hidden md:flex items-center gap-1">
+          <a href="{% url 'impact_feed' %}"
+             class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium
+                    text-gray-600 dark:text-gray-300
+                    hover:text-emerald-600 dark:hover:text-emerald-400
+                    hover:bg-emerald-50 dark:hover:bg-emerald-900/30
+                    transition duration-200">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                    d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            Impact Feed
+          </a>
+
+          {% if user.is_authenticated %}
+            {% if user.profile.role == 'donor' %}
+              <a href="{% url 'donor_dashboard' %}"
+                 class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium
+                        text-gray-600 dark:text-gray-300
+                        hover:text-emerald-600 dark:hover:text-emerald-400
+                        hover:bg-emerald-50 dark:hover:bg-emerald-900/30
+                        transition duration-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                        d="M4 6h16M4 10h16M4 14h8"/>
+                </svg>
+                Dashboard
+              </a>
+              <a href="{% url 'create_donation' %}"
+                 class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium
+                        bg-emerald-500 text-white hover:bg-emerald-600
+                        shadow-sm hover:shadow-glow
+                        transition duration-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 4v16m8-8H4"/>
+                </svg>
+                Donate Food
+              </a>
+            {% else %}
+              <a href="{% url 'volunteer_dashboard' %}"
+                 class="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium
+                        text-gray-600 dark:text-gray-300
+                        hover:text-emerald-600 dark:hover:text-emerald-400
+                        hover:bg-emerald-50 dark:hover:bg-emerald-900/30
+                        transition duration-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                        d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                </svg>
+                Dashboard
+              </a>
+            {% endif %}
+          {% endif %}
+        </div>
+
+        <!-- Right controls -->
+        <div class="flex items-center gap-1 sm:gap-2">
+
+          <!-- Theme toggle -->
+          <button @click="toggleTheme()"
+                  class="relative w-9 h-9 flex items-center justify-center rounded-lg
+                         text-gray-500 dark:text-gray-400
+                         hover:text-emerald-600 dark:hover:text-emerald-400
+                         hover:bg-emerald-50 dark:hover:bg-emerald-900/30
+                         transition duration-200"
+                  title="Toggle dark mode"
+                  aria-label="Toggle dark mode">
+            <!-- Sun icon (shown in dark) -->
+            <svg x-show="isDark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/>
+            </svg>
+            <!-- Moon icon (shown in light) -->
+            <svg x-show="!isDark" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+            </svg>
+          </button>
+
+          {% if user.is_authenticated %}
+            <!-- Notifications -->
+            <div class="relative" x-data="notificationManager()" x-init="init()">
+              <button @click="open = !open; if(open) fetchNotifications()"
+                      @click.outside="open = false"
+                      class="relative w-9 h-9 flex items-center justify-center rounded-lg
+                             text-gray-500 dark:text-gray-400
+                             hover:text-emerald-600 dark:hover:text-emerald-400
+                             hover:bg-emerald-50 dark:hover:bg-emerald-900/30
+                             transition duration-200"
+                      aria-label="Notifications">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                </svg>
+                <!-- Unread badge -->
+                <span x-show="unreadCount > 0"
+                      x-text="unreadCount > 9 ? '9+' : unreadCount"
+                      class="notif-dot absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1
+                             flex items-center justify-center
+                             bg-red-500 text-white text-[10px] font-bold
+                             rounded-full leading-none">
+                </span>
+              </button>
+
+              <!-- Dropdown panel -->
+              <div x-show="open"
+                   x-transition:enter="transition ease-out duration-200"
+                   x-transition:enter-start="opacity-0 scale-95 -translate-y-2"
+                   x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                   x-transition:leave="transition ease-in duration-150"
+                   x-transition:leave-start="opacity-100 scale-100"
+                   x-transition:leave-end="opacity-0 scale-95"
+                   class="absolute right-0 mt-2 w-80 glass rounded-2xl shadow-card-lg
+                          overflow-hidden z-50 border border-emerald-100/60 dark:border-emerald-900/40">
+
+                <!-- Header -->
+                <div class="flex items-center justify-between px-4 py-3
+                            border-b border-gray-100 dark:border-gray-700/50">
+                  <span class="text-sm font-semibold text-gray-700 dark:text-gray-200
+                               font-display">
+                    Notifications
+                  </span>
+                  <button @click="markAllRead()"
+                          x-show="unreadCount > 0"
+                          class="text-xs text-emerald-600 dark:text-emerald-400
+                                 hover:text-emerald-700 font-medium transition">
+                    Mark all read
+                  </button>
+                </div>
+
+                <!-- List -->
+                <div class="max-h-80 overflow-y-auto divide-y divide-gray-50 dark:divide-gray-700/30">
+                  <template x-if="notifications.length === 0">
+                    <div class="flex flex-col items-center justify-center py-10 text-gray-400">
+                      <span class="text-3xl mb-2">🔔</span>
+                      <p class="text-sm">No new notifications</p>
+                    </div>
+                  </template>
+                  <template x-for="n in notifications" :key="n.id">
+                    <a :href="n.donation_id ? '/donation/' + n.donation_id + '/' : '#'"
+                       class="flex gap-3 px-4 py-3 hover:bg-emerald-50/70 dark:hover:bg-emerald-900/20
+                              transition duration-150 group">
+                      <div class="shrink-0 w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50
+                                  flex items-center justify-center text-base mt-0.5">
+                        <span x-text="notifIcon(n.type)"></span>
+                      </div>
+                      <div class="min-w-0">
+                        <p class="text-sm text-gray-700 dark:text-gray-200 leading-snug"
+                           x-text="n.message"></p>
+                        <p class="text-xs text-gray-400 mt-1" x-text="n.created_at"></p>
+                      </div>
+                    </a>
+                  </template>
+                </div>
+              </div>
+            </div>
+
+            <!-- Profile menu -->
+            <div class="relative" x-data="{ open: false }">
+              <button @click="open = !open"
+                      @click.outside="open = false"
+                      class="flex items-center gap-2 pl-1 pr-2 py-1 rounded-xl
+                             hover:bg-gray-100 dark:hover:bg-gray-800
+                             transition duration-200 group">
+                <!-- Avatar -->
+                <div class="w-8 h-8 rounded-lg overflow-hidden ring-2 ring-emerald-200
+                            dark:ring-emerald-800 group-hover:ring-emerald-400 transition">
+                  {% if user.profile.profile_image %}
+                    <img src="{{ user.profile.profile_image.url }}"
+                         alt="{{ user.profile.full_name }}"
+                         class="w-full h-full object-cover" />
+                  {% else %}
+                    <div class="w-full h-full bg-gradient-to-br from-emerald-400 to-green-600
+                                flex items-center justify-center">
+                      <span class="text-white text-sm font-bold">
+                        {{ user.profile.full_name|first|upper }}
+                      </span>
+                    </div>
+                  {% endif %}
+                </div>
+                <!-- Name (desktop) -->
+                <span class="hidden sm:block text-sm font-medium
+                             text-gray-700 dark:text-gray-200 max-w-[100px] truncate">
+                  {{ user.profile.full_name|truncatechars:14 }}
+                </span>
+                <svg class="w-3.5 h-3.5 text-gray-400 transition duration-200"
+                     :class="{ 'rotate-180': open }"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+              </button>
+
+              <!-- Dropdown -->
+              <div x-show="open"
+                   x-transition:enter="transition ease-out duration-200"
+                   x-transition:enter-start="opacity-0 scale-95 -translate-y-2"
+                   x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                   x-transition:leave="transition ease-in duration-150"
+                   x-transition:leave-start="opacity-100"
+                   x-transition:leave-end="opacity-0 scale-95"
+                   class="absolute right-0 mt-2 w-56 glass rounded-2xl shadow-card-lg
+                          overflow-hidden z-50 border border-gray-100/80 dark:border-gray-700/40">
+
+                <!-- User info header -->
+                <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700/50">
+                  <p class="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate">
+                    {{ user.profile.full_name }}
+                  </p>
+                  <p class="text-xs text-gray-400 truncate mt-0.5">{{ user.email }}</p>
+                  <span class="inline-flex items-center gap-1 mt-2 px-2 py-0.5 rounded-full text-xs
+                               font-medium
+                               {% if user.profile.role == 'donor' %}
+                                 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300
+                               {% else %}
+                                 bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300
+                               {% endif %}">
+                    {% if user.profile.role == 'donor' %}🍱 Donor{% else %}🤝 Volunteer{% endif %}
+                  </span>
+                </div>
+
+                <!-- Menu items -->
+                <div class="py-1.5">
+                  {% if user.profile.role == 'donor' %}
+                    <a href="{% url 'donor_dashboard' %}"
+                       class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700
+                              dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30
+                              hover:text-emerald-700 dark:hover:text-emerald-300 transition">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                      </svg>
+                      My Dashboard
+                    </a>
+                    <a href="{% url 'create_donation' %}"
+                       class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700
+                              dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30
+                              hover:text-emerald-700 dark:hover:text-emerald-300 transition">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 4v16m8-8H4"/>
+                      </svg>
+                      Donate Food
+                    </a>
+                  {% else %}
+                    <a href="{% url 'volunteer_dashboard' %}"
+                       class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700
+                              dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30
+                              hover:text-emerald-700 dark:hover:text-emerald-300 transition">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                              d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                      </svg>
+                      My Dashboard
+                    </a>
+                  {% endif %}
+
+                  <a href="{% url 'volunteer_profile' %}"
+                     class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700
+                            dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30
+                            hover:text-emerald-700 dark:hover:text-emerald-300 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                    </svg>
+                    Edit Profile
+                  </a>
+
+                  <a href="{% url 'impact_feed' %}"
+                     class="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700
+                            dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30
+                            hover:text-emerald-700 dark:hover:text-emerald-300 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    Impact Feed
+                  </a>
+
+                  <div class="border-t border-gray-100 dark:border-gray-700/50 mt-1.5 pt-1.5">
+                    <a href="{% url 'logout' %}"
+                       class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-500
+                              dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20
+                              transition">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                      </svg>
+                      Sign Out
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          {% else %}
+            <!-- Guest buttons -->
+            <a href="{% url 'login' %}"
+               class="hidden sm:inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium
+                      text-gray-600 dark:text-gray-300
+                      hover:text-emerald-600 dark:hover:text-emerald-400
+                      hover:bg-emerald-50 dark:hover:bg-emerald-900/30
+                      transition duration-200">
+              Sign In
+            </a>
+            <a href="{% url 'register' %}"
+               class="inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium
+                      bg-emerald-500 text-white hover:bg-emerald-600
+                      shadow-sm hover:shadow-glow transition duration-200">
+              Get Started
+            </a>
+          {% endif %}
+
+          <!-- Mobile menu button -->
+          <button class="md:hidden w-9 h-9 flex items-center justify-center rounded-lg
+                         text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+                  @click="mobileOpen = !mobileOpen"
+                  x-data
+                  aria-label="Menu">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+          </button>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile nav drawer -->
+    <div x-data="{ mobileOpen: false }"
+         x-show="mobileOpen"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         class="md:hidden border-t border-gray-100 dark:border-gray-700/50 px-4 py-3 space-y-1">
+      <a href="{% url 'impact_feed' %}"
+         class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium
+                text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30
+                hover:text-emerald-600 transition">
+        ⚡ Impact Feed
+      </a>
+      {% if user.is_authenticated %}
+        {% if user.profile.role == 'donor' %}
+          <a href="{% url 'donor_dashboard' %}"
+             class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium
+                    text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30
+                    hover:text-emerald-600 transition">
+            📊 My Dashboard
+          </a>
+          <a href="{% url 'create_donation' %}"
+             class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium
+                    bg-emerald-500 text-white hover:bg-emerald-600 transition">
+            + Donate Food
+          </a>
+        {% else %}
+          <a href="{% url 'volunteer_dashboard' %}"
+             class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium
+                    text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30
+                    hover:text-emerald-600 transition">
+            📋 My Dashboard
+          </a>
+        {% endif %}
+        <a href="{% url 'volunteer_profile' %}"
+           class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium
+                  text-gray-700 dark:text-gray-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30
+                  hover:text-emerald-600 transition">
+          👤 Profile
+        </a>
+        <a href="{% url 'logout' %}"
+           class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium
+                  text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
+          → Sign Out
+        </a>
+      {% else %}
+        <a href="{% url 'login' %}"
+           class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium
+                  text-gray-700 dark:text-gray-300 hover:bg-emerald-50 transition">
+          Sign In
+        </a>
+        <a href="{% url 'register' %}"
+           class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-medium
+                  bg-emerald-500 text-white hover:bg-emerald-600 transition">
+          Get Started
+        </a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       DJANGO MESSAGES
+  ════════════════════════════════════════════════════════════════════ -->
+  {% if messages %}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-2"
+         x-data
+         x-init="setTimeout(() => $el.style.opacity = 0, 4500);
+                 setTimeout(() => $el.remove(), 5000)"
+         style="transition: opacity 0.5s ease">
+      {% for message in messages %}
+        <div class="flex items-start gap-3 px-4 py-3 rounded-xl text-sm font-medium
+                    shadow-card animate-slide-down
+                    {% if message.tags == 'error' %}
+                      bg-red-50 text-red-700 border border-red-200
+                      dark:bg-red-900/30 dark:text-red-300 dark:border-red-800/50
+                    {% elif message.tags == 'warning' %}
+                      bg-amber-50 text-amber-700 border border-amber-200
+                      dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-800/50
+                    {% elif message.tags == 'success' %}
+                      bg-emerald-50 text-emerald-700 border border-emerald-200
+                      dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800/50
+                    {% else %}
+                      bg-blue-50 text-blue-700 border border-blue-200
+                      dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800/50
+                    {% endif %}">
+          <span class="text-base shrink-0">
+            {% if message.tags == 'error' %}❌
+            {% elif message.tags == 'warning' %}⚠️
+            {% elif message.tags == 'success' %}✅
+            {% else %}ℹ️{% endif %}
+          </span>
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       MAIN CONTENT
+  ════════════════════════════════════════════════════════════════════ -->
+  <main class="page-enter">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════════════════════════════════ -->
+  <footer class="mt-24 border-t border-emerald-100/60 dark:border-emerald-900/30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <!-- Brand -->
+        <div class="flex items-center gap-2">
+          <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-400 to-green-600
+                      flex items-center justify-center">
+            <span class="text-white text-sm">🍱</span>
+          </div>
+          <span class="font-display font-semibold text-gray-700 dark:text-gray-300">
+            Food<span class="text-gradient">Rescue</span>
+          </span>
+        </div>
+        <!-- Links -->
+        <div class="flex items-center gap-6 text-sm text-gray-400">
+          <a href="{% url 'impact_feed' %}"
+             class="hover:text-emerald-500 transition">Impact</a>
+          <a href="{% url 'register' %}"
+             class="hover:text-emerald-500 transition">Join</a>
+          <a href="{% url 'login' %}"
+             class="hover:text-emerald-500 transition">Sign In</a>
+        </div>
+        <!-- Copy -->
+        <p class="text-xs text-gray-400">
+          © {% now "Y" %} Food Rescue · Reducing waste, feeding lives
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ════════════════════════════════════════════════════════════════════
+       SCRIPTS
+  ════════════════════════════════════════════════════════════════════ -->
+  <script>
+    /* ── Theme Manager ─────────────────────────────────────────────── */
+    function themeManager() {
+      return {
+        isDark: false,
+        init() {
+          const stored = localStorage.getItem('fr-theme');
+          if (stored) {
+            this.isDark = stored === 'dark';
+          } else {
+            this.isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          }
+          // Watch system changes
+          window.matchMedia('(prefers-color-scheme: dark)')
+            .addEventListener('change', e => {
+              if (!localStorage.getItem('fr-theme')) this.isDark = e.matches;
+            });
+        },
+        toggleTheme() {
+          this.isDark = !this.isDark;
+          localStorage.setItem('fr-theme', this.isDark ? 'dark' : 'light');
+        },
+      }
+    }
+
+    /* ── Notification Manager ──────────────────────────────────────── */
+    function notificationManager() {
+      return {
+        open:         false,
+        notifications: [],
+        unreadCount:  {{ unread|default:0 }},
+        _pollTimer:   null,
+
+        init() {
+          // Fetch unread count immediately on page load
+          this.refreshCount();
+          // Poll every 30 seconds so badge stays live without refresh
+          this._pollTimer = setInterval(() => this.refreshCount(), 30000);
+        },
+
+        async refreshCount() {
+          // Lightweight count-only fetch to keep badge updated
+          try {
+            const res  = await fetch("{% url 'notifications_json' %}");
+            const data = await res.json();
+            this.unreadCount = data.unread;
+            // If dropdown is open, refresh the list too
+            if (this.open) {
+              this.notifications = data.notifications;
+            }
+          } catch (e) { /* silent — network may be offline */ }
+        },
+
+        async fetchNotifications() {
+          try {
+            const res  = await fetch("{% url 'notifications_json' %}");
+            const data = await res.json();
+            this.notifications = data.notifications;
+            this.unreadCount   = data.unread;
+          } catch (e) {
+            console.warn('Could not load notifications', e);
+          }
+        },
+
+        async markAllRead() {
+          try {
+            await fetch("{% url 'mark_notifications_read' %}", {
+              method: 'POST',
+              headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            });
+            this.unreadCount  = 0;
+            this.notifications = [];
+          } catch (e) {
+            console.warn('Could not mark notifications read', e);
+          }
+        },
+
+        notifIcon(type) {
+          const map = {
+            accepted:     '✅',
+            cancelled:    '⚠️',
+            new_donation: '🍱',
+            picked_up:    '📦',
+            on_the_way:   '🚗',
+            delivered:    '🎉',
+          };
+          return map[type] || '🔔';
+        },
+      }
+    }
+
+    /* ── CSRF helper ───────────────────────────────────────────────── */
+    function getCookie(name) {
+      const v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+      return v ? v[2] : null;
+    }
+  </script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

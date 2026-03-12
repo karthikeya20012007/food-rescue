@@ -1,0 +1,147 @@
+{% extends "users/base.html" %}
+{% block title %}Impact Feed{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+
+  <!-- Header -->
+  <div class="text-center mb-12">
+    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full
+                bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300
+                text-sm font-semibold mb-5">
+      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+      Live Impact
+    </div>
+    <h1 class="font-display text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+      Real Deliveries. Real Impact.
+    </h1>
+    <p class="text-gray-500 dark:text-gray-400 text-lg max-w-xl mx-auto">
+      Every card below is a verified delivery — food rescued from waste and given
+      to someone who needed it.
+    </p>
+  </div>
+
+  <!-- Stats bar -->
+  <div class="grid grid-cols-3 gap-4 mb-12 max-w-2xl mx-auto">
+    <div class="glass rounded-2xl p-5 text-center shadow-card">
+      <p class="font-display text-3xl font-bold text-gradient">{{ total_deliveries }}</p>
+      <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Total Deliveries</p>
+    </div>
+    <div class="glass rounded-2xl p-5 text-center shadow-card">
+      <p class="font-display text-3xl font-bold text-gradient">{{ total_meals }}</p>
+      <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Meals Rescued</p>
+    </div>
+    <div class="glass rounded-2xl p-5 text-center shadow-card">
+      <p class="font-display text-3xl font-bold text-gradient">{{ cities_served }}</p>
+      <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">Cities</p>
+    </div>
+  </div>
+
+  <!-- Grid -->
+  {% if deliveries %}
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for d in deliveries %}
+    <div class="group glass rounded-3xl overflow-hidden shadow-card
+                hover:shadow-card-lg hover:-translate-y-1.5 transition duration-300">
+
+      <!-- Image -->
+      <div class="relative h-52 bg-gradient-to-br from-emerald-100 to-teal-100
+                  dark:from-emerald-900/30 dark:to-teal-900/30 overflow-hidden">
+        {% if d.delivery_image %}
+          <img src="{{ d.delivery_image.url }}" alt="{{ d.food_name }}"
+               class="w-full h-full object-cover group-hover:scale-105 transition duration-500"/>
+        {% elif d.image %}
+          <img src="{{ d.image.url }}" alt="{{ d.food_name }}"
+               class="w-full h-full object-cover group-hover:scale-105 transition duration-500"/>
+        {% else %}
+          <div class="w-full h-full flex items-center justify-center text-7xl">🍱</div>
+        {% endif %}
+
+        <div class="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1 rounded-full
+                    bg-emerald-500 text-white text-xs font-bold shadow">
+          <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clip-rule="evenodd"/>
+          </svg>
+          Verified Delivery
+        </div>
+
+        <div class="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-semibold
+                    {% if d.food_type == 'veg' %}
+                      bg-green-100 text-green-700 dark:bg-green-900/70 dark:text-green-300
+                    {% else %}
+                      bg-red-100 text-red-700 dark:bg-red-900/70 dark:text-red-300
+                    {% endif %}">
+          {% if d.food_type == 'veg' %}🟢 Veg{% else %}🔴 Non-Veg{% endif %}
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="p-5">
+        <h3 class="font-display font-semibold text-lg text-gray-900 dark:text-white
+                   mb-3 truncate">
+          {{ d.food_name }}
+        </h3>
+        <div class="space-y-2 mb-4">
+          <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+            <span>🍽️</span>
+            <span>Fed approximately <strong class="text-gray-700 dark:text-gray-200">{{ d.quantity }}</strong> people</span>
+          </div>
+          {% if d.delivery_location %}
+          <div class="flex items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
+            <span class="shrink-0 mt-0.5">📍</span>
+            <span class="line-clamp-1">{{ d.delivery_location }}</span>
+          </div>
+          {% elif d.donor.profile.city %}
+          <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+            <span>📍</span>
+            <span>{{ d.donor.profile.city }}</span>
+          </div>
+          {% endif %}
+          {% if d.delivery_time %}
+          <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+            <span>⏱</span>
+            <span>{{ d.delivery_time|date:"d M Y, g:i A" }}</span>
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Privacy note footer -->
+        <div class="pt-3 border-t border-gray-100 dark:border-gray-700/50
+                    flex items-center gap-1.5 text-xs text-gray-400">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+          Donor &amp; volunteer details kept private
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <!-- Empty state -->
+  <div class="text-center py-24">
+    <div class="w-20 h-20 mx-auto rounded-3xl bg-emerald-100 dark:bg-emerald-900/30
+                flex items-center justify-center text-4xl mb-6 animate-float">
+      🌱
+    </div>
+    <h3 class="font-display text-2xl font-semibold text-gray-700 dark:text-gray-200 mb-3">
+      No deliveries yet
+    </h3>
+    <p class="text-gray-500 dark:text-gray-400 mb-8 max-w-sm mx-auto">
+      Be the first to donate food or volunteer to make a delivery!
+    </p>
+    <div class="flex items-center justify-center gap-4">
+      <a href="{% url 'register' %}"
+         class="px-6 py-3 rounded-xl bg-emerald-500 text-white font-semibold
+                hover:bg-emerald-600 transition">
+        Get Started
+      </a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

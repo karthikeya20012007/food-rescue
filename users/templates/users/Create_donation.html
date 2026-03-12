@@ -1,0 +1,237 @@
+{% extends "users/base.html" %}
+{% block title %}{% if donation %}Edit Donation{% else %}Donate Food{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 sm:px-6 py-10">
+
+  <!-- Back link -->
+  <a href="{% url 'donor_dashboard' %}"
+     class="inline-flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400
+            hover:text-emerald-600 dark:hover:text-emerald-400 transition mb-8 group">
+    <svg class="w-4 h-4 group-hover:-translate-x-1 transition" fill="none"
+         stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+    </svg>
+    Back to Dashboard
+  </a>
+
+  <div class="glass rounded-3xl shadow-card-lg p-8 animate-slide-up">
+
+    <!-- Heading -->
+    <div class="mb-8">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-green-600
+                  flex items-center justify-center text-2xl shadow-md mb-4">
+        {% if donation %}✏️{% else %}🍱{% endif %}
+      </div>
+      <h1 class="font-display text-2xl font-bold text-gray-900 dark:text-white">
+        {% if donation %}Edit Donation{% else %}Post Surplus Food{% endif %}
+      </h1>
+      <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
+        {% if donation %}
+          Update the details for "{{ donation.food_name }}"
+        {% else %}
+          Help someone in need — fill in the details below
+        {% endif %}
+      </p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="space-y-6" novalidate>
+      {% csrf_token %}
+
+      <!-- Food Name + Type -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            Food Name <span class="text-red-400">*</span>
+          </label>
+          {{ form.food_name }}
+          {% if form.food_name.errors %}
+            <p class="mt-1.5 text-xs text-red-500">{{ form.food_name.errors.0 }}</p>
+          {% endif %}
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            Food Type <span class="text-red-400">*</span>
+          </label>
+          {{ form.food_type }}
+          {% if form.food_type.errors %}
+            <p class="mt-1.5 text-xs text-red-500">{{ form.food_type.errors.0 }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Quantity + Expiry -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            Serves (people) <span class="text-red-400">*</span>
+          </label>
+          {{ form.quantity }}
+          {% if form.quantity.errors %}
+            <p class="mt-1.5 text-xs text-red-500">{{ form.quantity.errors.0 }}</p>
+          {% endif %}
+          <p class="mt-1 text-xs text-gray-400">{{ form.quantity.help_text }}</p>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            Expires At <span class="text-red-400">*</span>
+          </label>
+          {{ form.expiry_time }}
+          {% if form.expiry_time.errors %}
+            <p class="mt-1.5 text-xs text-red-500">{{ form.expiry_time.errors.0 }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          Description <span class="text-gray-400 text-xs">(optional)</span>
+        </label>
+        {{ form.description }}
+      </div>
+
+      <!-- Food Photo -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          Food Photo <span class="text-gray-400 text-xs">(optional)</span>
+        </label>
+        {% if donation and donation.image %}
+          <div class="mb-3 flex items-center gap-3">
+            <img src="{{ donation.image.url }}" alt="Current food photo"
+                 class="w-16 h-16 rounded-xl object-cover shadow-sm"/>
+            <span class="text-xs text-gray-400">Current photo. Upload a new one to replace it.</span>
+          </div>
+        {% endif %}
+        {{ form.image }}
+      </div>
+
+      <!-- Divider -->
+      <div class="flex items-center gap-3 py-2">
+        <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+        <span class="text-xs text-gray-400 font-medium uppercase tracking-wide">📍 Pickup Location</span>
+        <div class="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+      </div>
+
+      <!-- GPS button -->
+      <div x-data="locationPicker()" class="space-y-3">
+        <button type="button" @click="getLocation()"
+                class="w-full flex items-center justify-center gap-2 py-3 rounded-xl
+                       border-2 border-dashed border-emerald-300 dark:border-emerald-700
+                       text-sm font-medium text-emerald-600 dark:text-emerald-400
+                       hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition"
+                :disabled="loading"
+                :class="{ 'opacity-70 cursor-wait': loading }">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          <span x-text="loading ? 'Detecting location…' : (detected ? '📍 Location detected & address filled!' : 'Use My GPS Location (auto-fills address)')"></span>
+        </button>
+
+        <p x-show="error" x-text="error" class="text-xs text-red-500 text-center"></p>
+
+        {{ form.latitude }}
+        {{ form.longitude }}
+      </div>
+
+      <!-- Address -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+          Pickup Address
+          <span class="text-gray-400 font-normal text-xs ml-1">(auto-filled by GPS, or type manually)</span>
+        </label>
+        {{ form.pickup_address }}
+        {% if form.pickup_address.errors %}
+          <p class="mt-1.5 text-xs text-red-500">{{ form.pickup_address.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <!-- Form errors -->
+      {% if form.non_field_errors %}
+        <div class="px-4 py-3 rounded-xl bg-red-50 dark:bg-red-900/30
+                    border border-red-200 text-sm text-red-600 dark:text-red-400">
+          {% for err in form.non_field_errors %}<p>❌ {{ err }}</p>{% endfor %}
+        </div>
+      {% endif %}
+
+      <!-- Submit -->
+      <div class="flex items-center gap-3 pt-2">
+        <a href="{% url 'donor_dashboard' %}"
+           class="flex-1 text-center py-3.5 rounded-xl border-2 border-gray-200
+                  dark:border-gray-700 text-gray-600 dark:text-gray-300 font-medium text-sm
+                  hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+          Cancel
+        </a>
+        <button type="submit"
+                class="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600
+                       text-white font-semibold text-sm
+                       hover:from-emerald-600 hover:to-green-700 hover:-translate-y-0.5
+                       hover:shadow-glow transition duration-200 shadow-md">
+          {% if donation %}Update Donation ✅{% else %}Post Donation 🚀{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function locationPicker() {
+    return {
+      loading:  false,
+      detected: false,
+      error:    '',
+
+      getLocation() {
+        if (!navigator.geolocation) {
+          this.error = 'Geolocation is not supported by your browser.';
+          return;
+        }
+        this.loading = true;
+        this.error   = '';
+
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+
+            // Fill hidden coordinate fields
+            document.getElementById('id_latitude').value  = lat.toFixed(6);
+            document.getElementById('id_longitude').value = lng.toFixed(6);
+
+            // Reverse geocode → fill the address textarea automatically
+            const addrField = document.getElementById('id_pickup_address');
+            try {
+              const res  = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
+                { headers: { 'Accept-Language': 'en' } }
+              );
+              const data = await res.json();
+              if (data && data.display_name) {
+                addrField.value = data.display_name;
+              } else {
+                addrField.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+              }
+            } catch (e) {
+              // Fallback to coordinates if reverse geocoding fails
+              addrField.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+            }
+
+            this.detected = true;
+            this.loading  = false;
+          },
+          (err) => {
+            this.error   = 'Could not detect location. Please enter address manually.';
+            this.loading = false;
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      },
+    }
+  }
+</script>
+{% endblock %}

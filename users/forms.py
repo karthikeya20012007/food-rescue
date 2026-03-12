@@ -1,0 +1,554 @@
+from django import forms
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import AuthenticationForm
+from django.utils import timezone
+from .models import UserProfile, FoodDonation
+
+
+# ---------------------------------------------------------------------------
+# Tailwind CSS class helpers
+# ---------------------------------------------------------------------------
+
+TEXT_INPUT   = (
+    "w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white "
+    "text-gray-800 placeholder-gray-400 text-sm "
+    "focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent "
+    "transition duration-200 "
+    "dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500"
+)
+
+SELECT_INPUT = (
+    "w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white "
+    "text-gray-800 text-sm "
+    "focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent "
+    "transition duration-200 "
+    "dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
+)
+
+FILE_INPUT   = (
+    "w-full text-sm text-gray-500 "
+    "file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 "
+    "file:text-sm file:font-medium "
+    "file:bg-emerald-50 file:text-emerald-700 "
+    "hover:file:bg-emerald-100 "
+    "transition duration-200 "
+    "dark:text-gray-400 dark:file:bg-gray-700 dark:file:text-emerald-400"
+)
+
+TEXTAREA     = (
+    "w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white "
+    "text-gray-800 placeholder-gray-400 text-sm resize-none "
+    "focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent "
+    "transition duration-200 "
+    "dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500"
+)
+
+CHECKBOX     = (
+    "h-4 w-4 rounded border-gray-300 text-emerald-500 "
+    "focus:ring-emerald-400 transition duration-200"
+)
+
+
+# ---------------------------------------------------------------------------
+# 1. User Registration Form
+# ---------------------------------------------------------------------------
+
+class UserRegistrationForm(forms.Form):
+    """
+    Combined form that creates both a Django User and a linked UserProfile.
+    Call form.save() to persist both objects.
+    """
+
+    ROLE_CHOICES = [
+        ("donor",     "🍱 Food Donor"),
+        ("volunteer", "🤝 Volunteer"),
+    ]
+
+    # ── User fields ──────────────────────────────────────────────────────────
+    full_name = forms.CharField(
+        max_length=150,
+        widget=forms.TextInput(attrs={
+            "class":       TEXT_INPUT,
+            "placeholder": "Jane Smith",
+            "autofocus":   True,
+        }),
+        label="Full Name",
+    )
+
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            "class":       TEXT_INPUT,
+            "placeholder": "jane@example.com",
+        }),
+        label="Email Address",
+    )
+
+    phone = forms.CharField(
+        max_length=20,
+        required=False,
+        widget=forms.TextInput(attrs={
+            "class":       TEXT_INPUT,
+            "placeholder": "+91 98765 43210",
+        }),
+        label="Phone Number",
+    )
+
+    password = forms.CharField(
+        min_length=8,
+        widget=forms.PasswordInput(attrs={
+            "class":       TEXT_INPUT,
+            "placeholder": "Minimum 8 characters",
+        }),
+        label="Password",
+    )
+
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            "class":       TEXT_INPUT,
+            "placeholder": "Re-enter your password",
+        }),
+        label="Confirm Password",
+    )
+
+    # ── Profile fields ───────────────────────────────────────────────────────
+    role = forms.ChoiceField(
+        choices=ROLE_CHOICES,
+        widget=forms.RadioSelect(attrs={"class": "hidden peer"}),
+        label="I want to join as",
+        initial="donor",
+    )
+
+    city = forms.CharField(
+        max_length=100,
+        required=False,
+        widget=forms.TextInput(attrs={
+            "class":       TEXT_INPUT,
+            "placeholder": "Mumbai",
+        }),
+        label="City",
+    )
+
+    organization_name = forms.CharField(
+        max_length=200,
+        required=False,
+        widget=forms.TextInput(attrs={
+            "class":       TEXT_INPUT,
+            "placeholder": "Restaurant / NGO / Event (optional)",
+        }),
+        label="Organization Name",
+    )
+
+    profile_image = forms.ImageField(
+        required=False,
+        widget=forms.ClearableFileInput(attrs={
+            "class":  FILE_INPUT,
+            "accept": "image/*",
+            "capture": "user",          # prefer front camera on mobile
+        }),
+        label="Profile Photo",
+    )
+
+    # ── Validation ───────────────────────────────────────────────────────────
+
+    def clean_email(self):
+        email = self.cleaned_data["email"].lower().strip()
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("An account with this email already exists.")
+        return email
+
+    def clean_confirm_password(self):
+        pw  = self.cleaned_data.get("password")
+        cpw = self.cleaned_data.get("confirm_password")
+        if pw and cpw and pw != cpw:
+            raise forms.ValidationError("Passwords do not match.")
+        return cpw
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get("phone", "").strip()
+        if phone:
+            digits = "".join(c for c in phone if c.isdigit())
+            if len(digits) < 7:
+                raise forms.ValidationError("Enter a valid phone number.")
+        return phone
+
+    # ── Save ─────────────────────────────────────────────────────────────────
+
+    def save(self):
+        data  = self.cleaned_data
+        email = data["email"]
+
+        user = User.objects.create_user(
+            username   = email,
+            email      = email,
+            password   = data["password"],
+            first_name = data["full_name"].split()[0],
+            last_name  = " ".join(data["full_name"].split()[1:]),
+        )
+
+        # The signal creates a bare profile; update it with full data
+        profile = user.profile
+        profile.full_name         = data["full_name"]
+        profile.phone             = data.get("phone", "")
+        profile.role              = data["role"]
+        profile.city              = data.get("city", "")
+        profile.organization_name = data.get("organization_name", "")
+        if data.get("profile_image"):
+            profile.profile_image = data["profile_image"]
+        profile.save()
+
+        return user
+
+
+# ---------------------------------------------------------------------------
+# 2. Login Form
+# ---------------------------------------------------------------------------
+
+class UserLoginForm(AuthenticationForm):
+    """
+    Extends Django's built-in AuthenticationForm with Tailwind styling.
+    Accepts email as the username field.
+    """
+
+    username = forms.EmailField(
+        widget=forms.EmailInput(attrs={
+            "class":       TEXT_INPUT,
+            "placeholder": "jane@example.com",
+            "autofocus":   True,
+        }),
+        label="Email Address",
+    )
+
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={
+            "class":       TEXT_INPUT,
+            "placeholder": "Your password",
+        }),
+        label="Password",
+    )
+
+    remember_me = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={"class": CHECKBOX}),
+        label="Remember me for 30 days",
+    )
+
+    error_messages = {
+        "invalid_login": "Invalid email or password. Please try again.",
+        "inactive":      "This account has been deactivated.",
+    }
+
+
+# ---------------------------------------------------------------------------
+# 3. Food Donation Form
+# ---------------------------------------------------------------------------
+
+class FoodDonationForm(forms.ModelForm):
+    """
+    Used by donors to post a new surplus food donation.
+    Includes GPS-optional location capture via hidden lat/lng fields.
+    """
+
+    class Meta:
+        model  = FoodDonation
+        fields = [
+            "food_name",
+            "food_type",
+            "quantity",
+            "description",
+            "image",
+            "expiry_time",
+            "pickup_address",
+            "latitude",
+            "longitude",
+        ]
+        widgets = {
+            "food_name": forms.TextInput(attrs={
+                "class":       TEXT_INPUT,
+                "placeholder": "e.g. Biryani, Sandwiches, Curry",
+            }),
+            "food_type": forms.Select(attrs={
+                "class": SELECT_INPUT,
+            }),
+            "quantity": forms.NumberInput(attrs={
+                "class":       TEXT_INPUT,
+                "placeholder": "Number of people this can serve",
+                "min":         1,
+                "max":         10000,
+            }),
+            "description": forms.Textarea(attrs={
+                "class":       TEXTAREA,
+                "placeholder": "Allergens, packaging details, any special notes…",
+                "rows":        3,
+            }),
+            "image": forms.ClearableFileInput(attrs={
+                "class":   FILE_INPUT,
+                "accept":  "image/*",
+                "capture": "environment",   # prefer rear camera on mobile
+            }),
+            "expiry_time": forms.DateTimeInput(
+                format="%Y-%m-%dT%H:%M",
+                attrs={
+                    "class": TEXT_INPUT,
+                    "type":  "datetime-local",
+                },
+            ),
+            "pickup_address": forms.Textarea(attrs={
+                "class":       TEXTAREA,
+                "placeholder": "Full pickup address (door / landmark / area)",
+                "rows":        2,
+            }),
+            # Hidden — populated by JS geolocation
+            "latitude": forms.HiddenInput(attrs={"id": "id_latitude"}),
+            "longitude": forms.HiddenInput(attrs={"id": "id_longitude"}),
+        }
+        labels = {
+            "food_name":      "Food Name",
+            "food_type":      "Food Type",
+            "quantity":       "Serves (people)",
+            "description":    "Description (optional)",
+            "image":          "Food Photo (optional)",
+            "expiry_time":    "Expires At",
+            "pickup_address": "Pickup Address",
+            "latitude":       "",
+            "longitude":      "",
+        }
+        help_texts = {
+            "quantity":    "Approximate number of people this food can serve.",
+            "expiry_time": "Food must be picked up before this time.",
+        }
+
+    # ── Init ─────────────────────────────────────────────────────────────────
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Address is validated in clean() so GPS-only submissions work
+        self.fields["pickup_address"].required = False
+
+    # ── Validation ───────────────────────────────────────────────────────────
+
+    def clean_quantity(self):
+        qty = self.cleaned_data.get("quantity")
+        if qty is None or qty < 1:
+            raise forms.ValidationError("Quantity must be at least 1 person.")
+        if qty > 10000:
+            raise forms.ValidationError("Quantity seems too high. Please double-check.")
+        return qty
+
+    def clean_expiry_time(self):
+        expiry = self.cleaned_data.get("expiry_time")
+        if expiry and expiry <= timezone.now():
+            raise forms.ValidationError("Expiry time must be in the future.")
+        return expiry
+
+    def clean_food_type(self):
+        ft = self.cleaned_data.get("food_type")
+        valid = [choice[0] for choice in FoodDonation.FOOD_TYPE_CHOICES]
+        if ft not in valid:
+            raise forms.ValidationError("Please select a valid food type.")
+        return ft
+
+    def clean(self):
+        cleaned = super().clean()
+        lat     = cleaned.get("latitude")
+        lng     = cleaned.get("longitude")
+        address = cleaned.get("pickup_address", "").strip()
+
+        has_coords = lat is not None and lng is not None
+
+        # Accept coords OR a typed address — at least one must be present
+        if not address and not has_coords:
+            self.add_error(
+                "pickup_address",
+                "Please enter a pickup address or use the GPS button.",
+            )
+
+        # If GPS was used but address left blank, store coords as fallback text
+        if not address and has_coords:
+            cleaned["pickup_address"] = f"GPS location: {float(lat):.5f}, {float(lng):.5f}"
+
+        # Validate coordinate range
+        if lat is not None:
+            if not (-90 <= float(lat) <= 90):
+                self.add_error("latitude", "Invalid latitude value.")
+        if lng is not None:
+            if not (-180 <= float(lng) <= 180):
+                self.add_error("longitude", "Invalid longitude value.")
+
+        return cleaned
+
+
+# ---------------------------------------------------------------------------
+# 4. Volunteer Profile Update Form
+# ---------------------------------------------------------------------------
+
+class VolunteerProfileUpdateForm(forms.ModelForm):
+    """
+    Allows volunteers (and donors) to update their profile details.
+    Also exposes first_name / last_name on the underlying User object.
+    """
+
+    # Extra fields pulled from User model
+    first_name = forms.CharField(
+        max_length=75,
+        required=False,
+        widget=forms.TextInput(attrs={
+            "class":       TEXT_INPUT,
+            "placeholder": "First name",
+        }),
+        label="First Name",
+    )
+
+    last_name = forms.CharField(
+        max_length=75,
+        required=False,
+        widget=forms.TextInput(attrs={
+            "class":       TEXT_INPUT,
+            "placeholder": "Last name",
+        }),
+        label="Last Name",
+    )
+
+    class Meta:
+        model  = UserProfile
+        fields = [
+            "full_name",
+            "phone",
+            "city",
+            "organization_name",
+            "profile_image",
+        ]
+        widgets = {
+            "full_name": forms.TextInput(attrs={
+                "class":       TEXT_INPUT,
+                "placeholder": "Your full name",
+            }),
+            "phone": forms.TextInput(attrs={
+                "class":       TEXT_INPUT,
+                "placeholder": "+91 98765 43210",
+            }),
+            "city": forms.TextInput(attrs={
+                "class":       TEXT_INPUT,
+                "placeholder": "Mumbai",
+            }),
+            "organization_name": forms.TextInput(attrs={
+                "class":       TEXT_INPUT,
+                "placeholder": "Restaurant / NGO / Organization (optional)",
+            }),
+            "profile_image": forms.ClearableFileInput(attrs={
+                "class":   FILE_INPUT,
+                "accept":  "image/*",
+                "capture": "user",
+            }),
+        }
+        labels = {
+            "full_name":         "Full Name",
+            "phone":             "Phone Number",
+            "city":              "City",
+            "organization_name": "Organization",
+            "profile_image":     "Profile Photo",
+        }
+
+    def __init__(self, *args, **kwargs):
+        # Accept the User instance so we can pre-populate name fields
+        self.user = kwargs.pop("user", None)
+        super().__init__(*args, **kwargs)
+        if self.user:
+            self.fields["first_name"].initial = self.user.first_name
+            self.fields["last_name"].initial  = self.user.last_name
+
+    # ── Validation ───────────────────────────────────────────────────────────
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get("phone", "").strip()
+        if phone:
+            digits = "".join(c for c in phone if c.isdigit())
+            if len(digits) < 7:
+                raise forms.ValidationError("Enter a valid phone number.")
+        return phone
+
+    def clean_full_name(self):
+        name = self.cleaned_data.get("full_name", "").strip()
+        if len(name) < 2:
+            raise forms.ValidationError("Full name must be at least 2 characters.")
+        return name
+
+    # ── Save ─────────────────────────────────────────────────────────────────
+
+    def save(self, commit=True):
+        profile = super().save(commit=False)
+        if self.user:
+            self.user.first_name = self.cleaned_data.get("first_name", "")
+            self.user.last_name  = self.cleaned_data.get("last_name", "")
+            if commit:
+                self.user.save()
+        if commit:
+            profile.save()
+        return profile
+
+
+# ---------------------------------------------------------------------------
+# 5. Delivery Confirmation Form
+# ---------------------------------------------------------------------------
+
+class DeliveryConfirmationForm(forms.ModelForm):
+    """
+    Used by volunteers when marking a donation as Delivered.
+    Requires an upload photo as proof of delivery.
+    """
+
+    class Meta:
+        model  = FoodDonation
+        fields = [
+            "delivery_location",
+            "delivery_image",
+        ]
+        widgets = {
+            "delivery_location": forms.Textarea(attrs={
+                "class":       TEXTAREA,
+                "placeholder": "Where was the food delivered? (area / landmark)",
+                "rows":        2,
+            }),
+            "delivery_image": forms.ClearableFileInput(attrs={
+                "class":   FILE_INPUT,
+                "accept":  "image/*",
+                "capture": "environment",   # open rear camera directly on mobile
+            }),
+        }
+        labels = {
+            "delivery_location": "Delivery Location",
+            "delivery_image":    "Delivery Photo (proof)",
+        }
+        help_texts = {
+            "delivery_image": "Take a photo of the food being handed over as proof of delivery.",
+        }
+
+    # ── Validation ───────────────────────────────────────────────────────────
+
+    def clean_delivery_image(self):
+        image = self.cleaned_data.get("delivery_image")
+        if not image:
+            raise forms.ValidationError(
+                "A delivery photo is required to confirm the delivery."
+            )
+        # Guard against oversized uploads (max 8 MB)
+        if hasattr(image, "size") and image.size > 8 * 1024 * 1024:
+            raise forms.ValidationError("Image file is too large. Maximum size is 8 MB.")
+        return image
+
+    def clean_delivery_location(self):
+        loc = self.cleaned_data.get("delivery_location", "").strip()
+        if len(loc) < 5:
+            raise forms.ValidationError(
+                "Please provide a meaningful delivery location (min 5 characters)."
+            )
+        return loc
+
+    # ── Save ─────────────────────────────────────────────────────────────────
+
+    def save(self, commit=True):
+        donation = super().save(commit=False)
+        donation.status        = "delivered"
+        donation.delivery_time = timezone.now()
+        if commit:
+            donation.save()
+        return donation
