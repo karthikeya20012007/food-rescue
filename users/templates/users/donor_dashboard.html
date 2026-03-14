@@ -8,40 +8,47 @@
   <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 au">
     <div>
       <p class="lbl mb-3">Donor Dashboard</p>
-      <h1 class="f-display text-6xl sm:text-7xl leading-none mb-3" style="color:#e8f5ec">WELCOME<br><span class="tg">{{ profile.full_name|truncatechars:18|upper }}</span></h1>
-      <p class="text-sm font-500" style="color:rgba(180,220,190,.55)">You've helped feed <span class="font-700" style="color:#00ff88">{{ meals_saved }}</span> people. Keep going.</p>
+      <h1 class="f-display text-6xl sm:text-7xl leading-none mb-3 t1">WELCOME<br>
+        <span class="tg">{{ profile.full_name|truncatechars:18|upper }}</span>
+      </h1>
+      <p class="text-sm font-500 ts">You've helped feed
+        <span class="font-700 ta">{{ meals_saved }}</span> people. Keep going.
+      </p>
     </div>
-    <a href="{% url 'create_donation' %}" class="btn btn-solid shrink-0" style="padding:.875rem 2rem;font-size:1rem">
-      <svg style="width:16px;height:16px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+    <a href="{% url 'create_donation' %}" class="btn btn-solid shrink-0"
+       style="padding:.875rem 2rem;font-size:1rem">
+      <svg style="width:16px;height:16px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+      </svg>
       Post Donation
     </a>
   </div>
 
   <!-- Stats -->
   <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-    {% for s in "1234" %}{% endfor %}
-    <div class="glow-card glass lift au" style="border-radius:16px;padding:1.5rem">
+    <div class="glow-card glass lift au"  style="border-radius:16px;padding:1.5rem">
       <div class="lbl mb-4">Total</div>
       <div class="f-display text-6xl tg mb-1">{{ total }}</div>
-      <div class="text-sm font-500" style="color:rgba(180,220,190,.5)">Donations posted</div>
+      <div class="text-sm font-500 ts">Donations posted</div>
       <div class="mt-4" style="height:2px;background:linear-gradient(90deg,#00ff88,transparent);border-radius:1px"></div>
     </div>
     <div class="glow-card glass lift au1" style="border-radius:16px;padding:1.5rem">
       <div class="lbl mb-4">Impact</div>
       <div class="f-display text-6xl tg-warm mb-1">{{ meals_saved }}</div>
-      <div class="text-sm font-500" style="color:rgba(180,220,190,.5)">Meals saved</div>
+      <div class="text-sm font-500 ts">Meals saved</div>
       <div class="mt-4" style="height:2px;background:linear-gradient(90deg,#f97316,transparent);border-radius:1px"></div>
     </div>
     <div class="glow-card glass lift au2" style="border-radius:16px;padding:1.5rem">
       <div class="lbl mb-4">Active</div>
-      <div class="f-display text-6xl" style="-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-image:linear-gradient(135deg,#00d4ff,#6366f1)">{{ active }}</div>
-      <div class="text-sm font-500" style="color:rgba(180,220,190,.5)">Live now</div>
+      <div class="f-display text-6xl mb-1"
+           style="-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-image:linear-gradient(135deg,#00d4ff,#6366f1)">{{ active }}</div>
+      <div class="text-sm font-500 ts">Live now</div>
       <div class="mt-4" style="height:2px;background:linear-gradient(90deg,#00d4ff,transparent);border-radius:1px"></div>
     </div>
     <div class="glow-card glass lift au3" style="border-radius:16px;padding:1.5rem">
       <div class="lbl mb-4">Delivered</div>
       <div class="f-display text-6xl tg-purple mb-1">{{ delivered }}</div>
-      <div class="text-sm font-500" style="color:rgba(180,220,190,.5)">Completed</div>
+      <div class="text-sm font-500 ts">Completed</div>
       <div class="mt-4" style="height:2px;background:linear-gradient(90deg,#a855f7,transparent);border-radius:1px"></div>
     </div>
   </div>
@@ -49,59 +56,195 @@
   <!-- Donations list -->
   <div class="flex items-center justify-between mb-6 au3">
     <div>
-      <h2 class="f-display text-3xl tracking-wider" style="color:#e8f5ec">MY DONATIONS</h2>
-      <p class="text-xs font-600 mt-1" style="color:rgba(120,180,140,.4)">{{ donations|length }} TOTAL · NEWEST FIRST</p>
+      <h2 class="f-display text-3xl tracking-wider t1">MY DONATIONS</h2>
+      <p class="text-xs font-600 mt-1 t3" id="donation-count">{{ donations|length }} TOTAL · NEWEST FIRST</p>
     </div>
   </div>
 
   {% if donations %}
-  <div class="space-y-3 au4">
+  <div class="space-y-3 au4" id="donations-list">
     {% for d in donations %}
-    <div class="glow-card glass bar-{{ d.status }} transition-all duration-200" style="border-radius:14px;overflow:hidden" onmouseover="this.style.background='rgba(0,255,136,.03)'" onmouseout="this.style.background=''">
+    <div class="glow-card glass bar-{{ d.status }} transition-all duration-300"
+         style="border-radius:14px;overflow:hidden"
+         id="donation-row-{{ d.pk }}"
+         data-status="{{ d.status }}">
       <div class="flex items-start gap-4 p-5">
-        <div class="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style="{% if d.food_type == 'veg' %}background:rgba(0,255,136,.1);border:1px solid rgba(0,255,136,.2){% else %}background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2){% endif %}">{% if d.food_type == 'veg' %}🥦{% else %}🍗{% endif %}</div>
+
+        <!-- Icon -->
+        <div class="shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-2xl badge {% if d.food_type == 'veg' %}chip-veg{% else %}chip-nonveg{% endif %}">
+          {% if d.food_type == 'veg' %}🥦{% else %}🍗{% endif %}
+        </div>
+
+        <!-- Main info -->
         <div class="flex-1 min-w-0">
           <div class="flex items-start justify-between gap-3 flex-wrap">
             <div>
-              <h3 class="font-800 text-base" style="color:#e8f5ec">{{ d.food_name }}</h3>
+              <h3 class="font-800 text-base t1">{{ d.food_name }}</h3>
               <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1.5">
-                <span class="text-xs font-600" style="color:rgba(180,220,190,.45)">👥 ~{{ d.quantity }} people</span>
-                <span class="text-xs font-600" style="color:rgba(180,220,190,.45)">⏱ {{ d.expiry_time|date:"d M, g:i A" }}</span>
-                <span class="text-xs font-500" style="color:rgba(120,180,140,.4)">📍 {{ d.pickup_address|truncatechars:45 }}</span>
+                <span class="text-xs font-600 ts">👥 ~{{ d.quantity }} people</span>
+                <span class="text-xs font-600 ts">⏱ {{ d.expiry_time|date:"d M, g:i A" }}</span>
+                <span class="text-xs font-500 t3">📍 {{ d.pickup_address|truncatechars:45 }}</span>
               </div>
             </div>
-            <span class="badge badge-{{ d.status }} shrink-0">{{ d.get_status_display }}</span>
+            <span class="badge badge-{{ d.status }} shrink-0 status-badge">
+              {{ d.get_status_display }}
+            </span>
           </div>
+
           {% if d.accepted_by and d.status != 'available' %}
-          <div class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-600" style="background:rgba(0,255,136,.06);border:1px solid rgba(0,255,136,.15);color:#00ff88">
-            <div style="width:16px;height:16px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#00ff88,#00b868);flex-shrink:0">
-              {% if d.accepted_by.profile.profile_image %}<img src="{{ d.accepted_by.profile.profile_image.url }}" style="width:100%;height:100%;object-fit:cover"/>
-              {% else %}<span style="color:#041209;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;height:100%">{{ d.accepted_by.profile.full_name|first|upper }}</span>{% endif %}
+          <div class="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-600 chip-green-sm">
+            <div class="img-frame" style="width:16px;height:16px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#00ff88,#00b868);flex-shrink:0">
+              {% if d.accepted_by.profile.profile_image %}
+                <img src="{{ d.accepted_by.profile.profile_image.url }}" alt=""/>
+              {% else %}
+                <span style="position:relative;z-index:1;color:#041209;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;height:100%">
+                  {{ d.accepted_by.profile.full_name|first|upper }}
+                </span>
+              {% endif %}
             </div>
             🤝 {{ d.accepted_by.profile.full_name }} is handling this
           </div>
           {% endif %}
         </div>
-        <div class="shrink-0 flex flex-col sm:flex-row items-end sm:items-center gap-2">
-          <a href="{% url 'donation_detail' d.pk %}" class="btn btn-ghost !py-2 !px-3" style="font-size:.78rem">View →</a>
+
+        <!-- Actions -->
+        <div class="shrink-0 flex flex-col sm:flex-row items-end sm:items-center gap-2 donation-actions"
+             data-pk="{{ d.pk }}" data-status="{{ d.status }}">
+          <a href="{% url 'donation_detail' d.pk %}" class="btn btn-ghost !py-2 !px-3"
+             style="font-size:.78rem">View →</a>
           {% if d.status|in_list:"available,expired" %}
-          <a href="{% url 'edit_donation' d.pk %}" class="btn !py-2 !px-3" style="font-size:.78rem;background:rgba(0,255,136,.08);color:#00ff88;border:1px solid rgba(0,255,136,.2)">Edit</a>
-          <form method="post" action="{% url 'cancel_donation' d.pk %}" onsubmit="return confirm('Cancel this donation?')">{% csrf_token %}
-            <button class="btn btn-danger !py-2 !px-3" style="font-size:.78rem">Cancel</button>
-          </form>
+          <a href="{% url 'edit_donation' d.pk %}" class="btn !py-2 !px-3 chip-green-sm">Edit</a>
+          <button class="btn btn-danger !py-2 !px-3 cancel-donation-btn"
+                  style="font-size:.78rem"
+                  data-pk="{{ d.pk }}"
+                  data-url="{% url 'cancel_donation' d.pk %}"
+                  data-name="{{ d.food_name }}">
+            Cancel
+          </button>
           {% endif %}
         </div>
+
       </div>
     </div>
     {% endfor %}
   </div>
+
   {% else %}
   <div class="glow-card glass text-center au4" style="border-radius:16px;padding:5rem 2rem">
     <div class="text-5xl mb-5 fy">🍱</div>
-    <h3 class="f-display text-3xl tracking-wider mb-2" style="color:#e8f5ec">NO DONATIONS YET</h3>
-    <p class="text-sm font-500 mb-8 max-w-xs mx-auto" style="color:rgba(180,220,190,.45)">Your first post could feed dozens of people tonight.</p>
+    <h3 class="f-display text-3xl tracking-wider mb-2 t1">NO DONATIONS YET</h3>
+    <p class="text-sm font-500 mb-8 max-w-xs mx-auto ts">Your first post could feed dozens of people tonight.</p>
     <a href="{% url 'create_donation' %}" class="btn btn-solid">+ Post Your First Donation</a>
   </div>
   {% endif %}
+
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* ── CSRF ────────────────────────────────────────────────────────────────── */
+function getCsrf(){
+  const m = document.cookie.match('(^|;)\\s*csrftoken=([^;]*)');
+  return m ? m[2] : '';
+}
+
+/* ── Toast ───────────────────────────────────────────────────────────────── */
+function showToast(msg, type){
+  const el = document.createElement('div');
+  el.className = 'ajax-toast ' + (type === 'err' ? 'ajax-toast-err' : 'ajax-toast-ok');
+  el.textContent = msg;
+  document.body.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('ajax-toast-in'));
+  setTimeout(() => {
+    el.classList.remove('ajax-toast-in');
+    el.addEventListener('transitionend', () => el.remove(), {once:true});
+  }, 3500);
+}
+
+/* ── Cancel donation via AJAX (no page reload) ───────────────────────────── */
+document.addEventListener('click', async function(e){
+  const btn = e.target.closest('.cancel-donation-btn');
+  if(!btn) return;
+  e.preventDefault();
+
+  const pk   = btn.dataset.pk;
+  const url  = btn.dataset.url;
+  const name = btn.dataset.name;
+
+  /* Custom confirm modal */
+  const confirmed = await appConfirm(`Cancel "${name}"? This cannot be undone.`);
+  if(!confirmed) return;
+
+  btn.disabled = true;
+  btn.innerHTML = '<span style="opacity:.5">…</span>';
+
+  try {
+    const res  = await fetch(url, {
+      method : 'POST',
+      headers: {
+        'X-CSRFToken'     : getCsrf(),
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept'          : 'application/json',
+      }
+    });
+    const data = await res.json();
+
+    if(data.ok){
+      showToast('✅ ' + data.message, 'ok');
+      /* Visually update the row — remove action buttons, update badge */
+      const row = document.getElementById('donation-row-' + pk);
+      if(row){
+        /* Update left status bar */
+        row.className = row.className.replace(/bar-\w+/, 'bar-cancelled');
+        row.dataset.status = 'cancelled';
+        /* Update badge */
+        const badge = row.querySelector('.status-badge');
+        if(badge){
+          badge.className = 'badge badge-cancelled shrink-0 status-badge';
+          badge.textContent = 'Cancelled';
+        }
+        /* Remove action buttons (edit + cancel) — keep View */
+        const actions = row.querySelector('.donation-actions');
+        if(actions){
+          actions.querySelectorAll('.cancel-donation-btn, .chip-green-sm').forEach(b => b.remove());
+        }
+        /* Fade in the updated row to draw attention */
+        row.style.transition = 'opacity .2s';
+        row.style.opacity = '0.4';
+        setTimeout(() => { row.style.opacity = '1'; }, 200);
+      }
+    } else {
+      showToast('❌ ' + (data.error || 'Could not cancel.'), 'err');
+      btn.disabled = false;
+      btn.innerHTML = 'Cancel';
+    }
+  } catch(err){
+    showToast('❌ Network error. Please try again.', 'err');
+    btn.disabled = false;
+    btn.innerHTML = 'Cancel';
+  }
+});
+
+/* ── appConfirm modal (shared with volunteer dashboard) ───────────────────── */
+function appConfirm(msg){
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.className = 'app-modal-overlay';
+    overlay.innerHTML = `
+      <div class="app-modal">
+        <p class="app-modal-msg">${msg}</p>
+        <div class="app-modal-btns">
+          <button class="app-modal-cancel">Keep it</button>
+          <button class="app-modal-ok">Yes, Cancel</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add('app-modal-in'));
+    overlay.querySelector('.app-modal-ok').onclick     = () => { overlay.remove(); resolve(true);  };
+    overlay.querySelector('.app-modal-cancel').onclick = () => { overlay.remove(); resolve(false); };
+    overlay.addEventListener('click', e => { if(e.target === overlay){ overlay.remove(); resolve(false); } });
+  });
+}
+</script>
 {% endblock %}

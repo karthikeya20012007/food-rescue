@@ -375,15 +375,18 @@ def cancel_donation(request, pk):
     donation = get_object_or_404(FoodDonation, pk=pk, donor=request.user)
 
     if donation.status not in ("available", "expired"):
-        messages.error(
-            request,
-            "Cannot cancel a donation that is already in progress."
-        )
+        msg = "Cannot cancel a donation that is already in progress."
+        messages.error(request, msg)
+        if _is_ajax(request):
+            return JsonResponse({"ok": False, "error": msg}, status=400)
         return redirect("donation_detail", pk=pk)
 
     donation.status = "cancelled"
     donation.save()
-    messages.success(request, "Donation cancelled.")
+    msg = f"'{donation.food_name}' has been cancelled."
+    messages.success(request, msg)
+    if _is_ajax(request):
+        return JsonResponse({"ok": True, "message": msg, "pk": pk})
     return redirect("donor_dashboard")
 
 

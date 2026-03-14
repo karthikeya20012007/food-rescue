@@ -121,9 +121,10 @@ html:not(.dark) .particles::after{
   position:relative;
 }
 html:not(.dark) .glass{
+  background:rgba(255,255,255,.92);
   box-shadow:
     0 4px 24px rgba(0,0,0,.08),
-    0 1px 0 rgba(255,255,255,.9) inset,
+    0 1px 0 rgba(255,255,255,.95) inset,
     0 -1px 0 rgba(0,0,0,.04) inset;
 }
 .nav-glass{
@@ -325,7 +326,7 @@ html:not(.dark) .bar-cancelled{border-left-color:#ef4444}
 
 /* ── LABELS ───────────────────────────────────────────────────────────── */
 .lbl{font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(120,180,140,.6)}
-html:not(.dark) .lbl{color:rgba(40,80,55,.45)}
+html:not(.dark) .lbl{color:rgba(30,70,45,.6)}
 
 /* ── ANIMATIONS ───────────────────────────────────────────────────────── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
@@ -446,7 +447,7 @@ html:not(.dark) .t3{color:rgba(20,70,40,.42)}
 html:not(.dark) .ta{color:#059669}
 /* Stat card subtext */
 .ts{color:rgba(180,220,190,.5);font-size:.875rem;font-weight:500}
-html:not(.dark) .ts{color:rgba(20,70,40,.5)}
+html:not(.dark) .ts{color:rgba(15,50,30,.65)}
 /* Large heading */
 .th{color:#e8f5ec}
 html:not(.dark) .th{color:#081a0e}
@@ -541,18 +542,26 @@ html:not(.dark) .profile-banner-fade{
 }
 
 /* ── HERO WORD — explicit text fill to prevent webkit clip inheritance ─── */
+/* The h1 gets will-change:transform to create its own compositing layer,
+   which prevents -webkit-background-clip:text on child spans from bleeding
+   into sibling text nodes. */
+.hero-h1{
+  will-change:transform;
+  -webkit-transform:translateZ(0);
+  transform:translateZ(0);
+}
 .hero-word{
   -webkit-text-fill-color:#e8f5ec !important;
   color:#e8f5ec !important;
   display:inline;
-  /* Force own paint layer to escape webkit-background-clip inheritance */
   -webkit-background-clip:unset !important;
   background-clip:unset !important;
   background-image:none !important;
+  position:relative;
 }
 html:not(.dark) .hero-word{
-  -webkit-text-fill-color:#0d1f12 !important;
-  color:#0d1f12 !important;
+  -webkit-text-fill-color:#111827 !important;
+  color:#111827 !important;
 }
 /* ── TG BLUE — blue-purple gradient ─────────────────────────────────────── */
 .tg-blue{

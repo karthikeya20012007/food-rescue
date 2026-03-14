@@ -5,14 +5,14 @@
 <!-- HERO -->
 <section class="relative overflow-hidden" style="min-height:90vh;display:flex;align-items:center">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 py-24 text-center w-full relative z-10">
-    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-700 mb-10 au" style="background:rgba(0,255,136,.1);color:#00ff88;border:1px solid rgba(0,255,136,.3);letter-spacing:.1em">
-      <span class="w-2 h-2 rounded-full gp" style="background:#00ff88;box-shadow:0 0 8px #00ff88"></span>
+    <div class="live-pill mb-10 au">
+      <span class="live-dot gp"></span>
       LIVE · CONNECTING DONORS &amp; VOLUNTEERS
     </div>
-    <h1 class="f-display au1 mb-6" style="font-size:clamp(4rem,12vw,10rem);line-height:.9;color:#e8f5ec">
-      REDUCE<br>FOOD <span class="tg">WASTE.</span><br>FEED <span style="-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-image:linear-gradient(135deg,#00d4ff,#a855f7)">PEOPLE.</span>
+    <h1 class="f-display au1 mb-6 hero-h1" style="font-size:clamp(4rem,12vw,10rem);line-height:.9">
+      <span class="hero-word">REDUCE</span><br><span class="hero-word">FOOD </span><span class="tg">WASTE.</span><br><span class="hero-word">FEED </span><span class="tg-blue">PEOPLE.</span>
     </h1>
-    <p class="text-lg font-500 max-w-xl mx-auto mb-12 au2" style="color:rgba(180,220,190,.6)">Connect surplus food from restaurants and households with volunteers who deliver it to people in need. Every meal counts.</p>
+    <p class="text-lg font-500 max-w-xl mx-auto mb-12 au2 t2">Connect surplus food from restaurants and households with volunteers who deliver it to people in need. Every meal counts.</p>
     <div class="flex flex-col sm:flex-row items-center justify-center gap-4 au3">
       <a href="{% url 'register' %}?role=donor" class="btn btn-solid" style="padding:1rem 2.5rem;font-size:1.05rem">🍱 Become a Donor</a>
       <a href="{% url 'register' %}?role=volunteer" class="btn btn-neon" style="padding:1rem 2.5rem;font-size:1.05rem">🤝 Become a Volunteer</a>
@@ -23,12 +23,12 @@
         <p class="f-display text-5xl tg">{{ total_deliveries }}</p>
         <p class="text-xs font-700 lbl mt-1">Deliveries</p>
       </div>
-      <div style="width:1px;height:40px;background:rgba(0,255,136,.2)"></div>
+      <div class="stat-sep"></div>
       <div class="text-center">
         <p class="f-display text-5xl tg-warm">{{ total_meals }}</p>
         <p class="text-xs font-700 lbl mt-1">Meals Saved</p>
       </div>
-      <div style="width:1px;height:40px;background:rgba(0,255,136,.2)"></div>
+      <div class="stat-sep"></div>
       <div class="text-center">
         <p class="f-display text-5xl tg-purple">{{ active_donors }}</p>
         <p class="text-xs font-700 lbl mt-1">Donors</p>
@@ -41,26 +41,26 @@
 <section class="py-24 max-w-7xl mx-auto px-4 sm:px-6">
   <div class="text-center mb-16">
     <p class="lbl mb-4">Simple Process</p>
-    <h2 class="f-display text-5xl sm:text-6xl" style="color:#e8f5ec">HOW IT <span class="tg">WORKS</span></h2>
+    <h2 class="f-display text-5xl sm:text-6xl t1">HOW IT <span class="tg">WORKS</span></h2>
   </div>
   <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
     <div class="glow-card glass lift text-center" style="border-radius:16px;padding:2.5rem 2rem">
-      <div class="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl mb-6 fy shine" style="background:linear-gradient(135deg,rgba(0,255,136,.2),rgba(0,212,255,.1));border:1px solid rgba(0,255,136,.3);box-shadow:0 0 20px rgba(0,255,136,.15)">🍱</div>
+      <div class="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl mb-6 fy shine" class="icon-glow-circle" style="background:linear-gradient(135deg,rgba(0,255,136,.2),rgba(0,212,255,.1));border:1px solid rgba(0,255,136,.3)">🍱</div>
       <div class="f-display text-6xl tg mb-4">01</div>
-      <h3 class="font-800 text-lg mb-3" style="color:#e8f5ec">Donors Post Food</h3>
-      <p class="text-sm font-500 leading-relaxed" style="color:rgba(180,220,190,.5)">Restaurants, households, and event organizers post surplus food with location, quantity, and pickup time.</p>
+      <h3 class="font-800 text-lg mb-3 t1">Donors Post Food</h3>
+      <p class="text-sm font-500 leading-relaxed ts">Restaurants, households, and event organizers post surplus food with location, quantity, and pickup time.</p>
     </div>
     <div class="glow-card glass lift text-center" style="border-radius:16px;padding:2.5rem 2rem;margin-top:0px">
       <div class="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl mb-6 fy shine" style="animation-delay:.5s;background:linear-gradient(135deg,rgba(0,212,255,.2),rgba(124,58,237,.1));border:1px solid rgba(0,212,255,.3);box-shadow:0 0 20px rgba(0,212,255,.15)">🚴</div>
       <div class="f-display text-6xl mb-4" style="-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-image:linear-gradient(135deg,#00d4ff,#6366f1)">02</div>
-      <h3 class="font-800 text-lg mb-3" style="color:#e8f5ec">Volunteers Accept</h3>
-      <p class="text-sm font-500 leading-relaxed" style="color:rgba(180,220,190,.5)">Nearby volunteers accept the pickup, get navigation directions, and collect the food from the donor.</p>
+      <h3 class="font-800 text-lg mb-3 t1">Volunteers Accept</h3>
+      <p class="text-sm font-500 leading-relaxed ts">Nearby volunteers accept the pickup, get navigation directions, and collect the food from the donor.</p>
     </div>
     <div class="glow-card glass lift text-center" style="border-radius:16px;padding:2.5rem 2rem">
       <div class="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl mb-6 fy shine" style="animation-delay:1s;background:linear-gradient(135deg,rgba(167,139,250,.2),rgba(236,72,153,.1));border:1px solid rgba(167,139,250,.3);box-shadow:0 0 20px rgba(167,139,250,.15)">❤️</div>
       <div class="f-display text-6xl tg-purple mb-4">03</div>
-      <h3 class="font-800 text-lg mb-3" style="color:#e8f5ec">Food Reaches People</h3>
-      <p class="text-sm font-500 leading-relaxed" style="color:rgba(180,220,190,.5)">The volunteer delivers food to those in need and uploads a photo as verified proof on the Impact Feed.</p>
+      <h3 class="font-800 text-lg mb-3 t1">Food Reaches People</h3>
+      <p class="text-sm font-500 leading-relaxed ts">The volunteer delivers food to those in need and uploads a photo as verified proof on the Impact Feed.</p>
     </div>
   </div>
 </section>
@@ -69,21 +69,21 @@
 {% if recent_deliveries %}
 <section class="py-20 max-w-7xl mx-auto px-4 sm:px-6">
   <div class="flex items-end justify-between mb-12">
-    <div><p class="lbl mb-3">Live Impact</p><h2 class="f-display text-4xl sm:text-5xl" style="color:#e8f5ec">RECENT <span class="tg">DELIVERIES</span></h2></div>
+    <div><p class="lbl mb-3">Live Impact</p><h2 class="f-display text-4xl sm:text-5xl t1">RECENT <span class="tg">DELIVERIES</span></h2></div>
     <a href="{% url 'impact_feed' %}" class="btn btn-ghost hidden sm:inline-flex">View all →</a>
   </div>
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     {% for d in recent_deliveries %}
-    <div class="glow-card glass lift" style="border-radius:16px;overflow:hidden">
-      <div class="relative" style="height:180px;background:linear-gradient(135deg,rgba(0,255,136,.08),rgba(0,212,255,.06));overflow:hidden">
-        {% if d.delivery_image %}<img src="{{ d.delivery_image.url }}" alt="{{ d.food_name }}" style="width:100%;height:100%;object-fit:cover"/>
-        {% elif d.image %}<img src="{{ d.image.url }}" alt="{{ d.food_name }}" style="width:100%;height:100%;object-fit:cover"/>
-        {% else %}<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:4rem">🍱</div>{% endif %}
-        <div class="absolute top-3 left-3 px-2.5 py-1 rounded-full text-xs font-700" style="background:rgba(0,255,136,.2);color:#00ff88;border:1px solid rgba(0,255,136,.4);backdrop-filter:blur(8px)">✅ Verified</div>
+    <div class="glow-card glass-plain lift" style="border-radius:16px;overflow:hidden">
+      <div class="img-frame" style="height:180px;background:linear-gradient(135deg,rgba(0,255,136,.08),rgba(0,212,255,.06))">
+        {% if d.delivery_image %}<img src="{{ d.delivery_image.url }}" alt="{{ d.food_name }}"/>
+        {% elif d.image %}<img src="{{ d.image.url }}" alt="{{ d.food_name }}"/>
+        {% else %}<div style="position:relative;z-index:1;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:4rem">🍱</div>{% endif %}
+        <div class="overlay-top-left">✅ Verified</div>
       </div>
       <div class="p-4">
-        <h3 class="font-800 text-base mb-2" style="color:#e8f5ec;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ d.food_name }}</h3>
-        <div class="space-y-1 text-xs font-500" style="color:rgba(180,220,190,.5)">
+        <h3 class="font-800 text-base mb-2 t1" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ d.food_name }}</h3>
+        <div class="space-y-1 text-xs font-500 ts">
           <div>🍽️ Fed ~{{ d.quantity }} people</div>
           {% if d.donor.profile.city %}<div>📍 {{ d.donor.profile.city }}</div>{% endif %}
           {% if d.delivery_time %}<div>⏱ {{ d.delivery_time|timesince }} ago</div>{% endif %}
@@ -98,8 +98,8 @@
 <!-- CTA BANNER -->
 <section class="py-20 max-w-7xl mx-auto px-4 sm:px-6">
   <div class="glow-card glass lift text-center shine" style="border-radius:24px;padding:5rem 2rem;background:linear-gradient(135deg,rgba(0,255,136,.08),rgba(0,212,255,.05),rgba(124,58,237,.08))">
-    <h2 class="f-display text-5xl sm:text-7xl mb-4" style="color:#e8f5ec">READY TO MAKE<br><span class="tg">A DIFFERENCE?</span></h2>
-    <p class="text-base font-500 mb-10 max-w-lg mx-auto" style="color:rgba(180,220,190,.5)">Join hundreds of donors and volunteers already fighting food waste in your city.</p>
+    <h2 class="f-display text-5xl sm:text-7xl mb-4 t1">READY TO MAKE<br><span class="tg">A DIFFERENCE?</span></h2>
+    <p class="text-base font-500 mb-10 max-w-lg mx-auto ts">Join hundreds of donors and volunteers already fighting food waste in your city.</p>
     <a href="{% url 'register' %}" class="btn btn-solid" style="padding:1.125rem 3rem;font-size:1.1rem">Join FoodRescue Today 🚀</a>
   </div>
 </section>

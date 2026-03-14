@@ -7,25 +7,51 @@
       <div style="height:2px;background:linear-gradient(90deg,transparent,#00ff88,#00d4ff,transparent)"></div>
       <div class="p-8 sm:p-10">
         <div class="text-center mb-9">
-          <div class="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl mb-5 fy shine" style="background:linear-gradient(135deg,rgba(0,255,136,.2),rgba(0,212,255,.12));border:1px solid rgba(0,255,136,.4);box-shadow:0 0 30px rgba(0,255,136,.2),inset 0 1px 0 rgba(0,255,136,.15)">🍱</div>
+          <div class="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl mb-5 fy shine"
+               style="background:linear-gradient(135deg,rgba(0,255,136,.2),rgba(0,212,255,.12));border:1px solid rgba(0,255,136,.4);box-shadow:0 0 30px rgba(0,255,136,.2),inset 0 1px 0 rgba(0,255,136,.15)">🍱</div>
           <h1 class="f-display text-4xl tracking-widest tg mb-2">WELCOME BACK</h1>
           <p class="text-sm font-500 ts">Sign in to continue your food rescue journey</p>
         </div>
 
-        <form method="post" id="login-form" class="space-y-5" novalidate
-              autocomplete="off"
-              onsubmit="prepareSubmit(this)">
-          {% csrf_token %}
+        {# Decoy fields absorbed by the password manager before the real form #}
+        <div style="position:absolute;left:-9999px;width:0;height:0;overflow:hidden" aria-hidden="true">
+          <input type="text"     name="_decoy_user" tabindex="-1" autocomplete="username"/>
+          <input type="password" name="_decoy_pass" tabindex="-1" autocomplete="current-password"/>
+        </div>
 
+        <form method="post" id="fr-login" class="space-y-5" novalidate autocomplete="off">
+          {% csrf_token %}
           <div>
             <label class="lbl mb-2 block">Email Address</label>
-            {{ form.username }}
-            {% if form.username.errors %}<p class="mt-1.5 text-xs val-err">{{ form.username.errors.0 }}</p>{% endif %}
+            {# Rendered with name="_u" — renamed to "username" on submit #}
+            <input id="fr-email"
+                   name="_u"
+                   type="email"
+                   class="inp"
+                   placeholder="jane@example.com"
+                   autocomplete="off"
+                   data-lpignore="true"
+                   data-form-type="other"
+                   spellcheck="false"
+                   value="{{ form.username.value|default:'' }}"/>
+            {% if form.username.errors %}
+              <p class="mt-1.5 text-xs val-err">{{ form.username.errors.0 }}</p>
+            {% endif %}
           </div>
           <div>
             <label class="lbl mb-2 block">Password</label>
-            {{ form.password }}
-            {% if form.password.errors %}<p class="mt-1.5 text-xs val-err">{{ form.password.errors.0 }}</p>{% endif %}
+            {# Rendered with name="_p" — renamed to "password" on submit #}
+            <input id="fr-pass"
+                   name="_p"
+                   type="password"
+                   class="inp"
+                   placeholder="Your password"
+                   autocomplete="new-password"
+                   data-lpignore="true"
+                   data-form-type="other"/>
+            {% if form.password.errors %}
+              <p class="mt-1.5 text-xs val-err">{{ form.password.errors.0 }}</p>
+            {% endif %}
           </div>
 
           {% if form.non_field_errors %}
@@ -35,10 +61,12 @@
           {% endif %}
 
           <label class="flex items-center gap-2.5 cursor-pointer">
-            {{ form.remember_me }}
+            <input type="checkbox" name="remember_me" class="h-4 w-4 rounded text-emerald-500 focus:ring-emerald-400 transition duration-200 cursor-pointer"{% if form.remember_me.value %} checked{% endif %}/>
             <span class="text-sm font-500 ts">Remember me for 30 days</span>
           </label>
-          <button type="submit" class="btn btn-solid w-full justify-center mt-2" style="padding:.875rem;font-size:1rem">Sign In →</button>
+
+          <button type="submit" class="btn btn-solid w-full justify-center mt-2"
+                  style="padding:.875rem;font-size:1rem">Sign In →</button>
         </form>
 
         <div class="flex items-center gap-3 my-7">
@@ -46,7 +74,8 @@
           <span class="text-xs font-600 t3">NEW HERE?</span>
           <div class="divider flex-1"></div>
         </div>
-        <a href="{% url 'register' %}" class="btn btn-neon w-full justify-center" style="padding:.875rem">Create an Account</a>
+        <a href="{% url 'register' %}" class="btn btn-neon w-full justify-center"
+           style="padding:.875rem">Create an Account</a>
       </div>
     </div>
   </div>
@@ -54,26 +83,13 @@
 {% endblock %}
 {% block extra_js %}
 <script>
-/* Prevent browser from recognising this as a login form until submit */
-(function(){
-  /* Set all inputs to readonly on load — browser won't autofill readonly fields */
-  document.querySelectorAll('#login-form input:not([type=hidden]):not([type=checkbox])').forEach(function(inp){
-    inp.setAttribute('readonly', 'readonly');
-    /* Remove readonly on first interaction so user can type */
-    ['focus','click','keydown','touchstart'].forEach(function(ev){
-      inp.addEventListener(ev, function(){
-        inp.removeAttribute('readonly');
-      }, {once: true});
-    });
-  });
-})();
-
-function prepareSubmit(form){
-  /* Remove readonly before submit so values are sent */
-  form.querySelectorAll('[readonly]').forEach(function(el){
-    el.removeAttribute('readonly');
-  });
-  return true;
-}
+/* Rename _u → username and _p → password just before submit
+   so Django's AuthenticationForm receives the correct field names.
+   The browser indexed the fields under _u / _p so it never matches
+   any saved credential for this site's login form. */
+document.getElementById('fr-login').addEventListener('submit', function(){
+  document.getElementById('fr-email').name = 'username';
+  document.getElementById('fr-pass').name  = 'password';
+});
 </script>
 {% endblock %}
