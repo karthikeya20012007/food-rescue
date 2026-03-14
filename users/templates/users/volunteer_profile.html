@@ -3,90 +3,140 @@
 {% block content %}
 <div class="max-w-2xl mx-auto px-4 sm:px-6 py-12">
   <a href="{% if profile.role == 'donor' %}{% url 'donor_dashboard' %}{% else %}{% url 'volunteer_dashboard' %}{% endif %}"
-     class="inline-flex items-center gap-2 text-sm font-600 transition-all mb-8 au group" style="color:rgba(0,255,136,.5)" onmouseover="this.style.color='#00ff88'" onmouseout="this.style.color='rgba(0,255,136,.5)'">
+     class="back-link mb-8 au">
     <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
     Back to Dashboard
   </a>
+
   <div class="glow-card glass au1" style="border-radius:20px;overflow:hidden">
-    <!-- Hero banner -->
-    <div class="relative h-36 shine" style="background:linear-gradient(135deg,rgba(0,255,136,.25),rgba(0,212,255,.15) 50%,rgba(124,58,237,.2));border-bottom:1px solid rgba(0,255,136,.15)">
-      <div class="absolute inset-0" style="background-image:radial-gradient(rgba(0,255,136,.15) 1px,transparent 1px);background-size:22px 22px"></div>
-      <div class="absolute inset-0" style="background:linear-gradient(to bottom,transparent,rgba(5,13,7,.6))"></div>
-      <div class="absolute bottom-5 left-7">
-        <p class="f-display text-2xl tracking-widest tg">EDIT PROFILE</p>
-        <p class="text-xs font-500 mt-0.5" style="color:rgba(180,220,190,.45)">Your identity on FoodRescue</p>
-      </div>
-      <div class="absolute top-5 right-7 text-4xl fy" style="opacity:.5">{% if profile.role == 'donor' %}🍱{% else %}🤝{% endif %}</div>
+
+    <!-- ── Banner (role emoji only, no text title — title moved below avatar) ── -->
+    <div class="profile-banner shine" style="height:110px">
+      <div class="profile-banner-dots"></div>
+      <div class="profile-banner-fade"></div>
+      <div class="absolute top-4 right-6 text-4xl fy" style="opacity:.45">{% if profile.role == 'donor' %}🍱{% else %}🤝{% endif %}</div>
     </div>
 
-    <div class="px-7 pb-8">
-      <!-- Avatar row -->
-      <div class="flex items-end gap-5 mb-8" style="margin-top:-44px">
-        <div id="av-wrap" style="width:88px;height:88px;border-radius:14px;overflow:hidden;border:3px solid rgba(0,255,136,.4);box-shadow:0 0 24px rgba(0,255,136,.25),0 8px 24px rgba(0,0,0,.5);flex-shrink:0;cursor:pointer">
+    <!-- ── Avatar + identity row (overlaps banner by -44px) ── -->
+    <div class="px-7 pb-0">
+      <div class="flex items-end gap-5" style="margin-top:-44px;margin-bottom:0">
+        <!-- Avatar -->
+        <div id="av-wrap" class="img-frame shrink-0" style="width:88px;height:88px;border-radius:14px;overflow:hidden;border:3px solid rgba(0,255,136,.4);box-shadow:0 0 24px rgba(0,255,136,.25),0 8px 24px rgba(0,0,0,.5);cursor:pointer;z-index:2">
           {% if profile.profile_image %}
-            <img id="av-img" src="{{ profile.profile_image.url }}" alt="{{ profile.full_name }}" style="width:100%;height:100%;object-fit:cover"/>
+            <img id="av-img" src="{{ profile.profile_image.url }}" alt="{{ profile.full_name }}"/>
           {% else %}
-            <div id="av-init" style="width:100%;height:100%;background:linear-gradient(135deg,#00ff88,#00b868);display:flex;align-items:center;justify-content:center">
+            <div id="av-init" style="position:relative;z-index:1;width:100%;height:100%;background:linear-gradient(135deg,#00ff88,#00b868);display:flex;align-items:center;justify-content:center">
               <span style="color:#041209;font-family:'Bebas Neue',sans-serif;font-size:2.5rem;letter-spacing:.05em">{{ profile.full_name|first|upper }}</span>
             </div>
           {% endif %}
         </div>
-        <div class="pb-2">
-          <h2 class="font-800 text-xl" style="color:#e8f5ec">{{ profile.full_name }}</h2>
-          <div class="flex flex-wrap items-center gap-2 mt-1.5">
-            <span class="text-sm font-500" style="color:rgba(120,180,140,.45)">{{ user.email }}</span>
-            <span class="badge {% if profile.role == 'donor' %}badge-available{% else %}badge-picked_up{% endif %}">{% if profile.role == 'donor' %}🍱 Donor{% else %}🤝 Volunteer{% endif %}</span>
+        <!-- Name + email — sits beside avatar, clears the banner -->
+        <div class="pb-1 min-w-0 flex-1" style="padding-top:48px">
+          <h2 class="font-800 text-xl t1 truncate">{{ profile.full_name }}</h2>
+          <div class="flex flex-wrap items-center gap-2 mt-1">
+            <span class="text-sm font-500 t3 truncate">{{ user.email }}</span>
+            <span class="badge {% if profile.role == 'donor' %}badge-available{% else %}badge-picked_up{% endif %}">
+              {% if profile.role == 'donor' %}🍱 Donor{% else %}🤝 Volunteer{% endif %}
+            </span>
           </div>
         </div>
       </div>
 
-      <form method="post" enctype="multipart/form-data" class="space-y-5" novalidate>
+      <!-- ── Title below avatar row ── -->
+      <div class="mt-5 mb-6 pb-5" style="border-bottom:1px solid var(--border)">
+        <p class="f-display text-3xl tracking-widest tg">EDIT PROFILE</p>
+        <p class="text-xs font-500 mt-1 ts">Your identity on FoodRescue</p>
+      </div>
+    </div>
+
+    <!-- ── Form ── -->
+    <div class="px-7 pb-8">
+      <form method="post" enctype="multipart/form-data" class="space-y-5" novalidate autocomplete="off">
         {% csrf_token %}
-        <div class="grid grid-cols-2 gap-4">
-          <div><label class="lbl mb-2 block">First Name</label>{{ form.first_name }}</div>
-          <div><label class="lbl mb-2 block">Last Name</label>{{ form.last_name }}</div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="lbl mb-2 block">First Name</label>
+            {{ form.first_name }}
+          </div>
+          <div>
+            <label class="lbl mb-2 block">Last Name</label>
+            {{ form.last_name }}
+          </div>
         </div>
+
         <div>
-          <label class="lbl mb-2 block">Display Name <span style="color:#f87171;text-transform:none;font-weight:400;font-size:.8rem">*</span></label>
+          <label class="lbl mb-2 block">
+            Display Name <span style="color:#f87171;text-transform:none;font-weight:400;font-size:.8rem">*</span>
+          </label>
           {{ form.full_name }}
-          {% if form.full_name.errors %}<p class="mt-1.5 text-xs" style="color:#f87171">{{ form.full_name.errors.0 }}</p>{% endif %}
+          {% if form.full_name.errors %}
+            <p class="mt-1.5 text-xs" style="color:#f87171">{{ form.full_name.errors.0 }}</p>
+          {% endif %}
         </div>
-        <div class="grid grid-cols-2 gap-4">
-          <div><label class="lbl mb-2 block">Phone</label>{{ form.phone }}{% if form.phone.errors %}<p class="mt-1.5 text-xs" style="color:#f87171">{{ form.phone.errors.0 }}</p>{% endif %}</div>
-          <div><label class="lbl mb-2 block">City</label>{{ form.city }}</div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="lbl mb-2 block">Phone</label>
+            {{ form.phone }}
+            {% if form.phone.errors %}
+              <p class="mt-1.5 text-xs" style="color:#f87171">{{ form.phone.errors.0 }}</p>
+            {% endif %}
+          </div>
+          <div>
+            <label class="lbl mb-2 block">City</label>
+            {{ form.city }}
+          </div>
         </div>
-        <div><label class="lbl mb-2 block">Organization <span style="text-transform:none;font-weight:400;font-size:.75rem;color:rgba(120,180,140,.4)">(optional)</span></label>{{ form.organization_name }}</div>
+
+        <div>
+          <label class="lbl mb-2 block">
+            Organization <span class="t3" style="text-transform:none;font-weight:400;font-size:.75rem">(optional)</span>
+          </label>
+          {{ form.organization_name }}
+        </div>
 
         <!-- Profile photo with live preview -->
         <div>
-          <label class="lbl mb-2 block">Profile Photo</label>
-          <div class="flex items-center gap-4 p-4 rounded-xl" style="background:rgba(0,255,136,.04);border:1.5px dashed rgba(0,255,136,.25)">
-            <div id="mini-wrap" style="width:56px;height:56px;border-radius:10px;overflow:hidden;border:2px solid rgba(0,255,136,.35);box-shadow:0 0 12px rgba(0,255,136,.15);flex-shrink:0">
-              {% if profile.profile_image %}
-                <img id="mini-img" src="{{ profile.profile_image.url }}" alt="Current" style="width:100%;height:100%;object-fit:cover"/>
-              {% else %}
-                <div id="mini-init" style="width:100%;height:100%;background:linear-gradient(135deg,#00ff88,#00b868);display:flex;align-items:center;justify-content:center">
-                  <span style="color:#041209;font-weight:800;font-size:.875rem">{{ profile.full_name|first|upper }}</span>
-                </div>
-              {% endif %}
+          <label class="lbl mb-3 block">Profile Photo</label>
+          <div class="rounded-xl overflow-hidden" style="border:1px solid var(--border)">
+            <!-- Preview strip -->
+            <div class="flex items-center gap-4 px-4 py-4 tint-green" style="border-bottom:1px solid var(--border)">
+              <div id="mini-wrap" class="img-frame shrink-0" style="width:60px;height:60px;border-radius:12px;overflow:hidden;border:2px solid rgba(0,255,136,.35);box-shadow:0 0 12px rgba(0,255,136,.15)">
+                {% if profile.profile_image %}
+                  <img id="mini-img" src="{{ profile.profile_image.url }}" alt="Current photo"/>
+                {% else %}
+                  <div id="mini-init" style="position:relative;z-index:1;width:100%;height:100%;background:linear-gradient(135deg,#00ff88,#00b868);display:flex;align-items:center;justify-content:center">
+                    <span style="color:#041209;font-weight:800;font-size:1rem">{{ profile.full_name|first|upper }}</span>
+                  </div>
+                {% endif %}
+              </div>
+              <div>
+                <p class="text-sm font-700 t1 mb-0.5">
+                  {% if profile.profile_image %}Current photo{% else %}No photo yet{% endif %}
+                </p>
+                <p class="text-xs t3">
+                  {% if profile.profile_image %}Choose a new file below to replace it{% else %}JPG or PNG · max 10 MB{% endif %}
+                </p>
+              </div>
             </div>
-            <div class="flex-1">
+            <!-- File input -->
+            <div class="p-4">
               {{ form.profile_image }}
-              <p class="text-xs font-500 mt-2" style="color:rgba(120,180,140,.4)">
-                {% if profile.profile_image %}✅ Photo uploaded. Choose a new one to replace.{% else %}JPG or PNG · max 10 MB · shows in navbar and profile{% endif %}
-              </p>
             </div>
           </div>
         </div>
 
-        <div class="flex items-center gap-2 px-4 py-3 rounded-xl text-xs font-600" style="background:rgba(0,255,136,.03);border:1px solid rgba(0,255,136,.1);color:rgba(120,180,140,.4)">
+        <div class="flex items-center gap-2 px-4 py-3 rounded-xl text-xs font-600 t3 tint-green" style="border:1px solid var(--border)">
           📅 Member since {{ profile.created_at|date:"F Y" }}
         </div>
 
         <div class="flex gap-3 pt-1">
-          <a href="{% if profile.role == 'donor' %}{% url 'donor_dashboard' %}{% else %}{% url 'volunteer_dashboard' %}{% endif %}" class="btn btn-ghost flex-1 justify-center">Cancel</a>
+          <a href="{% if profile.role == 'donor' %}{% url 'donor_dashboard' %}{% else %}{% url 'volunteer_dashboard' %}{% endif %}"
+             class="btn btn-ghost flex-1 justify-center">Cancel</a>
           <button type="submit" class="btn btn-solid flex-1 justify-center">Save Changes ✅</button>
         </div>
+
       </form>
     </div>
   </div>
@@ -95,24 +145,34 @@
 {% block extra_js %}
 <script>
 (function(){
-  const inp=document.querySelector('input[type="file"][name="profile_image"]');
-  if(!inp)return;
-  inp.addEventListener('change',function(){
-    const f=this.files[0];
-    if(!f||!f.type.startsWith('image/'))return;
-    const r=new FileReader();
-    r.onload=function(e){
-      const src=e.target.result;
+  const inp = document.querySelector('input[type="file"][name="profile_image"]');
+  if(!inp) return;
+  inp.addEventListener('change', function(){
+    const f = this.files[0];
+    if(!f || !f.type.startsWith('image/')) return;
+    const r = new FileReader();
+    r.onload = function(e){
+      const src = e.target.result;
       // Update big avatar
-      const bigImg=document.getElementById('av-img');
-      const bigInit=document.getElementById('av-init');
-      if(bigImg){bigImg.src=src}
-      else if(bigInit){const img=document.createElement('img');img.id='av-img';img.src=src;img.style.cssText='width:100%;height:100%;object-fit:cover';bigInit.replaceWith(img)}
+      const bigImg  = document.getElementById('av-img');
+      const bigInit = document.getElementById('av-init');
+      if(bigImg){ bigImg.src = src; }
+      else if(bigInit){
+        const img = document.createElement('img');
+        img.id = 'av-img'; img.src = src;
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transform:translateZ(0)';
+        bigInit.replaceWith(img);
+      }
       // Update mini preview
-      const miniImg=document.getElementById('mini-img');
-      const miniInit=document.getElementById('mini-init');
-      if(miniImg){miniImg.src=src}
-      else if(miniInit){const img=document.createElement('img');img.id='mini-img';img.src=src;img.style.cssText='width:100%;height:100%;object-fit:cover';miniInit.replaceWith(img)}
+      const miniImg  = document.getElementById('mini-img');
+      const miniInit = document.getElementById('mini-init');
+      if(miniImg){ miniImg.src = src; }
+      else if(miniInit){
+        const img = document.createElement('img');
+        img.id = 'mini-img'; img.src = src;
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transform:translateZ(0)';
+        miniInit.replaceWith(img);
+      }
     };
     r.readAsDataURL(f);
   });

@@ -1,55 +1,40 @@
 {% extends "users/base.html" %}
 {% block title %}Sign In{% endblock %}
 {% block content %}
-<div class="min-h-[82vh] flex items-center justify-center px-4 sm:px-6 py-12">
+<div class="min-h-[85vh] flex items-center justify-center px-4 py-12">
   <div class="w-full max-w-md au">
-
-    <div class="gcard glass shadow-2xl overflow-hidden">
-      <!-- Top gradient strip -->
-      <div class="h-1.5 bg-gradient-to-r from-emerald-400 via-green-500 to-teal-500"></div>
-
+    <div class="glow-card glass lift" style="border-radius:20px;overflow:hidden">
+      <!-- Top neon bar -->
+      <div style="height:2px;background:linear-gradient(90deg,transparent,#00ff88,#00d4ff,transparent)"></div>
       <div class="p-8 sm:p-10">
-        <!-- Icon + heading -->
-        <div class="text-center mb-8">
-          <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center text-3xl shadow-lg mb-5" style="box-shadow:0 8px 24px rgba(34,197,94,.35)">🍱</div>
-          <h1 class="font-display text-2xl font-800 text-gray-900 dark:text-white">Welcome back</h1>
-          <p class="text-sm text-gray-500 dark:text-gray-400 mt-1.5">Sign in to your FoodRescue account</p>
+        <div class="text-center mb-9">
+          <div class="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl mb-5 fy shine" style="background:linear-gradient(135deg,rgba(0,255,136,.2),rgba(0,212,255,.12));border:1px solid rgba(0,255,136,.4);box-shadow:0 0 30px rgba(0,255,136,.2),inset 0 1px 0 rgba(0,255,136,.15)">🍱</div>
+          <h1 class="f-display text-4xl tracking-widest tg mb-2">WELCOME BACK</h1>
+          <p class="text-sm font-500 ts">Sign in to continue your food rescue journey</p>
         </div>
-
-        <form method="post" class="space-y-5" novalidate>
+        <form method="post" class="space-y-5" novalidate autocomplete="off">
           {% csrf_token %}
           <div>
-            <label class="block text-xs font-700 uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1.5">Email Address</label>
+            <label class="lbl mb-2 block">Email Address</label>
             {{ form.username }}
-            {% if form.username.errors %}<p class="mt-1.5 text-xs text-red-500">{{ form.username.errors.0 }}</p>{% endif %}
+            {% if form.username.errors %}<p class="mt-1.5 text-xs" style="color:#f87171">{{ form.username.errors.0 }}</p>{% endif %}
           </div>
           <div>
-            <label class="block text-xs font-700 uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1.5">Password</label>
+            <label class="lbl mb-2 block">Password</label>
             {{ form.password }}
-            {% if form.password.errors %}<p class="mt-1.5 text-xs text-red-500">{{ form.password.errors.0 }}</p>{% endif %}
+            {% if form.password.errors %}<p class="mt-1.5 text-xs" style="color:#f87171">{{ form.password.errors.0 }}</p>{% endif %}
           </div>
-
           {% if form.non_field_errors %}
-          <div class="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-red-50 dark:bg-red-950/40 text-sm text-red-600 dark:text-red-400" style="border:1px solid rgba(239,68,68,.2)">
-            ❌ {{ form.non_field_errors.0 }}
-          </div>
+          <div class="flex items-center gap-2.5 px-4 py-3 rounded-xl glass text-sm font-600" style="border-color:rgba(248,113,113,.3);color:#f87171">❌ {{ form.non_field_errors.0 }}</div>
           {% endif %}
-
-          <label class="flex items-center gap-2.5 cursor-pointer group">
+          <label class="flex items-center gap-2.5 cursor-pointer">
             {{ form.remember_me }}
-            <span class="text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition">Remember me for 30 days</span>
+            <span class="text-sm font-500 ts">Remember me for 30 days</span>
           </label>
-
-          <button type="submit" class="btn-primary w-full justify-center py-3.5 text-base mt-2">Sign In →</button>
+          <button type="submit" class="btn btn-solid w-full justify-center mt-2" style="padding:.875rem;font-size:1rem">Sign In →</button>
         </form>
-
-        <div class="flex items-center gap-3 my-6">
-          <div class="divider flex-1"></div>
-          <span class="text-xs text-gray-400">New here?</span>
-          <div class="divider flex-1"></div>
-        </div>
-
-        <a href="{% url 'register' %}" class="btn-ghost w-full justify-center">Create an Account</a>
+        <div class="flex items-center gap-3 my-7"><div class="divider flex-1"></div><span class="text-xs font-600 t3">NEW HERE?</span><div class="divider flex-1"></div></div>
+        <a href="{% url 'register' %}" class="btn btn-neon w-full justify-center" style="padding:.875rem">Create an Account</a>
       </div>
     </div>
   </div>

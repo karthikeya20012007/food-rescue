@@ -5,47 +5,42 @@ from django.utils import timezone
 from .models import UserProfile, FoodDonation
 
 
+class CleanFileInput(forms.ClearableFileInput):
+    """
+    Clean file input — hides Django's verbose 'Currently: path Clear Change:'
+    rendering. Renders just the file chooser button; the template shows the
+    current image separately via profile_image.url / image.url.
+    """
+    def get_context(self, name, value, attrs):
+        ctx = super().get_context(name, value, attrs)
+        # Suppress 'Currently: …' initial-value display
+        ctx['widget']['is_initial'] = False
+        return ctx
+
+    def use_required_attribute(self, initial_value):
+        # Don't mark required when a file already exists
+        return not initial_value
+
+
 # ---------------------------------------------------------------------------
 # Tailwind CSS class helpers
 # ---------------------------------------------------------------------------
 
-TEXT_INPUT   = (
-    "w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white "
-    "text-gray-800 placeholder-gray-400 text-sm "
-    "focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent "
-    "transition duration-200 "
-    "dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500"
-)
-
-SELECT_INPUT = (
-    "w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white "
-    "text-gray-800 text-sm "
-    "focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent "
-    "transition duration-200 "
-    "dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-)
-
+TEXT_INPUT   = "inp"
+SELECT_INPUT = "inp"
 FILE_INPUT   = (
-    "w-full text-sm text-gray-500 "
+    "w-full text-sm t3 "
     "file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 "
-    "file:text-sm file:font-medium "
-    "file:bg-emerald-50 file:text-emerald-700 "
-    "hover:file:bg-emerald-100 "
-    "transition duration-200 "
-    "dark:text-gray-400 dark:file:bg-gray-700 dark:file:text-emerald-400"
+    "file:text-sm file:font-semibold cursor-pointer "
+    "file:bg-emerald-900 file:text-emerald-300 "
+    "hover:file:bg-emerald-800 "
+    "dark:file:bg-emerald-900 dark:file:text-emerald-300 "
+    "transition duration-200"
 )
-
-TEXTAREA     = (
-    "w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white "
-    "text-gray-800 placeholder-gray-400 text-sm resize-none "
-    "focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent "
-    "transition duration-200 "
-    "dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-500"
-)
-
+TEXTAREA     = "inp"
 CHECKBOX     = (
-    "h-4 w-4 rounded border-gray-300 text-emerald-500 "
-    "focus:ring-emerald-400 transition duration-200"
+    "h-4 w-4 rounded text-emerald-500 "
+    "focus:ring-emerald-400 transition duration-200 cursor-pointer"
 )
 
 
@@ -140,7 +135,7 @@ class UserRegistrationForm(forms.Form):
 
     profile_image = forms.ImageField(
         required=False,
-        widget=forms.ClearableFileInput(attrs={
+        widget=CleanFileInput(attrs={
             "class":  FILE_INPUT,
             "accept": "image/*",
             "capture": "user",          # prefer front camera on mobile
@@ -211,17 +206,19 @@ class UserLoginForm(AuthenticationForm):
 
     username = forms.EmailField(
         widget=forms.EmailInput(attrs={
-            "class":       TEXT_INPUT,
-            "placeholder": "jane@example.com",
-            "autofocus":   True,
+            "class":        TEXT_INPUT,
+            "placeholder":  "jane@example.com",
+            "autofocus":    True,
+            "autocomplete": "off",
         }),
         label="Email Address",
     )
 
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={
-            "class":       TEXT_INPUT,
-            "placeholder": "Your password",
+            "class":        TEXT_INPUT,
+            "placeholder":  "Your password",
+            "autocomplete": "new-password",
         }),
         label="Password",
     )
@@ -280,7 +277,7 @@ class FoodDonationForm(forms.ModelForm):
                 "placeholder": "Allergens, packaging details, any special notes…",
                 "rows":        3,
             }),
-            "image": forms.ClearableFileInput(attrs={
+            "image": CleanFileInput(attrs={
                 "class":   FILE_INPUT,
                 "accept":  "image/*",
                 "capture": "environment",   # prefer rear camera on mobile
@@ -434,7 +431,7 @@ class VolunteerProfileUpdateForm(forms.ModelForm):
                 "class":       TEXT_INPUT,
                 "placeholder": "Restaurant / NGO / Organization (optional)",
             }),
-            "profile_image": forms.ClearableFileInput(attrs={
+            "profile_image": CleanFileInput(attrs={
                 "class":   FILE_INPUT,
                 "accept":  "image/*",
                 "capture": "user",
@@ -508,7 +505,7 @@ class DeliveryConfirmationForm(forms.ModelForm):
                 "placeholder": "Where was the food delivered? (area / landmark)",
                 "rows":        2,
             }),
-            "delivery_image": forms.ClearableFileInput(attrs={
+            "delivery_image": CleanFileInput(attrs={
                 "class":   FILE_INPUT,
                 "accept":  "image/*",
                 "capture": "environment",   # open rear camera directly on mobile

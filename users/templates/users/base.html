@@ -28,7 +28,7 @@ body{
 }
 .dark body,.dark{background:#050d07;color:#e8f5ec}
 html:not(.dark) body{background:#f0faf3;color:#0d1f12}
-html:not(.dark){--surface:rgba(255,255,255,0.82);--border:rgba(0,180,80,0.15);--text-dim:rgba(30,80,50,0.55)}
+html:not(.dark){--surface:rgba(255,255,255,0.88);--border:rgba(0,180,80,0.15);--text-dim:rgba(30,80,50,0.55)}
 
 /* ── DISPLAY FONT ─────────────────────────────────────────────────────── */
 .f-display{font-family:'Bebas Neue',sans-serif;letter-spacing:.03em}
@@ -113,13 +113,21 @@ html:not(.dark) .particles::after{
 /* ── GLASSMORPHISM ────────────────────────────────────────────────────── */
 .glass{
   background:var(--surface);
-  backdrop-filter:blur(20px) saturate(180%);
-  -webkit-backdrop-filter:blur(20px) saturate(180%);
   border:1px solid var(--border);
   box-shadow:
     0 4px 24px rgba(0,0,0,.35),
     0 1px 0 rgba(0,255,136,.08) inset,
     0 -1px 0 rgba(0,0,0,.3) inset;
+  /* Use pseudo-element for backdrop so child images can escape on their own layer */
+  position:relative;
+}
+.glass::before{
+  content:'';
+  position:absolute;inset:0;z-index:0;
+  border-radius:inherit;
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  pointer-events:none;
 }
 html:not(.dark) .glass{
   box-shadow:
@@ -353,6 +361,547 @@ html:not(.dark) ::-webkit-scrollbar-thumb{background:rgba(34,197,94,.3)}
 /* ── DIVIDER ──────────────────────────────────────────────────────────── */
 .divider{height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,136,.2),transparent)}
 html:not(.dark) .divider{background:linear-gradient(90deg,transparent,rgba(34,197,94,.2),transparent)}
+
+/* ── DROPDOWN PANELS — theme-aware, no hardcoded dark colors ─────────────── */
+.dd-panel{
+  position:absolute;right:0;top:calc(100% + 8px);
+  background:rgba(6,18,10,.97);
+  backdrop-filter:blur(24px) saturate(200%);
+  -webkit-backdrop-filter:blur(24px) saturate(200%);
+  border:1px solid rgba(0,255,136,.14);
+  border-radius:14px;
+  box-shadow:0 16px 48px rgba(0,0,0,.6),0 2px 8px rgba(0,0,0,.4);
+  overflow:hidden;z-index:60;
+}
+html:not(.dark) .dd-panel{
+  background:rgba(248,253,250,.98);
+  border-color:rgba(34,197,94,.18);
+  box-shadow:0 8px 32px rgba(0,0,0,.12),0 2px 8px rgba(0,0,0,.06);
+}
+.dd-header{padding:.75rem 1rem;border-bottom:1px solid rgba(0,255,136,.1)}
+html:not(.dark) .dd-header{border-bottom-color:rgba(34,197,94,.12)}
+.dd-name{font-size:.875rem;font-weight:700;color:#e8f5ec;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html:not(.dark) .dd-name{color:#0d1f12}
+.dd-email{font-size:.72rem;font-weight:500;margin-top:2px;color:rgba(120,180,140,.5);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html:not(.dark) .dd-email{color:rgba(30,80,50,.45)}
+.dd-item{
+  display:flex;align-items:center;gap:.625rem;padding:.625rem 1rem;
+  font-size:.875rem;font-weight:600;transition:background .15s,color .15s;
+  color:rgba(200,230,210,.8);text-decoration:none;
+}
+.dd-item:hover{background:rgba(0,255,136,.07);color:#00ff88}
+html:not(.dark) .dd-item{color:rgba(30,80,50,.7)}
+html:not(.dark) .dd-item:hover{background:rgba(34,197,94,.07);color:#059669}
+.dd-danger{color:#f87171 !important}
+.dd-danger:hover{background:rgba(239,68,68,.07) !important;color:#ef4444 !important}
+html:not(.dark) .dd-danger{color:#dc2626 !important}
+html:not(.dark) .dd-danger:hover{background:rgba(239,68,68,.05) !important;color:#b91c1c !important}
+.dd-sep{border-top:1px solid rgba(239,68,68,.12);padding-top:.25rem;margin-top:.25rem}
+html:not(.dark) .dd-sep{border-top-color:rgba(239,68,68,.1)}
+
+/* ── SELECT OPTIONS — native dark override ────────────────────────────────── */
+select.inp option{background:#071a0c;color:#e8f5ec}
+html:not(.dark) select.inp option{background:#f0fdf4;color:#0d1f12}
+
+/* ── IMAGE CONTAINERS — prevent backdrop-filter bleeding on images ─────────── */
+.img-frame{
+  position:relative;overflow:hidden;
+  /* z-index:1 puts this above glass::before (z-index:0) so backdrop-filter doesn't capture it */
+  z-index:1;
+}
+.img-frame img{
+  position:absolute;inset:0;
+  width:100%;height:100%;object-fit:cover;display:block;
+  /* Own compositing layer prevents parent backdrop-filter bleeding */
+  transform:translateZ(0);
+}
+
+/* ── NAVBAR BUTTON HOVER — theme-aware ────────────────────────────────────── */
+.nav-icon-btn{
+  width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  border-radius:10px;transition:background .15s,border-color .15s;
+  border:1px solid rgba(0,255,136,.15);color:rgba(0,255,136,.7);
+}
+.nav-icon-btn:hover{background:rgba(0,255,136,.08);border-color:rgba(0,255,136,.35);color:#00ff88}
+html:not(.dark) .nav-icon-btn{border-color:rgba(34,197,94,.2);color:rgba(34,197,94,.7)}
+html:not(.dark) .nav-icon-btn:hover{background:rgba(34,197,94,.08);border-color:rgba(34,197,94,.4);color:#059669}
+
+/* ── PROFILE TRIGGER BUTTON ─────────────────────────────────────────────── */
+.profile-btn{
+  display:flex;align-items:center;gap:.5rem;padding:.375rem .5rem;
+  border-radius:10px;border:1px solid rgba(0,255,136,.12);
+  transition:background .15s,border-color .15s;
+}
+.profile-btn:hover{background:rgba(0,255,136,.06);border-color:rgba(0,255,136,.3)}
+html:not(.dark) .profile-btn{border-color:rgba(34,197,94,.15)}
+html:not(.dark) .profile-btn:hover{background:rgba(34,197,94,.06);border-color:rgba(34,197,94,.3)}
+.profile-btn-name{font-size:.875rem;font-weight:600;color:rgba(220,240,225,.85)}
+html:not(.dark) .profile-btn-name{color:rgba(20,60,35,.8)}
+.profile-btn-caret{width:12px;height:12px;color:rgba(0,255,136,.5);transition:transform .2s}
+html:not(.dark) .profile-btn-caret{color:rgba(34,197,94,.5)}
+
+/* ── THEME-AWARE TEXT UTILITIES ─────────────────────────────────────────── */
+/* Primary body text */
+.t1{color:#e8f5ec}
+html:not(.dark) .t1{color:#0d1f12}
+/* Secondary text */
+.t2{color:rgba(180,220,190,.7)}
+html:not(.dark) .t2{color:rgba(20,70,40,.65)}
+/* Muted/caption text */
+.t3{color:rgba(120,180,140,.5)}
+html:not(.dark) .t3{color:rgba(20,70,40,.42)}
+/* Accent green text */
+.ta{color:#00ff88}
+html:not(.dark) .ta{color:#059669}
+/* Stat card subtext */
+.ts{color:rgba(180,220,190,.5);font-size:.875rem;font-weight:500}
+html:not(.dark) .ts{color:rgba(20,70,40,.5)}
+/* Large heading */
+.th{color:#e8f5ec}
+html:not(.dark) .th{color:#081a0e}
+/* Section heading */
+.th2{color:#e8f5ec}
+html:not(.dark) .th2{color:#0d2015}
+
+/* ── THEME-AWARE CARD BG TINTS ──────────────────────────────────────────── */
+.tint-green{background:rgba(0,255,136,.06)}
+html:not(.dark) .tint-green{background:rgba(34,197,94,.05)}
+.tint-row:hover{background:rgba(0,255,136,.03)}
+html:not(.dark) .tint-row:hover{background:rgba(34,197,94,.04)}
+
+/* ── NEON ACCENT LINE ─────────────────────────────────────────────────────── */
+.accent-line{height:2px;border-radius:1px;background:linear-gradient(90deg,currentColor,transparent)}
+
+/* ── NAV LINKS ────────────────────────────────────────────────────────────── */
+.nav-link{
+  padding:.5rem 1rem;border-radius:8px;
+  font-size:.875rem;font-weight:600;
+  color:rgba(0,255,136,.6);
+  transition:color .15s,background .15s;
+  text-decoration:none;
+}
+.nav-link:hover{color:#00ff88;background:rgba(0,255,136,.07)}
+html:not(.dark) .nav-link{color:rgba(20,100,55,.6)}
+html:not(.dark) .nav-link:hover{color:#059669;background:rgba(34,197,94,.07)}
+
+/* ── BACK LINK & CLEAR LINK ───────────────────────────────────────────────── */
+.back-link{
+  display:inline-flex;align-items:center;gap:.5rem;
+  font-size:.875rem;font-weight:600;
+  color:rgba(0,255,136,.5);
+  transition:color .15s;text-decoration:none;
+}
+.back-link:hover{color:#00ff88}
+html:not(.dark) .back-link{color:rgba(20,120,60,.5)}
+html:not(.dark) .back-link:hover{color:#059669}
+.clear-link{font-size:.75rem;font-weight:700;color:rgba(248,113,113,.6);transition:color .15s}
+.clear-link:hover{color:#f87171}
+html:not(.dark) .clear-link{color:rgba(220,38,38,.55)}
+html:not(.dark) .clear-link:hover{color:#dc2626}
+
+/* ── FILE INPUT ────────────────────────────────────────────────────────────── */
+input[type="file"].inp{
+  padding:.5rem .75rem;
+  background:rgba(0,255,136,.04);
+  border:1.5px dashed rgba(0,255,136,.25);
+  cursor:pointer;
+}
+input[type="file"].inp::file-selector-button{
+  padding:.35rem .875rem;border-radius:8px;border:none;
+  background:rgba(0,255,136,.12);color:#00ff88;
+  font-size:.8rem;font-weight:700;font-family:'Cabinet Grotesk',sans-serif;
+  cursor:pointer;transition:background .15s;margin-right:.75rem;
+}
+input[type="file"].inp::file-selector-button:hover{background:rgba(0,255,136,.2)}
+input[type="file"].inp:focus{border-style:dashed}
+html:not(.dark) input[type="file"].inp{
+  background:rgba(34,197,94,.03);
+  border-color:rgba(34,197,94,.25);
+}
+html:not(.dark) input[type="file"].inp::file-selector-button{
+  background:rgba(34,197,94,.1);color:#059669;
+}
+html:not(.dark) input[type="file"].inp::file-selector-button:hover{background:rgba(34,197,94,.18)}
+
+/* ── PROFILE BANNER ────────────────────────────────────────────────────────── */
+.profile-banner{
+  position:relative;height:144px;overflow:hidden;
+  background:linear-gradient(135deg,rgba(0,255,136,.3),rgba(0,212,255,.18) 50%,rgba(124,58,237,.22));
+  border-bottom:1px solid rgba(0,255,136,.15);
+}
+html:not(.dark) .profile-banner{
+  background:linear-gradient(135deg,rgba(34,197,94,.35),rgba(14,165,233,.2) 50%,rgba(139,92,246,.18));
+  border-bottom-color:rgba(34,197,94,.2);
+}
+.profile-banner-dots{
+  position:absolute;inset:0;
+  background-image:radial-gradient(rgba(0,255,136,.18) 1px,transparent 1px);
+  background-size:22px 22px;
+}
+html:not(.dark) .profile-banner-dots{
+  background-image:radial-gradient(rgba(34,197,94,.2) 1px,transparent 1px);
+}
+.profile-banner-fade{
+  position:absolute;inset:0;
+  background:linear-gradient(to bottom,transparent,rgba(5,13,7,.55));
+}
+html:not(.dark) .profile-banner-fade{
+  background:linear-gradient(to bottom,transparent,rgba(240,250,243,.4));
+}
+
+/* ── HERO WORD — explicit text fill to prevent webkit clip inheritance ─── */
+.hero-word{
+  -webkit-text-fill-color:#e8f5ec;
+  color:#e8f5ec;
+  display:inline;
+}
+html:not(.dark) .hero-word{
+  -webkit-text-fill-color:#081a0e;
+  color:#081a0e;
+}
+/* ── TG BLUE — blue-purple gradient ─────────────────────────────────────── */
+.tg-blue{
+  background:linear-gradient(135deg,#00d4ff,#a855f7);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+html:not(.dark) .tg-blue{
+  background:linear-gradient(135deg,#0891b2,#7c3aed);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+/* ── GLASS PLAIN — no backdrop blur for cards with images ──────────────── */
+.glass-plain{
+  background:var(--surface);
+  border:1px solid var(--border);
+  box-shadow:0 4px 24px rgba(0,0,0,.35);
+  position:relative;
+}
+html:not(.dark) .glass-plain{
+  box-shadow:0 4px 24px rgba(0,0,0,.08);
+}
+
+/* ── ACCENT CHIP — neon pill/badge used across cards ─────────────────────── */
+.chip-green{
+  background:rgba(0,255,136,.1);color:#00ff88;
+  border:1px solid rgba(0,255,136,.3);
+}
+html:not(.dark) .chip-green{
+  background:rgba(34,197,94,.1);color:#059669;
+  border-color:rgba(34,197,94,.3);
+}
+.chip-green-sm{
+  font-size:.78rem;
+  background:rgba(0,255,136,.08);color:#00ff88;
+  border:1px solid rgba(0,255,136,.2);
+  padding:.2rem .6rem;border-radius:6px;font-weight:600;
+  display:inline-flex;align-items:center;gap:.3rem;
+}
+html:not(.dark) .chip-green-sm{
+  background:rgba(34,197,94,.08);color:#059669;
+  border-color:rgba(34,197,94,.2);
+}
+.chip-red-sm{
+  font-size:.78rem;
+  background:rgba(248,113,113,.08);color:#f87171;
+  border:1px solid rgba(248,113,113,.2);
+  padding:.2rem .6rem;border-radius:6px;font-weight:600;
+}
+html:not(.dark) .chip-red-sm{
+  background:rgba(220,38,38,.08);color:#dc2626;
+  border-color:rgba(220,38,38,.2);
+}
+
+/* ── LIVE DOT ─────────────────────────────────────────────────────────────── */
+.live-dot{
+  width:.5rem;height:.5rem;border-radius:50%;
+  background:#00ff88;box-shadow:0 0 8px #00ff88;
+}
+html:not(.dark) .live-dot{
+  background:#059669;box-shadow:0 0 8px rgba(5,150,105,.5);
+}
+
+/* ── LIVE PILL (LIVE · CONNECTING DONORS & VOLUNTEERS) ─────────────────── */
+.live-pill{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.375rem 1rem;border-radius:9999px;
+  font-size:.75rem;font-weight:700;letter-spacing:.1em;
+  background:rgba(0,255,136,.1);color:#00ff88;
+  border:1px solid rgba(0,255,136,.3);
+}
+html:not(.dark) .live-pill{
+  background:rgba(34,197,94,.08);color:#059669;
+  border-color:rgba(34,197,94,.25);
+}
+
+/* ── NEON ACCENT LINE / DIVIDER ──────────────────────────────────────────── */
+.accent-dot{
+  background:#00ff88;box-shadow:0 0 8px #00ff88;
+  border-radius:50%;
+}
+html:not(.dark) .accent-dot{
+  background:#059669;box-shadow:none;
+}
+
+/* ── STAT SEPARATOR ──────────────────────────────────────────────────────── */
+.stat-sep{width:1px;height:2.5rem;background:rgba(0,255,136,.2)}
+html:not(.dark) .stat-sep{background:rgba(34,197,94,.2)}
+
+/* ── FOOD TYPE CHIP ──────────────────────────────────────────────────────── */
+.chip-veg{background:rgba(0,255,136,.12);color:#00ff88;border:1px solid rgba(0,255,136,.25)}
+.chip-nonveg{background:rgba(248,113,113,.12);color:#f87171;border:1px solid rgba(248,113,113,.25)}
+html:not(.dark) .chip-veg{background:rgba(34,197,94,.1);color:#15803d;border-color:rgba(34,197,94,.3)}
+html:not(.dark) .chip-nonveg{background:rgba(239,68,68,.08);color:#dc2626;border-color:rgba(239,68,68,.2)}
+
+/* ── AVATAR INITIALS — dark text on neon bg ─────────────────────────────── */
+.av-text{color:#041209;font-weight:800}
+html:not(.dark) .av-text{color:#081a0e}
+
+/* ── OVERLAY VERIFIED BADGE ─────────────────────────────────────────────── */
+.overlay-verified{
+  position:absolute;bottom:1rem;left:1.25rem;z-index:3;
+  display:inline-flex;align-items:center;gap:.375rem;
+  padding:.25rem .75rem;border-radius:9999px;
+  font-size:.75rem;font-weight:700;
+  background:rgba(0,255,136,.25);color:#00ff88;
+  border:1px solid rgba(0,255,136,.5);
+  backdrop-filter:blur(8px);
+}
+html:not(.dark) .overlay-verified{
+  background:rgba(34,197,94,.2);color:#166534;
+  border-color:rgba(34,197,94,.4);
+}
+.overlay-top-left{
+  position:absolute;top:.75rem;left:.75rem;z-index:3;
+  display:inline-flex;align-items:center;gap:.375rem;
+  padding:.25rem .75rem;border-radius:9999px;
+  font-size:.75rem;font-weight:700;
+  background:rgba(0,255,136,.2);color:#00ff88;
+  border:1px solid rgba(0,255,136,.4);
+  backdrop-filter:blur(8px);
+}
+html:not(.dark) .overlay-top-left{
+  background:rgba(34,197,94,.15);color:#166534;
+  border-color:rgba(34,197,94,.35);
+}
+.overlay-top-right{position:absolute;top:.75rem;right:.75rem;z-index:3}
+
+/* ── INPUT VALIDATION COLORS ─────────────────────────────────────────────── */
+.val-ok{color:#00ff88}
+html:not(.dark) .val-ok{color:#059669}
+.val-err{color:#f87171}
+html:not(.dark) .val-err{color:#dc2626}
+
+/* ── SECTION DIVIDERS ─────────────────────────────────────────────────────── */
+.sect-divider{
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,255,136,.15),transparent);
+}
+html:not(.dark) .sect-divider{
+  background:linear-gradient(90deg,transparent,rgba(34,197,94,.15),transparent);
+}
+
+/* ── ROLE SELECTOR CARDS (register page) ────────────────────────────────── */
+.role-card-base{border:1.5px solid rgba(0,255,136,.15);background:rgba(0,255,136,.03)}
+html:not(.dark) .role-card-base{border-color:rgba(34,197,94,.15);background:rgba(34,197,94,.03)}
+.role-card-active{border-color:rgba(0,255,136,.5)!important;background:rgba(0,255,136,.08)!important;box-shadow:0 0 20px rgba(0,255,136,.12)}
+html:not(.dark) .role-card-active{border-color:rgba(34,197,94,.5)!important;background:rgba(34,197,94,.08)!important;box-shadow:0 0 16px rgba(34,197,94,.15)}
+
+/* ── UPLOAD ZONE ─────────────────────────────────────────────────────────── */
+.upload-zone{
+  background:rgba(0,255,136,.04);
+  border:1.5px dashed rgba(0,255,136,.25);
+}
+html:not(.dark) .upload-zone{
+  background:rgba(34,197,94,.04);
+  border-color:rgba(34,197,94,.25);
+}
+
+/* ── ICON GLOW CIRCLE ────────────────────────────────────────────────────── */
+.icon-glow-circle{
+  background:linear-gradient(135deg,rgba(0,255,136,.2),rgba(0,212,255,.12));
+  border:1px solid rgba(0,255,136,.4);
+  box-shadow:0 0 30px rgba(0,255,136,.2);
+}
+html:not(.dark) .icon-glow-circle{
+  background:linear-gradient(135deg,rgba(34,197,94,.15),rgba(14,165,233,.1));
+  border-color:rgba(34,197,94,.35);
+  box-shadow:0 0 20px rgba(34,197,94,.15);
+}
+
+/* ── FLASH MESSAGES ──────────────────────────────────────────────────────── */
+.flash-ok{border-color:rgba(0,255,136,.3);color:#00ff88}
+html:not(.dark) .flash-ok{border-color:rgba(34,197,94,.3);color:#15803d}
+.flash-warn{border-color:rgba(251,191,36,.3);color:#fbbf24}
+html:not(.dark) .flash-warn{border-color:rgba(202,138,4,.3);color:#92400e}
+.flash-err{border-color:rgba(248,113,113,.3);color:#f87171}
+html:not(.dark) .flash-err{border-color:rgba(220,38,38,.3);color:#b91c1c}
+
+/* ── AJAX TOAST NOTIFICATIONS ─────────────────────────────────────────────── */
+.ajax-toast{
+  position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;
+  max-width:380px;padding:.875rem 1.25rem;
+  border-radius:12px;font-size:.875rem;font-weight:600;
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid;
+  transform:translateY(12px) scale(.97);
+  opacity:0;
+  transition:opacity .25s, transform .25s;
+  pointer-events:none;
+  font-family:'Cabinet Grotesk',sans-serif;
+  line-height:1.4;
+}
+.ajax-toast-in{opacity:1;transform:translateY(0) scale(1)}
+.ajax-toast-ok{
+  background:rgba(6,20,10,.92);color:#00ff88;
+  border-color:rgba(0,255,136,.3);
+  box-shadow:0 4px 24px rgba(0,255,136,.15),0 8px 32px rgba(0,0,0,.4);
+}
+html:not(.dark) .ajax-toast-ok{
+  background:rgba(240,253,244,.96);color:#166534;
+  border-color:rgba(34,197,94,.3);
+  box-shadow:0 4px 24px rgba(34,197,94,.15),0 8px 32px rgba(0,0,0,.1);
+}
+.ajax-toast-err{
+  background:rgba(20,6,6,.92);color:#f87171;
+  border-color:rgba(248,113,113,.3);
+  box-shadow:0 4px 24px rgba(248,113,113,.15),0 8px 32px rgba(0,0,0,.4);
+}
+html:not(.dark) .ajax-toast-err{
+  background:rgba(255,241,241,.96);color:#b91c1c;
+  border-color:rgba(220,38,38,.3);
+  box-shadow:0 4px 24px rgba(220,38,38,.12),0 8px 32px rgba(0,0,0,.08);
+}
+
+/* ── AUTOFILL OVERRIDE — kill browser's blue/white autofill highlight ─────── */
+/* Chrome/Edge/Safari use -webkit-autofill and force their own bg color.       */
+/* The only reliable override: use box-shadow inset to paint over their bg.    */
+.inp:-webkit-autofill,
+.inp:-webkit-autofill:hover,
+.inp:-webkit-autofill:focus,
+.inp:-webkit-autofill:active {
+  /* Dark mode: paint dark background over autofill */
+  -webkit-box-shadow: 0 0 0 9999px rgba(8, 20, 12, 0.95) inset !important;
+  box-shadow:         0 0 0 9999px rgba(8, 20, 12, 0.95) inset !important;
+  -webkit-text-fill-color: #e8f5ec !important;
+  caret-color: #00ff88;
+  border-color: rgba(0, 255, 136, 0.35) !important;
+  transition: background-color 99999s ease-in-out 0s; /* delay browser bg transition forever */
+}
+html:not(.dark) .inp:-webkit-autofill,
+html:not(.dark) .inp:-webkit-autofill:hover,
+html:not(.dark) .inp:-webkit-autofill:focus,
+html:not(.dark) .inp:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 9999px rgba(245, 252, 248, 0.98) inset !important;
+  box-shadow:         0 0 0 9999px rgba(245, 252, 248, 0.98) inset !important;
+  -webkit-text-fill-color: #0d1f12 !important;
+  caret-color: #059669;
+  border-color: rgba(34, 197, 94, 0.4) !important;
+}
+
+/* ── CUSTOM APP CONFIRM MODAL ─────────────────────────────────────────────── */
+.app-modal-overlay{
+  position:fixed;inset:0;z-index:10000;
+  background:rgba(0,0,0,.65);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity .2s;
+  padding:1rem;
+}
+.app-modal-overlay.app-modal-in{opacity:1}
+.app-modal{
+  background:rgba(8,22,13,.97);
+  border:1px solid rgba(0,255,136,.2);
+  border-radius:16px;
+  padding:1.75rem 2rem;
+  max-width:380px;width:100%;
+  box-shadow:0 24px 64px rgba(0,0,0,.7),0 0 0 1px rgba(0,255,136,.08);
+  transform:scale(.95) translateY(8px);
+  transition:transform .2s,opacity .2s;
+  font-family:'Cabinet Grotesk',sans-serif;
+}
+.app-modal-overlay.app-modal-in .app-modal{transform:scale(1) translateY(0)}
+html:not(.dark) .app-modal{
+  background:rgba(248,253,250,.99);
+  border-color:rgba(34,197,94,.25);
+  box-shadow:0 16px 48px rgba(0,0,0,.15);
+}
+.app-modal-msg{
+  font-size:.9375rem;font-weight:600;line-height:1.55;
+  color:#e8f5ec;margin-bottom:1.5rem;
+}
+html:not(.dark) .app-modal-msg{color:#0d1f12}
+.app-modal-btns{display:flex;gap:.75rem;justify-content:flex-end}
+.app-modal-cancel{
+  padding:.55rem 1.25rem;border-radius:9px;
+  font-size:.875rem;font-weight:700;
+  background:rgba(255,255,255,.06);
+  color:rgba(180,220,190,.7);
+  border:1px solid rgba(255,255,255,.1);
+  cursor:pointer;transition:all .15s;
+  font-family:'Cabinet Grotesk',sans-serif;
+}
+.app-modal-cancel:hover{background:rgba(255,255,255,.1);color:#e8f5ec}
+html:not(.dark) .app-modal-cancel{background:rgba(0,0,0,.04);color:#374151;border-color:rgba(0,0,0,.12)}
+html:not(.dark) .app-modal-cancel:hover{background:rgba(0,0,0,.08);color:#111827}
+.app-modal-ok{
+  padding:.55rem 1.5rem;border-radius:9px;
+  font-size:.875rem;font-weight:700;
+  background:linear-gradient(135deg,#00ff88,#00c969);
+  color:#041209;border:none;
+  cursor:pointer;transition:all .15s;
+  box-shadow:0 0 16px rgba(0,255,136,.3);
+  font-family:'Cabinet Grotesk',sans-serif;
+}
+.app-modal-ok:hover{background:linear-gradient(135deg,#1affa0,#00e07a);transform:translateY(-1px)}
+html:not(.dark) .app-modal-ok{background:linear-gradient(135deg,#22c55e,#059669);color:#fff;box-shadow:0 4px 12px rgba(34,197,94,.3)}
+
+/* ── SELECT & INPUT OPTION TEXT — improved visibility ──────────────────────── */
+select.inp{color:#e8f5ec}
+html:not(.dark) select.inp{color:#1f2937}
+select.inp option{
+  background:#071a0c;color:#e8f5ec;
+  padding:.5rem;
+}
+html:not(.dark) select.inp option{
+  background:#f0fdf4;color:#0d1f12;
+}
+/* Fix selected option text not showing in light mode */
+html:not(.dark) select.inp option:checked{
+  background:#dcfce7;color:#14532d;
+}
+select.inp option:hover{background:#0a2e14}
+
+/* ── LIGHT THEME GLOBAL IMPROVEMENTS ──────────────────────────────────────── */
+/* Ensure all text inputs readable in light */
+html:not(.dark) .inp{color:#111827}
+html:not(.dark) textarea.inp{color:#111827}
+/* Glass cards in light mode - better contrast */
+html:not(.dark) .glass{
+  background:rgba(255,255,255,.9);
+}
+html:not(.dark) .glass-plain{
+  background:rgba(255,255,255,.9);
+}
+/* Dropdown panel light mode */
+html:not(.dark) .dd-panel{
+  background:rgba(255,255,255,.99);
+}
+/* Lift card hover in light mode */
+html:not(.dark) .glow-card::before{
+  background:linear-gradient(135deg,rgba(34,197,94,.35),rgba(14,165,233,.12) 40%,transparent 70%);
+}
+/* Mobile nav light mode */
+html:not(.dark) nav [style*="border-top:1px solid rgba(0,255,136"]{
+  border-top-color:rgba(34,197,94,.12)!important;
+}
+/* Stat bar gradients light mode visibility */
+html:not(.dark) [style*="height:2px;background:linear-gradient(90deg,#00d4ff"]{
+  opacity:.6;
+}
 </style>
 {% block extra_head %}{% endblock %}
 </head>
@@ -373,24 +922,24 @@ html:not(.dark) .divider{background:linear-gradient(90deg,transparent,rgba(34,19
 
     <a href="{% url 'landing' %}" class="flex items-center gap-2.5 shrink-0 group">
       <div class="w-8 h-8 rounded-xl flex items-center justify-center text-sm shine" style="background:linear-gradient(135deg,rgba(0,255,136,.3),rgba(0,212,255,.2));border:1px solid rgba(0,255,136,.4);box-shadow:0 0 14px rgba(0,255,136,.2);transition:all .3s ease" onmouseover="this.style.transform='scale(1.12) rotate(8deg)'" onmouseout="this.style.transform=''">🍱</div>
-      <span class="f-display text-xl tracking-widest" style="color:#00ff88;text-shadow:0 0 20px rgba(0,255,136,.4)">FOOD</span><span class="f-display text-xl tracking-widest text-white dark:text-white" style="color:#e8f5ec">RESCUE</span>
+      <span class="f-display text-xl tracking-widest ta" style="text-shadow:0 0 20px rgba(0,255,136,.4)">FOOD</span><span class="f-display text-xl tracking-widest text-white dark:text-white th2" style="font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:.1em">RESCUE</span>
     </a>
 
     <div class="hidden md:flex items-center gap-1 flex-1 justify-center">
-      <a href="{% url 'impact_feed' %}" class="px-4 py-2 rounded-lg text-sm font-600 transition-all" style="color:rgba(180,220,190,.7)" onmouseover="this.style.color='#00ff88';this.style.background='rgba(0,255,136,.06)'" onmouseout="this.style.color='rgba(180,220,190,.7)';this.style.background=''">⚡ Impact</a>
+      <a href="{% url 'impact_feed' %}" class="nav-link">⚡ Impact</a>
       {% if user.is_authenticated %}
         {% if user.profile.role == 'donor' %}
-          <a href="{% url 'donor_dashboard' %}" class="px-4 py-2 rounded-lg text-sm font-600 transition-all" style="color:rgba(180,220,190,.7)" onmouseover="this.style.color='#00ff88';this.style.background='rgba(0,255,136,.06)'" onmouseout="this.style.color='rgba(180,220,190,.7)';this.style.background=''">Dashboard</a>
+          <a href="{% url 'donor_dashboard' %}" class="nav-link">Dashboard</a>
           <a href="{% url 'create_donation' %}" class="btn btn-neon !py-2 !px-4 text-sm ml-2">+ Donate Food</a>
         {% else %}
-          <a href="{% url 'volunteer_dashboard' %}" class="px-4 py-2 rounded-lg text-sm font-600 transition-all" style="color:rgba(180,220,190,.7)" onmouseover="this.style.color='#00ff88';this.style.background='rgba(0,255,136,.06)'" onmouseout="this.style.color='rgba(180,220,190,.7)';this.style.background=''">Dashboard</a>
+          <a href="{% url 'volunteer_dashboard' %}" class="nav-link">Dashboard</a>
         {% endif %}
       {% endif %}
     </div>
 
     <div class="flex items-center gap-2">
       <!-- Theme toggle -->
-      <button @click="toggleTheme()" class="w-9 h-9 flex items-center justify-center rounded-xl transition-all" style="color:rgba(0,255,136,.7);border:1px solid rgba(0,255,136,.15)" onmouseover="this.style.background='rgba(0,255,136,.08)';this.style.borderColor='rgba(0,255,136,.35)'" onmouseout="this.style.background='';this.style.borderColor='rgba(0,255,136,.15)'">
+      <button @click="toggleTheme()" class="nav-icon-btn">
         <svg x-show="dark" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
         <svg x-show="!dark" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
       </button>
@@ -399,21 +948,21 @@ html:not(.dark) .divider{background:linear-gradient(90deg,transparent,rgba(34,19
         <!-- Notifications -->
         <div class="relative" x-data="Notif()" x-init="boot()">
           <button @click="open=!open;if(open)load()" @click.outside="open=false"
-                  class="relative w-9 h-9 flex items-center justify-center rounded-xl transition-all" style="color:rgba(0,255,136,.7);border:1px solid rgba(0,255,136,.15)" onmouseover="this.style.background='rgba(0,255,136,.08)'" onmouseout="this.style.background=''">
+                  class="relative nav-icon-btn">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:16px;height:16px"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
             <span x-show="n>0" x-text="n>9?'9+':n" class="gp absolute -top-1 -right-1 min-w-[18px] h-[18px] px-0.5 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-800 leading-none" style="box-shadow:0 0 8px rgba(239,68,68,.6)"></span>
           </button>
-          <div x-show="open" class="asd absolute right-0 mt-2 w-80 glass rounded-2xl shadow-2xl overflow-hidden z-50">
-            <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--border)">
-              <span class="f-display text-sm tracking-wider" style="color:#00ff88">NOTIFICATIONS</span>
-              <button x-show="n>0" @click="readAll()" class="text-xs font-600 transition" style="color:rgba(0,255,136,.6)" onmouseover="this.style.color='#00ff88'" onmouseout="this.style.color='rgba(0,255,136,.6)'">Mark all read</button>
+          <div x-show="open" class="asd dd-panel w-80">
+            <div class="dd-header flex items-center justify-between">
+              <span class="f-display text-sm tracking-wider ta">NOTIFICATIONS</span>
+              <button x-show="n>0" @click="readAll()" class="text-xs font-700 dd-name" style="background:none;border:none;cursor:pointer;opacity:.75">Mark all read</button>
             </div>
             <div class="max-h-72 overflow-y-auto">
-              <template x-if="items.length===0"><div class="py-10 text-center text-sm" style="color:rgba(180,220,190,.4)"><div class="text-2xl mb-2 fy">🔔</div>All caught up!</div></template>
+              <template x-if="items.length===0"><div class="py-10 text-center dd-email text-sm"><div class="text-2xl mb-2 fy">🔔</div>All caught up!</div></template>
               <template x-for="i in items" :key="i.id">
-                <a :href="i.donation_id?`/donation/${i.donation_id}/`:'#'" class="flex gap-3 px-4 py-3 transition-all" style="border-bottom:1px solid rgba(0,255,136,.04)" onmouseover="this.style.background='rgba(0,255,136,.04)'" onmouseout="this.style.background=''">
-                  <span class="text-lg shrink-0" x-text="ico(i.type)"></span>
-                  <div><p class="text-xs leading-snug" style="color:rgba(220,240,225,.85)" x-text="i.message"></p><p class="text-[11px] mt-0.5" style="color:rgba(120,180,140,.5)" x-text="i.created_at"></p></div>
+                <a :href="i.donation_id?`/donation/${i.donation_id}/`:'#'" class="dd-item" style="border-bottom:1px solid rgba(0,255,136,.05);align-items:flex-start;padding:.75rem 1rem">
+                  <span class="text-lg shrink-0 mt-0.5" x-text="ico(i.type)"></span>
+                  <div><p class="text-xs leading-snug dd-name" x-text="i.message"></p><p class="text-[11px] mt-0.5 dd-email" x-text="i.created_at"></p></div>
                 </a>
               </template>
             </div>
@@ -422,40 +971,39 @@ html:not(.dark) .divider{background:linear-gradient(90deg,transparent,rgba(34,19
 
         <!-- Profile dropdown -->
         <div class="relative" x-data="{o:false}">
-          <button @click="o=!o" @click.outside="o=false"
-                  class="flex items-center gap-2 px-2 py-1.5 rounded-xl transition-all" style="border:1px solid rgba(0,255,136,.12)" onmouseover="this.style.background='rgba(0,255,136,.06)'" onmouseout="this.style.background=''">
-            <div style="width:28px;height:28px;border-radius:8px;overflow:hidden;border:1.5px solid rgba(0,255,136,.4);box-shadow:0 0 8px rgba(0,255,136,.2);flex-shrink:0">
-              {% if user.profile.profile_image %}<img src="{{ user.profile.profile_image.url }}" alt="" style="width:100%;height:100%;object-fit:cover"/>
+          <button @click="o=!o" @click.outside="o=false" class="profile-btn">
+            <div class="img-frame" style="width:28px;height:28px;border-radius:8px;overflow:hidden;border:1.5px solid rgba(0,255,136,.4);box-shadow:0 0 8px rgba(0,255,136,.2);flex-shrink:0">
+              {% if user.profile.profile_image %}<img src="{{ user.profile.profile_image.url }}" alt=""/>
               {% else %}<div style="width:100%;height:100%;background:linear-gradient(135deg,#00ff88,#00b868);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#041209">{{ user.profile.full_name|first|upper }}</div>{% endif %}
             </div>
-            <span class="hidden sm:block text-sm font-600 max-w-[80px] truncate" style="color:rgba(220,240,225,.85)">{{ user.profile.full_name|truncatechars:11 }}</span>
-            <svg class="w-3 h-3 transition" :class="{'rotate-180':o}" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color:rgba(0,255,136,.5)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            <span class="hidden sm:block profile-btn-name max-w-[80px] truncate">{{ user.profile.full_name|truncatechars:11 }}</span>
+            <svg class="profile-btn-caret" :class="{'rotate-180':o}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
           </button>
-          <div x-show="o" class="asd absolute right-0 mt-2 w-52 glass rounded-2xl shadow-2xl overflow-hidden z-50">
-            <div class="px-4 py-3" style="border-bottom:1px solid var(--border)">
-              <p class="text-sm font-700 truncate" style="color:#e8f5ec">{{ user.profile.full_name }}</p>
-              <p class="text-xs truncate mt-0.5" style="color:rgba(120,180,140,.5)">{{ user.email }}</p>
-              <span class="inline-block mt-1.5 px-2 py-0.5 rounded-full text-xs font-700" style="{% if user.profile.role == 'donor' %}background:rgba(0,255,136,.12);color:#00ff88;border:1px solid rgba(0,255,136,.25){% else %}background:rgba(96,165,250,.1);color:#60a5fa;border:1px solid rgba(96,165,250,.25){% endif %}">
+          <div x-show="o" class="asd dd-panel w-52">
+            <div class="dd-header">
+              <p class="dd-name">{{ user.profile.full_name }}</p>
+              <p class="dd-email">{{ user.email }}</p>
+              <span class="badge inline-block mt-1.5 {% if user.profile.role == 'donor' %}badge-available{% else %}badge-picked_up{% endif %}">
                 {% if user.profile.role == 'donor' %}🍱 Donor{% else %}🤝 Volunteer{% endif %}
               </span>
             </div>
             <div class="py-1">
               {% if user.profile.role == 'donor' %}
-                <a href="{% url 'donor_dashboard' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm transition-all" style="color:rgba(180,220,190,.75)" onmouseover="this.style.background='rgba(0,255,136,.06)';this.style.color='#00ff88'" onmouseout="this.style.background='';this.style.color='rgba(180,220,190,.75)'">📊 Dashboard</a>
-                <a href="{% url 'create_donation' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm transition-all" style="color:rgba(180,220,190,.75)" onmouseover="this.style.background='rgba(0,255,136,.06)';this.style.color='#00ff88'" onmouseout="this.style.background='';this.style.color='rgba(180,220,190,.75)'">🍱 Donate Food</a>
+                <a href="{% url 'donor_dashboard' %}" class="dd-item">📊 Dashboard</a>
+                <a href="{% url 'create_donation' %}" class="dd-item">🍱 Donate Food</a>
               {% else %}
-                <a href="{% url 'volunteer_dashboard' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm transition-all" style="color:rgba(180,220,190,.75)" onmouseover="this.style.background='rgba(0,255,136,.06)';this.style.color='#00ff88'" onmouseout="this.style.background='';this.style.color='rgba(180,220,190,.75)'">📋 Dashboard</a>
+                <a href="{% url 'volunteer_dashboard' %}" class="dd-item">📋 Dashboard</a>
               {% endif %}
-              <a href="{% url 'volunteer_profile' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm transition-all" style="color:rgba(180,220,190,.75)" onmouseover="this.style.background='rgba(0,255,136,.06)';this.style.color='#00ff88'" onmouseout="this.style.background='';this.style.color='rgba(180,220,190,.75)'">👤 Edit Profile</a>
-              <a href="{% url 'impact_feed' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm transition-all" style="color:rgba(180,220,190,.75)" onmouseover="this.style.background='rgba(0,255,136,.06)';this.style.color='#00ff88'" onmouseout="this.style.background='';this.style.color='rgba(180,220,190,.75)'">⚡ Impact Feed</a>
-              <div style="border-top:1px solid rgba(239,68,68,.15)" class="pt-1 mt-1">
-                <a href="{% url 'logout' %}" class="flex items-center gap-2.5 px-4 py-2.5 text-sm transition-all" style="color:#f87171" onmouseover="this.style.background='rgba(239,68,68,.08)'" onmouseout="this.style.background=''">→ Sign Out</a>
+              <a href="{% url 'volunteer_profile' %}" class="dd-item">👤 Edit Profile</a>
+              <a href="{% url 'impact_feed' %}" class="dd-item">⚡ Impact Feed</a>
+              <div class="dd-sep">
+                <a href="{% url 'logout' %}" class="dd-item dd-danger">→ Sign Out</a>
               </div>
             </div>
           </div>
         </div>
       {% else %}
-        <a href="{% url 'login' %}" class="hidden sm:block px-4 py-2 rounded-lg text-sm font-600 transition-all" style="color:rgba(0,255,136,.6)" onmouseover="this.style.color='#00ff88'" onmouseout="this.style.color='rgba(0,255,136,.6)'">Sign In</a>
+        <a href="{% url 'login' %}" class="hidden sm:block nav-link">Sign In</a>
         <a href="{% url 'register' %}" class="btn btn-solid !py-2 !px-4 text-sm">Get Started</a>
       {% endif %}
 
@@ -467,14 +1015,14 @@ html:not(.dark) .divider{background:linear-gradient(90deg,transparent,rgba(34,19
 
   <!-- Mobile nav -->
   <div x-data="{o:false}" @mob.window="o=!o" x-show="o" class="md:hidden px-4 py-3 space-y-1" style="border-top:1px solid rgba(0,255,136,.08)">
-    <a href="{% url 'impact_feed' %}" class="block px-3 py-2.5 rounded-xl text-sm font-600" style="color:rgba(180,220,190,.75)">⚡ Impact Feed</a>
+    <a href="{% url 'impact_feed' %}" class="block dd-item rounded-xl">⚡ Impact Feed</a>
     {% if user.is_authenticated %}
-      {% if user.profile.role == 'donor' %}<a href="{% url 'donor_dashboard' %}" class="block px-3 py-2.5 rounded-xl text-sm font-600" style="color:rgba(180,220,190,.75)">📊 Dashboard</a><a href="{% url 'create_donation' %}" class="block px-3 py-2.5 rounded-xl text-sm font-700 btn btn-neon text-center" style="display:block">+ Donate Food</a>
-      {% else %}<a href="{% url 'volunteer_dashboard' %}" class="block px-3 py-2.5 rounded-xl text-sm font-600" style="color:rgba(180,220,190,.75)">📋 Dashboard</a>{% endif %}
-      <a href="{% url 'volunteer_profile' %}" class="block px-3 py-2.5 rounded-xl text-sm font-600" style="color:rgba(180,220,190,.75)">👤 Profile</a>
+      {% if user.profile.role == 'donor' %}<a href="{% url 'donor_dashboard' %}" class="block dd-item rounded-xl">📊 Dashboard</a><a href="{% url 'create_donation' %}" class="block px-3 py-2.5 rounded-xl text-sm font-700 btn btn-neon text-center" style="display:block">+ Donate Food</a>
+      {% else %}<a href="{% url 'volunteer_dashboard' %}" class="block dd-item rounded-xl">📋 Dashboard</a>{% endif %}
+      <a href="{% url 'volunteer_profile' %}" class="block dd-item rounded-xl">👤 Profile</a>
       <a href="{% url 'logout' %}" class="block px-3 py-2.5 rounded-xl text-sm font-600" style="color:#f87171">→ Sign Out</a>
     {% else %}
-      <a href="{% url 'login' %}" class="block px-3 py-2.5 rounded-xl text-sm font-600" style="color:rgba(180,220,190,.75)">Sign In</a>
+      <a href="{% url 'login' %}" class="block dd-item rounded-xl">Sign In</a>
       <a href="{% url 'register' %}" class="block btn btn-solid text-center">Get Started</a>
     {% endif %}
   </div>
@@ -485,8 +1033,7 @@ html:not(.dark) .divider{background:linear-gradient(90deg,transparent,rgba(34,19
 <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-2 relative z-10 au"
      x-data x-init="setTimeout(()=>{$el.style.opacity=0;$el.style.transition='opacity .5s'},4500);setTimeout(()=>$el.remove(),5000)">
   {% for msg in messages %}
-  <div class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-600 shadow-lg glass"
-       style="{% if msg.tags == 'error' %}border-color:rgba(248,113,113,.3);color:#f87171{% elif msg.tags == 'warning' %}border-color:rgba(251,191,36,.3);color:#fbbf24{% elif msg.tags == 'success' %}border-color:rgba(0,255,136,.3);color:#00ff88{% else %}border-color:rgba(96,165,250,.3);color:#60a5fa{% endif %}">
+  <div class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-600 shadow-lg glass {% if msg.tags == 'error' %}flash-err{% elif msg.tags == 'warning' %}flash-warn{% else %}flash-ok{% endif %}">
     {% if msg.tags == 'error' %}❌{% elif msg.tags == 'warning' %}⚠️{% elif msg.tags == 'success' %}✅{% else %}ℹ️{% endif %} {{ msg }}
   </div>
   {% endfor %}
@@ -499,14 +1046,14 @@ html:not(.dark) .divider{background:linear-gradient(90deg,transparent,rgba(34,19
   <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
     <div class="flex items-center gap-2.5">
       <div class="w-6 h-6 rounded-lg flex items-center justify-center text-xs shine" style="background:linear-gradient(135deg,rgba(0,255,136,.25),rgba(0,212,255,.15));border:1px solid rgba(0,255,136,.3)">🍱</div>
-      <span class="f-display text-sm tracking-widest" style="color:#00ff88">FOOD</span><span class="f-display text-sm tracking-widest" style="color:rgba(220,240,225,.6)">RESCUE</span>
+      <span class="f-display text-sm tracking-widest ta">FOOD</span><span class="f-display text-sm tracking-widest" class="t3">RESCUE</span>
     </div>
-    <div class="flex gap-6 text-xs font-600" style="color:rgba(120,180,140,.45)">
-      <a href="{% url 'impact_feed' %}" onmouseover="this.style.color='#00ff88'" onmouseout="this.style.color='rgba(120,180,140,.45)'" class="transition-colors">Impact</a>
-      <a href="{% url 'register' %}" onmouseover="this.style.color='#00ff88'" onmouseout="this.style.color='rgba(120,180,140,.45)'" class="transition-colors">Join</a>
-      <a href="{% url 'login' %}" onmouseover="this.style.color='#00ff88'" onmouseout="this.style.color='rgba(120,180,140,.45)'" class="transition-colors">Sign In</a>
+    <div class="flex gap-6 text-xs font-600 t3">
+      <a href="{% url 'impact_feed' %}" class="transition-colors hover:text-emerald-500 transition-colors">Impact</a>
+      <a href="{% url 'register' %}" class="transition-colors hover:text-emerald-500 transition-colors">Join</a>
+      <a href="{% url 'login' %}" class="transition-colors hover:text-emerald-500 transition-colors">Sign In</a>
     </div>
-    <p class="text-xs font-500" style="color:rgba(120,180,140,.35)">© {% now "Y" %} FoodRescue · Zero waste, maximum impact</p>
+    <p class="text-xs font-500 t3">© {% now "Y" %} FoodRescue · Zero waste, maximum impact</p>
   </div>
 </footer>
 

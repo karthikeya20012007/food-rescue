@@ -6,8 +6,8 @@
   <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-12 au">
     <div>
       <p class="lbl mb-3">Volunteer Dashboard</p>
-      <h1 class="f-display text-6xl sm:text-7xl leading-none mb-3" style="color:#e8f5ec">READY<br><span style="-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-image:linear-gradient(135deg,#00d4ff,#a855f7)">{{ profile.full_name|truncatechars:18|upper }}</span></h1>
-      <p class="text-sm font-500" style="color:rgba(180,220,190,.55)">{% if total_pickups %}You've delivered <span class="font-700" style="color:#00d4ff">{{ meals_delivered }} meals</span> across {{ total_pickups }} pickups.{% else %}Accept your first pickup below and start making an impact.{% endif %}</p>
+      <h1 class="f-display text-6xl sm:text-7xl leading-none mb-3 t1">READY<br><span style="-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-image:linear-gradient(135deg,#00d4ff,#a855f7)">{{ profile.full_name|truncatechars:18|upper }}</span></h1>
+      <p class="text-sm font-500 ts">{% if total_pickups %}You've delivered <span class="font-700" style="color:#00d4ff">{{ meals_delivered }} meals</span> across {{ total_pickups }} pickups.{% else %}Accept your first pickup below and start making an impact.{% endif %}</p>
     </div>
     <a href="{% url 'impact_feed' %}" class="btn btn-ghost shrink-0">⚡ View Impact Feed</a>
   </div>
@@ -17,69 +17,65 @@
     <div class="glow-card glass lift au" style="border-radius:16px;padding:1.5rem">
       <div class="lbl mb-4">Total</div>
       <div class="f-display text-6xl mb-1" style="-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;background-image:linear-gradient(135deg,#00d4ff,#6366f1)">{{ total_pickups }}</div>
-      <div class="text-sm font-500" style="color:rgba(180,220,190,.5)">Pickups done</div>
+      <div class="text-sm font-500 ts">Pickups done</div>
       <div class="mt-4" style="height:2px;background:linear-gradient(90deg,#00d4ff,transparent);border-radius:1px"></div>
     </div>
     <div class="glow-card glass lift au1" style="border-radius:16px;padding:1.5rem">
       <div class="lbl mb-4">Impact</div>
       <div class="f-display text-6xl tg-warm mb-1">{{ meals_delivered }}</div>
-      <div class="text-sm font-500" style="color:rgba(180,220,190,.5)">Meals delivered</div>
+      <div class="text-sm font-500 ts">Meals delivered</div>
       <div class="mt-4" style="height:2px;background:linear-gradient(90deg,#f97316,transparent);border-radius:1px"></div>
     </div>
     <div class="glow-card glass lift au2" style="border-radius:16px;padding:1.5rem">
       <div class="lbl mb-4">Active</div>
       <div class="f-display text-6xl tg mb-1">{{ active_deliveries }}</div>
-      <div class="text-sm font-500" style="color:rgba(180,220,190,.5)">In progress</div>
+      <div class="text-sm font-500 ts">In progress</div>
       <div class="mt-4" style="height:2px;background:linear-gradient(90deg,#00ff88,transparent);border-radius:1px"></div>
     </div>
     <div class="glow-card glass lift au3" style="border-radius:16px;padding:1.5rem">
       <div class="lbl mb-4">Done</div>
       <div class="f-display text-6xl tg-purple mb-1">{{ completed }}</div>
-      <div class="text-sm font-500" style="color:rgba(180,220,190,.5)">Completed</div>
+      <div class="text-sm font-500 ts">Completed</div>
       <div class="mt-4" style="height:2px;background:linear-gradient(90deg,#a855f7,transparent);border-radius:1px"></div>
     </div>
   </div>
 
   <!-- Active pickups -->
   {% if my_pickups %}
-  <div class="mb-12 au2">
+  <div class="mb-12 au2" id="active-pickups-section">
     <div class="flex items-center gap-3 mb-6">
-      <h2 class="f-display text-3xl tracking-wider" style="color:#e8f5ec">ACTIVE PICKUPS</h2>
-      <span class="badge" style="background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.3)">{{ my_pickups|length }} active</span>
+      <h2 class="f-display text-3xl tracking-wider t1">ACTIVE PICKUPS</h2>
+      <span class="badge" style="background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.3)" id="active-count-badge">{{ my_pickups|length }} active</span>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="active-pickups-grid">
       {% for d in my_pickups %}
-      <div class="glow-card glass lift" style="border-radius:16px;overflow:hidden">
-        <div style="height:2px;background:{% if d.status == 'accepted' %}linear-gradient(90deg,#fbbf24,#f97316){% elif d.status == 'picked_up' %}linear-gradient(90deg,#60a5fa,#6366f1){% else %}linear-gradient(90deg,#a78bfa,#ec4899){% endif %}"></div>
+      <div class="glow-card glass lift" style="border-radius:16px;overflow:hidden" id="pickup-card-{{ d.pk }}" data-pk="{{ d.pk }}" data-status="{{ d.status }}">
+        <div class="status-bar" style="height:2px;background:{% if d.status == 'accepted' %}linear-gradient(90deg,#fbbf24,#f97316){% elif d.status == 'picked_up' %}linear-gradient(90deg,#60a5fa,#6366f1){% else %}linear-gradient(90deg,#a78bfa,#ec4899){% endif %}"></div>
         <div class="p-5">
           <div class="flex items-start justify-between gap-2 mb-4">
             <div>
-              <h3 class="font-800 text-base" style="color:#e8f5ec">{{ d.food_name }}</h3>
-              <p class="text-xs font-500 mt-0.5" style="color:rgba(120,180,140,.45)">by {{ d.donor.profile.full_name|default:d.donor.username }}</p>
+              <h3 class="font-800 text-base t1">{{ d.food_name }}</h3>
+              <p class="text-xs font-500 mt-0.5 t3">by {{ d.donor.profile.full_name|default:d.donor.username }}</p>
             </div>
-            <span class="badge badge-{{ d.status }} shrink-0">{{ d.get_status_display }}</span>
+            <span class="badge badge-{{ d.status }} status-badge shrink-0">{{ d.get_status_display }}</span>
           </div>
           <div class="space-y-2 mb-5">
-            <div class="flex items-center gap-2 text-xs font-500" style="color:rgba(180,220,190,.5)"><span>🍽️</span>~{{ d.quantity }} people</div>
-            <div class="flex items-start gap-2 text-xs font-500" style="color:rgba(180,220,190,.5)"><span class="shrink-0">📍</span><span style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ d.pickup_address }}</span></div>
-            <div class="flex items-center gap-2 text-xs font-500" style="color:rgba(180,220,190,.5)"><span>⏱</span>{{ d.expiry_time|date:"d M, g:i A" }}</div>
+            <div class="flex items-center gap-2 text-xs font-500 ts"><span>🍽️</span>~{{ d.quantity }} people</div>
+            <div class="flex items-start gap-2 text-xs font-500 ts"><span class="shrink-0">📍</span><span style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ d.pickup_address }}</span></div>
+            <div class="flex items-center gap-2 text-xs font-500 ts"><span>⏱</span>{{ d.expiry_time|date:"d M, g:i A" }}</div>
           </div>
-          <div class="flex flex-wrap gap-2 pt-4" style="border-top:1px solid rgba(0,255,136,.08)">
+          <div class="flex flex-wrap gap-2 pt-4 action-buttons" style="border-top:1px solid rgba(0,255,136,.08)">
             <a href="{{ d.google_maps_url }}" target="_blank" class="btn !py-2 !px-3" style="font-size:.78rem;background:rgba(96,165,250,.1);color:#60a5fa;border:1px solid rgba(96,165,250,.2)">📍 Navigate</a>
             {% if d.status == 'accepted' %}
-              <form method="post" action="{% url 'mark_picked_up' d.pk %}">{% csrf_token %}
-                <button class="btn !py-2 !px-3" style="font-size:.78rem;background:rgba(0,255,136,.1);color:#00ff88;border:1px solid rgba(0,255,136,.2)">📦 Picked Up</button>
-              </form>
-              <form method="post" action="{% url 'cancel_pickup' d.pk %}" x-data onsubmit="return confirm('Cancel this pickup? It will return to available.')">{% csrf_token %}
-                <button class="btn btn-danger !py-2 !px-3" style="font-size:.78rem">✕ Cancel Pickup</button>
-              </form>
+              <button class="btn !py-2 !px-3 chip-green-sm ajax-action" style="font-size:.78rem"
+                data-url="{% url 'mark_picked_up' d.pk %}" data-confirm="">📦 Picked Up</button>
+              <button class="btn btn-danger !py-2 !px-3 ajax-action" style="font-size:.78rem"
+                data-url="{% url 'cancel_pickup' d.pk %}" data-confirm="Cancel this pickup? It will return to available.">✕ Cancel Pickup</button>
             {% elif d.status == 'picked_up' %}
-              <form method="post" action="{% url 'mark_on_the_way' d.pk %}">{% csrf_token %}
-                <button class="btn !py-2 !px-3" style="font-size:.78rem;background:rgba(167,139,250,.1);color:#a78bfa;border:1px solid rgba(167,139,250,.2)">🚗 On The Way</button>
-              </form>
-              <form method="post" action="{% url 'cancel_pickup' d.pk %}" x-data onsubmit="return confirm('Cancel? Donation returns to available.')">{% csrf_token %}
-                <button class="btn btn-danger !py-2 !px-3" style="font-size:.78rem">✕ Cancel</button>
-              </form>
+              <button class="btn !py-2 !px-3 ajax-action" style="font-size:.78rem;background:rgba(167,139,250,.1);color:#a78bfa;border:1px solid rgba(167,139,250,.2)"
+                data-url="{% url 'mark_on_the_way' d.pk %}" data-confirm="">🚗 On The Way</button>
+              <button class="btn btn-danger !py-2 !px-3 ajax-action" style="font-size:.78rem"
+                data-url="{% url 'cancel_pickup' d.pk %}" data-confirm="Cancel? Donation returns to available.">✕ Cancel</button>
             {% elif d.status == 'on_the_way' %}
               <a href="{% url 'mark_delivered' d.pk %}" class="btn btn-solid !py-2 !px-3" style="font-size:.78rem">✅ Mark Delivered</a>
             {% endif %}
@@ -95,8 +91,8 @@
   <div class="mb-6 au3" x-data="DF()">
     <div class="flex items-center justify-between flex-wrap gap-3 mb-5">
       <div>
-        <h2 class="f-display text-3xl tracking-wider" style="color:#e8f5ec">AVAILABLE NOW</h2>
-        <p class="text-xs font-600 mt-1" style="color:rgba(120,180,140,.4)">{{ available_donations|length }} DONATIONS WAITING{% if distance_applied %} · WITHIN {{ distance_km }} KM{% endif %}</p>
+        <h2 class="f-display text-3xl tracking-wider t1">AVAILABLE NOW</h2>
+        <p class="text-xs font-600 mt-1 t3">{{ available_donations|length }} DONATIONS WAITING{% if distance_applied %} · WITHIN {{ distance_km }} KM{% endif %}</p>
       </div>
     </div>
     <form method="get" id="ff" class="flex flex-wrap items-center gap-2.5">
@@ -115,53 +111,53 @@
         <option value="5"   {% if distance_km == '5'   %}selected{% endif %}>Within 5 km</option>
         <option value="10"  {% if distance_km == '10'  %}selected{% endif %}>Within 10 km</option>
       </select>
-      <span x-show="msg" x-text="msg" :style="err?'color:#f87171':'color:#00ff88'" class="text-xs font-700"></span>
-      {% if food_type != 'all' or search or distance_km != 'all' %}<a href="{% url 'volunteer_dashboard' %}" class="text-xs font-700 transition" style="color:rgba(248,113,113,.6)" onmouseover="this.style.color='#f87171'" onmouseout="this.style.color='rgba(248,113,113,.6)'">✕ Clear</a>{% endif %}
+      <span x-show="msg" x-text="msg" :class="err?'val-err':'val-ok'" class="text-xs font-700"></span>
+      {% if food_type != 'all' or search or distance_km != 'all' %}<a href="{% url 'volunteer_dashboard' %}" class="clear-link">✕ Clear</a>{% endif %}
     </form>
   </div>
 
   <!-- Available donation cards -->
   {% if available_donations %}
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 au4">
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 au4" id="available-grid">
     {% for d in available_donations %}
-    <div class="glow-card glass lift" style="border-radius:16px;overflow:hidden">
-      <!-- Food type header -->
+    <div class="glow-card glass lift" style="border-radius:16px;overflow:hidden" id="avail-card-{{ d.pk }}" data-pk="{{ d.pk }}">
       <div class="px-5 py-4" style="background:{% if d.food_type == 'veg' %}rgba(0,255,136,.05){% else %}rgba(248,113,113,.05){% endif %};border-bottom:1px solid {% if d.food_type == 'veg' %}rgba(0,255,136,.12){% else %}rgba(248,113,113,.12){% endif %}">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style="background:{% if d.food_type == 'veg' %}rgba(0,255,136,.12){% else %}rgba(248,113,113,.12){% endif %}">{% if d.food_type == 'veg' %}🥦{% else %}🍗{% endif %}</div>
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl tint-green">{% if d.food_type == 'veg' %}🥦{% else %}🍗{% endif %}</div>
             <div>
-              <h3 class="font-800 text-base" style="color:#e8f5ec;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ d.food_name }}</h3>
-              <p class="text-xs font-500 mt-0.5" style="color:rgba(120,180,140,.45)">by {{ d.donor.profile.full_name|default:d.donor.username }}</p>
+              <h3 class="font-800 text-base t1" style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ d.food_name }}</h3>
+              <p class="text-xs font-500 mt-0.5 t3">by {{ d.donor.profile.full_name|default:d.donor.username }}</p>
             </div>
           </div>
-          <span class="badge badge-{% if d.food_type == 'veg' %}available{% else %}expired{% endif %}" style="{% if d.food_type == 'veg' %}background:rgba(0,255,136,.1);color:#00ff88;border-color:rgba(0,255,136,.25){% else %}background:rgba(248,113,113,.1);color:#f87171;border-color:rgba(248,113,113,.25){% endif %}">{% if d.food_type == 'veg' %}🟢 Veg{% else %}🔴 Non-Veg{% endif %}</span>
+          <span class="badge {% if d.food_type == 'veg' %}chip-veg{% else %}chip-nonveg{% endif %}">{% if d.food_type == 'veg' %}🟢 Veg{% else %}🔴 Non-Veg{% endif %}</span>
         </div>
       </div>
       <div class="p-5">
         <div class="space-y-3 mb-5">
           <div class="flex items-center gap-3">
             <span class="lbl" style="width:60px;flex-shrink:0">Serves</span>
-            <span class="text-sm font-700" style="color:#e8f5ec">~{{ d.quantity }} people</span>
+            <span class="text-sm font-700 t1">~{{ d.quantity }} people</span>
           </div>
           <div class="flex items-start gap-3">
             <span class="lbl" style="width:60px;flex-shrink:0;margin-top:2px">Location</span>
-            <span class="text-sm font-500" style="color:rgba(180,220,190,.65);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ d.pickup_address }}</span>
+            <span class="text-sm font-500 t2" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ d.pickup_address }}</span>
           </div>
           <div class="flex items-center gap-3">
             <span class="lbl" style="width:60px;flex-shrink:0">Expires</span>
-            <span class="text-sm font-600 {% if d.is_expired %}text-red-400{% endif %}" style="color:{% if d.is_expired %}#f87171{% else %}rgba(180,220,190,.65){% endif %}">{{ d.expiry_time|date:"d M, g:i A" }}</span>
+            <span class="text-sm font-600 {% if d.is_expired %}text-red-400{% endif %}">{{ d.expiry_time|date:"d M, g:i A" }}</span>
           </div>
-          {% if d.distance_km %}
+          {% if d._distance_km %}
           <div class="flex items-center gap-3">
             <span class="lbl" style="width:60px;flex-shrink:0">Distance</span>
-            <span class="text-sm font-700" style="color:#00d4ff">{{ d.distance_km }} km</span>
+            <span class="text-sm font-700" style="color:#00d4ff">{{ d._distance_km }} km</span>
           </div>
           {% endif %}
         </div>
-        <form method="post" action="{% url 'accept_pickup' d.pk %}">{% csrf_token %}
-          <button type="submit" class="btn btn-solid w-full justify-center">Accept Pickup 🚴</button>
-        </form>
+        <button type="button" class="btn btn-solid w-full justify-center ajax-accept"
+          data-url="{% url 'accept_pickup' d.pk %}" data-pk="{{ d.pk }}">
+          Accept Pickup 🚴
+        </button>
       </div>
     </div>
     {% endfor %}
@@ -169,14 +165,226 @@
   {% else %}
   <div class="glow-card glass text-center au4" style="border-radius:16px;padding:5rem 2rem">
     <div class="text-5xl mb-5 fy">🔍</div>
-    <h3 class="f-display text-3xl tracking-wider mb-2" style="color:#e8f5ec">NOTHING AVAILABLE</h3>
-    <p class="text-sm font-500 max-w-sm mx-auto" style="color:rgba(180,220,190,.45)">{% if search or food_type != 'all' or distance_km != 'all' %}Try adjusting your filters.{% else %}Donors post food throughout the day — check back soon.{% endif %}</p>
+    <h3 class="f-display text-3xl tracking-wider mb-2 t1">NOTHING AVAILABLE</h3>
+    <p class="text-sm font-500 max-w-sm mx-auto ts">{% if search or food_type != 'all' or distance_km != 'all' %}Try adjusting your filters.{% else %}Donors post food throughout the day — check back soon.{% endif %}</p>
   </div>
   {% endif %}
 </div>
 {% endblock %}
 {% block extra_js %}
 <script>
+/* ── GPS filter ───────────────────────────────────────────────────────────── */
 function DF(){return{msg:'',err:false,hd(e){const v=e.target.value,la=document.getElementById('vla'),ln=document.getElementById('vln');if(v==='all'){la.value='';ln.value='';document.getElementById('ff').submit();return}if(la.value&&ln.value){document.getElementById('ff').submit();return}if(!navigator.geolocation){this.msg='❌ GPS unavailable';this.err=true;e.target.value='all';return}this.msg='📡 Getting location…';this.err=false;navigator.geolocation.getCurrentPosition(p=>{la.value=p.coords.latitude.toFixed(6);ln.value=p.coords.longitude.toFixed(6);this.msg='📍 Found!';setTimeout(()=>document.getElementById('ff').submit(),500)},()=>{this.msg='❌ Location denied';this.err=true;e.target.value='all'},{enableHighAccuracy:true,timeout:10000})}}}
+
+/* ── CSRF helper ─────────────────────────────────────────────────────────── */
+function getCsrf(){
+  return document.cookie.split(';').map(c=>c.trim())
+    .find(c=>c.startsWith('csrftoken='))?.split('=')[1] || '';
+}
+
+/* ── Custom confirm modal (replaces browser confirm()) ───────────────────── */
+function appConfirm(msg){
+  return new Promise(resolve=>{
+    const overlay = document.createElement('div');
+    overlay.className = 'app-modal-overlay';
+    overlay.innerHTML = `
+      <div class="app-modal">
+        <p class="app-modal-msg">${msg}</p>
+        <div class="app-modal-btns">
+          <button class="app-modal-cancel">Cancel</button>
+          <button class="app-modal-ok">Confirm</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    requestAnimationFrame(()=>overlay.classList.add('app-modal-in'));
+    overlay.querySelector('.app-modal-ok').onclick = ()=>{ overlay.remove(); resolve(true); };
+    overlay.querySelector('.app-modal-cancel').onclick = ()=>{ overlay.remove(); resolve(false); };
+    overlay.addEventListener('click', e=>{ if(e.target===overlay){ overlay.remove(); resolve(false); } });
+  });
+}
+
+/* ── Toast notification ──────────────────────────────────────────────────── */
+function showToast(msg, type='ok'){
+  const el = document.createElement('div');
+  el.className = 'ajax-toast ' + (type==='ok' ? 'ajax-toast-ok' : 'ajax-toast-err');
+  el.textContent = msg;
+  document.body.appendChild(el);
+  requestAnimationFrame(()=>{ el.classList.add('ajax-toast-in'); });
+  setTimeout(()=>{ el.classList.remove('ajax-toast-in'); el.addEventListener('transitionend',()=>el.remove()); }, 3500);
+}
+
+/* ── Status display map ──────────────────────────────────────────────────── */
+const STATUS_LABELS = {
+  accepted:   'Accepted',
+  picked_up:  'Picked Up',
+  on_the_way: 'On The Way',
+  delivered:  'Delivered',
+  available:  'Available',
+};
+const STATUS_BAR = {
+  accepted:   'linear-gradient(90deg,#fbbf24,#f97316)',
+  picked_up:  'linear-gradient(90deg,#60a5fa,#6366f1)',
+  on_the_way: 'linear-gradient(90deg,#a78bfa,#ec4899)',
+};
+
+/* ── Update an active pickup card after status change ────────────────────── */
+function updatePickupCard(card, newStatus){
+  const pk = card.dataset.pk;
+
+  /* Update status bar color */
+  const bar = card.querySelector('.status-bar');
+  if(bar && STATUS_BAR[newStatus]) bar.style.background = STATUS_BAR[newStatus];
+
+  /* Update badge */
+  const badge = card.querySelector('.status-badge');
+  if(badge){
+    badge.className = `badge badge-${newStatus} status-badge shrink-0`;
+    badge.textContent = STATUS_LABELS[newStatus] || newStatus;
+  }
+
+  /* Rebuild action buttons */
+  const btns = card.querySelector('.action-buttons');
+  if(!btns) return;
+
+  /* Keep navigate button */
+  const nav = btns.querySelector('a[href*="maps"]');
+  btns.innerHTML = '';
+  if(nav) btns.appendChild(nav);
+
+  if(newStatus === 'accepted'){
+    btns.insertAdjacentHTML('beforeend', `
+      <button class="btn !py-2 !px-3 chip-green-sm ajax-action" style="font-size:.78rem"
+        data-url="/volunteer/${pk}/picked-up/" data-confirm="">📦 Picked Up</button>
+      <button class="btn btn-danger !py-2 !px-3 ajax-action" style="font-size:.78rem"
+        data-url="/volunteer/${pk}/cancel/" data-confirm="Cancel this pickup? It will return to available.">✕ Cancel Pickup</button>
+    `);
+  } else if(newStatus === 'picked_up'){
+    btns.insertAdjacentHTML('beforeend', `
+      <button class="btn !py-2 !px-3 ajax-action" style="font-size:.78rem;background:rgba(167,139,250,.1);color:#a78bfa;border:1px solid rgba(167,139,250,.2)"
+        data-url="/volunteer/${pk}/on-the-way/" data-confirm="">🚗 On The Way</button>
+      <button class="btn btn-danger !py-2 !px-3 ajax-action" style="font-size:.78rem"
+        data-url="/volunteer/${pk}/cancel/" data-confirm="Cancel? Donation returns to available.">✕ Cancel</button>
+    `);
+  } else if(newStatus === 'on_the_way'){
+    btns.insertAdjacentHTML('beforeend', `
+      <a href="/volunteer/${pk}/delivered/" class="btn btn-solid !py-2 !px-3" style="font-size:.78rem">✅ Mark Delivered</a>
+    `);
+  } else if(newStatus === 'available'){
+    /* Card was cancelled — animate it out */
+    card.style.transition = 'opacity .4s, transform .4s';
+    card.style.opacity = '0';
+    card.style.transform = 'scale(.95)';
+    setTimeout(()=>{
+      card.remove();
+      /* Update active count badge */
+      const grid = document.getElementById('active-pickups-grid');
+      const remaining = grid ? grid.querySelectorAll('[id^="pickup-card-"]').length : 0;
+      const badge = document.getElementById('active-count-badge');
+      if(badge) badge.textContent = remaining + ' active';
+      if(remaining === 0){
+        const section = document.getElementById('active-pickups-section');
+        if(section){ section.style.transition='opacity .3s'; section.style.opacity='0'; setTimeout(()=>section.remove(),300); }
+      }
+    }, 420);
+    return;
+  }
+
+  /* Re-bind events on new buttons */
+  bindActionButtons(card);
+  card.dataset.status = newStatus;
+}
+
+/* ── AJAX action for active pickup buttons ───────────────────────────────── */
+async function handleAction(btn){
+  const url = btn.dataset.url;
+  const confirmMsg = btn.dataset.confirm;
+  if(confirmMsg){ const ok = await appConfirm(confirmMsg); if(!ok) return; }
+
+  btn.disabled = true;
+  const origText = btn.innerHTML;
+  btn.innerHTML = '<span style="opacity:.6">…</span>';
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCsrf(),
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json',
+      }
+    });
+    const data = await res.json();
+    if(data.ok){
+      showToast('✅ ' + data.message, 'ok');
+      const card = btn.closest('[id^="pickup-card-"]');
+      if(card) updatePickupCard(card, data.new_status);
+    } else {
+      showToast('❌ ' + (data.error || 'Something went wrong'), 'err');
+      btn.disabled = false;
+      btn.innerHTML = origText;
+    }
+  } catch(e){
+    showToast('❌ Network error. Please try again.', 'err');
+    btn.disabled = false;
+    btn.innerHTML = origText;
+  }
+}
+
+/* ── AJAX accept pickup (from available cards) ───────────────────────────── */
+async function handleAccept(btn){
+  const url = btn.dataset.url;
+  const pk  = btn.dataset.pk;
+  btn.disabled = true;
+  btn.innerHTML = '<span style="opacity:.6">Accepting…</span>';
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCsrf(),
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json',
+      }
+    });
+    const data = await res.json();
+    if(data.ok){
+      showToast('✅ ' + data.message, 'ok');
+      /* Remove the card from available grid */
+      const card = document.getElementById('avail-card-' + pk);
+      if(card){
+        card.style.transition = 'opacity .35s, transform .35s';
+        card.style.opacity = '0';
+        card.style.transform = 'scale(.95) translateY(-4px)';
+        setTimeout(()=>card.remove(), 360);
+      }
+      /* Reload page after short delay to show new active pickup */
+      setTimeout(()=>location.reload(), 900);
+    } else {
+      showToast('❌ ' + (data.error || 'Could not accept. Try again.'), 'err');
+      btn.disabled = false;
+      btn.innerHTML = 'Accept Pickup 🚴';
+    }
+  } catch(e){
+    showToast('❌ Network error.', 'err');
+    btn.disabled = false;
+    btn.innerHTML = 'Accept Pickup 🚴';
+  }
+}
+
+/* ── Bind event listeners ────────────────────────────────────────────────── */
+function bindActionButtons(root){
+  root.querySelectorAll('.ajax-action').forEach(btn=>{
+    btn.removeEventListener('click', btn._ajaxHandler);
+    btn._ajaxHandler = ()=>handleAction(btn);
+    btn.addEventListener('click', btn._ajaxHandler);
+  });
+  root.querySelectorAll('.ajax-accept').forEach(btn=>{
+    btn.removeEventListener('click', btn._acceptHandler);
+    btn._acceptHandler = ()=>handleAccept(btn);
+    btn.addEventListener('click', btn._acceptHandler);
+  });
+}
+
+document.addEventListener('DOMContentLoaded', ()=>bindActionButtons(document));
 </script>
 {% endblock %}
