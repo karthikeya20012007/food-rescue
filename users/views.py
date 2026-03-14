@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from django.db import transaction
 from django.db.models import Count, Q, Sum
-from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
 from .models import UserProfile, FoodDonation, Notification
@@ -458,6 +458,30 @@ def volunteer_profile(request):
 
 
 @login_required
+def change_password_view(request):
+    """Allow authenticated users to change their password."""
+    if request.method == "POST":
+        form = PasswordChangeForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Keep the user logged in after password change
+            update_session_auth_hash(request, user)
+            messages.success(request, "Password changed successfully! 🔐")
+            return redirect("volunteer_profile")
+        else:
+            messages.error(request, "Please correct the errors below.")
+    else:
+        form = PasswordChangeForm(user=request.user)
+
+    profile = get_object_or_404(UserProfile, user=request.user)
+    return render(request, "users/change_password.html", {
+        "form":    form,
+        "profile": profile,
+        "unread":  _unread_count(request.user),
+    })
+
+
+@login_required
 @require_POST
 def remove_profile_image(request):
     """AJAX: Remove the user's profile picture and revert to initials avatar."""
@@ -657,7 +681,27 @@ def cancel_pickup(request, pk):
     )
     messages.warning(request, msg)
     if _is_ajax(request):
-        return JsonResponse({"ok": True, "message": msg, "new_status": "available"})
+        # Return full donation data so the frontend can reinsert the card
+        return JsonResponse({
+            "ok":         True,
+            "message":    msg,
+            "new_status": "available",
+            "donation": {
+                "pk":             donation.pk,
+                "food_name":      donation.food_name,
+                "food_type":      donation.food_type,
+                "quantity":       donation.quantity,
+                "pickup_address": donation.pickup_address,
+                "expiry_time":    (
+                    donation.expiry_time.strftime("%d %b, %I:%M %p")
+                    .lstrip("0").replace(" 0", " ")
+                ),
+                "is_expired":     donation.is_expired,
+                "donor_name":     donation.donor.profile.full_name or donation.donor.username,
+                "google_maps_url":donation.google_maps_url,
+                "accept_url":     f"/volunteer/{donation.pk}/accept/",
+            }
+        })
     return redirect("volunteer_dashboard")
 
 

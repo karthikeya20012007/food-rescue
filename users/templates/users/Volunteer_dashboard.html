@@ -313,18 +313,34 @@ async function handleAction(btn){
         'Accept': 'application/json',
       }
     });
+
+    /* Server errors (4xx/5xx) return HTML, not JSON — handle before parsing */
+    if(!res.ok){
+      const text = await res.text();
+      console.error('Server error', res.status, text.slice(0, 300));
+      showToast(`❌ Server error (${res.status}). Please refresh and try again.`, 'err');
+      btn.disabled = false;
+      btn.innerHTML = origText;
+      return;
+    }
+
     const data = await res.json();
     if(data.ok){
       showToast('✅ ' + data.message, 'ok');
       const card = btn.closest('[id^="pickup-card-"]');
       if(card) updatePickupCard(card, data.new_status);
+      /* If cancelled and full donation data returned, reinsert into available grid */
+      if(data.new_status === 'available' && data.donation){
+        setTimeout(()=> reinsertAvailableCard(data.donation), 480);
+      }
     } else {
       showToast('❌ ' + (data.error || 'Something went wrong'), 'err');
       btn.disabled = false;
       btn.innerHTML = origText;
     }
   } catch(e){
-    showToast('❌ Network error. Please try again.', 'err');
+    console.error('Fetch error:', e);
+    showToast('❌ Could not reach server. Check your connection.', 'err');
     btn.disabled = false;
     btn.innerHTML = origText;
   }
@@ -346,6 +362,16 @@ async function handleAccept(btn){
         'Accept': 'application/json',
       }
     });
+
+    if(!res.ok){
+      const text = await res.text();
+      console.error('Server error', res.status, text.slice(0, 300));
+      showToast(`❌ Server error (${res.status}). Please refresh and try again.`, 'err');
+      btn.disabled = false;
+      btn.innerHTML = 'Accept Pickup 🚴';
+      return;
+    }
+
     const data = await res.json();
     if(data.ok){
       showToast('✅ ' + data.message, 'ok');
@@ -365,11 +391,101 @@ async function handleAccept(btn){
       btn.innerHTML = 'Accept Pickup 🚴';
     }
   } catch(e){
-    showToast('❌ Network error.', 'err');
+    console.error('Fetch error:', e);
+    showToast('❌ Could not reach server. Check your connection.', 'err');
     btn.disabled = false;
     btn.innerHTML = 'Accept Pickup 🚴';
   }
 }
+
+/* ── Reinsert a cancelled donation into the available grid ──────────────── */
+function reinsertAvailableCard(d){
+  /* Remove "nothing available" placeholder if present */
+  const emptyBlock = document.querySelector('[id="available-grid"] ~ div, #available-grid + div');
+  const nothingMsg = document.querySelector('.f-display');
+  /* More targeted: look for the NOTHING AVAILABLE block */
+  document.querySelectorAll('.glow-card.glass.text-center').forEach(el => {
+    if(el.textContent.includes('NOTHING AVAILABLE')) el.remove();
+  });
+
+  /* Get or create the available grid */
+  let grid = document.getElementById('available-grid');
+  if(!grid){
+    /* Create grid and insert it before the footer of the section */
+    grid = document.createElement('div');
+    grid.id = 'available-grid';
+    grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5';
+    /* Find the filter section and insert after it */
+    const filterSection = document.getElementById('ff');
+    if(filterSection && filterSection.parentElement){
+      filterSection.parentElement.insertAdjacentElement('afterend', grid);
+    } else {
+      document.querySelector('.max-w-7xl').appendChild(grid);
+    }
+  }
+
+  /* Avoid duplicates */
+  if(document.getElementById('avail-card-' + d.pk)) return;
+
+  const isVeg    = d.food_type === 'veg';
+  const vegBg    = isVeg ? 'rgba(0,255,136,.05)'  : 'rgba(248,113,113,.05)';
+  const vegBord  = isVeg ? 'rgba(0,255,136,.12)'  : 'rgba(248,113,113,.12)';
+  const vegEmoji = isVeg ? '🥦' : '🍗';
+  const vegChip  = isVeg ? 'chip-veg' : 'chip-nonveg';
+  const vegLabel = isVeg ? '🟢 Veg'  : '🔴 Non-Veg';
+  const expClass = d.is_expired ? 'style="color:#f87171"' : '';
+
+  const html = `<div class="glow-card glass lift"
+       id="avail-card-${d.pk}" data-pk="${d.pk}"
+       style="border-radius:16px;overflow:hidden;opacity:0;transform:scale(.94);transition:opacity .4s,transform .4s">
+  <div class="px-5 py-4" style="background:${vegBg};border-bottom:1px solid ${vegBord}">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl tint-green">${vegEmoji}</div>
+        <div>
+          <h3 class="font-800 text-base t1" style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.food_name}</h3>
+          <p class="text-xs font-500 mt-0.5 t3">by ${d.donor_name}</p>
+        </div>
+      </div>
+      <span class="badge ${vegChip}">${vegLabel}</span>
+    </div>
+  </div>
+  <div class="p-5">
+    <div class="space-y-3 mb-5">
+      <div class="flex items-center gap-3">
+        <span class="lbl" style="width:60px;flex-shrink:0">Serves</span>
+        <span class="text-sm font-700 t1">~${d.quantity} people</span>
+      </div>
+      <div class="flex items-start gap-3">
+        <span class="lbl" style="width:60px;flex-shrink:0;margin-top:2px">Location</span>
+        <span class="text-sm font-500 t2" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${d.pickup_address}</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="lbl" style="width:60px;flex-shrink:0">Expires</span>
+        <span class="text-sm font-600" ${expClass}>${d.expiry_time}</span>
+      </div>
+    </div>
+    <button type="button" class="btn btn-solid w-full justify-center ajax-accept"
+            data-url="${d.accept_url}" data-pk="${d.pk}">
+      Accept Pickup 🚴
+    </button>
+  </div>
+</div>`;
+
+  grid.insertAdjacentHTML('afterbegin', html);
+
+  /* Animate in */
+  requestAnimationFrame(() => {
+    const newCard = document.getElementById('avail-card-' + d.pk);
+    if(newCard){
+      requestAnimationFrame(() => {
+        newCard.style.opacity = '1';
+        newCard.style.transform = 'scale(1)';
+      });
+    }
+  });
+}
+
 
 /* ── Event delegation — catches ALL clicks including dynamically added buttons ── */
 document.addEventListener('click', function(e){

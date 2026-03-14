@@ -19,6 +19,7 @@ urlpatterns = [
     # ── Profile ───────────────────────────────────────────────────────────────
     path("profile/",            views.volunteer_profile,    name="volunteer_profile"),
     path("profile/remove-photo/", views.remove_profile_image, name="remove_profile_image"),
+    path("profile/change-password/", views.change_password_view, name="change_password"),
 
     # ── Donor ─────────────────────────────────────────────────────────────────
     path("donor/",                            views.donor_dashboard, name="donor_dashboard"),

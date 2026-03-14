@@ -154,6 +154,19 @@
           📅 Member since {{ profile.created_at|date:"F Y" }}
         </div>
 
+        <!-- Change password link -->
+        <div class="flex items-center gap-3 px-4 py-3 rounded-xl tint-green"
+             style="border:1px solid var(--border)">
+          <span class="text-lg shrink-0">🔐</span>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-700 t1">Password</p>
+            <p class="text-xs t3 mt-0.5">Update your account password</p>
+          </div>
+          <a href="{% url 'change_password' %}" class="btn btn-ghost !py-2 !px-4 shrink-0" style="font-size:.8rem">
+            Change →
+          </a>
+        </div>
+
         <div class="flex gap-3 pt-1">
           <a href="{% if profile.role == 'donor' %}{% url 'donor_dashboard' %}{% else %}{% url 'volunteer_dashboard' %}{% endif %}"
              class="btn btn-ghost flex-1 justify-center">Cancel</a>
