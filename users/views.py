@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -453,6 +454,22 @@ def volunteer_profile(request):
     return render(request, "users/volunteer_profile.html", context)
 
 
+@login_required
+@require_POST
+def remove_profile_image(request):
+    """AJAX: Remove the user's profile picture and revert to initials avatar."""
+    profile = get_object_or_404(UserProfile, user=request.user)
+    if profile.profile_image:
+        # Delete the file from disk
+        try:
+            profile.profile_image.delete(save=False)
+        except Exception:
+            pass
+        profile.profile_image = None
+        profile.save(update_fields=["profile_image"])
+    return JsonResponse({"ok": True})
+
+
 # =============================================================================
 # Volunteer Views
 # =============================================================================
@@ -544,6 +561,14 @@ def volunteer_dashboard(request):
     return render(request, "users/volunteer_dashboard.html", context)
 
 
+def _is_ajax(request):
+    """Return True if request is an XMLHttpRequest / fetch with JSON accept."""
+    return (
+        request.headers.get("X-Requested-With") == "XMLHttpRequest"
+        or "application/json" in request.headers.get("Accept", "")
+    )
+
+
 @login_required
 @require_POST
 def accept_pickup(request, pk):
@@ -578,11 +603,13 @@ def accept_pickup(request, pk):
         notif_type="accepted",
     )
 
-    messages.success(
-        request,
+    msg = (
         f"You have accepted '{donation.food_name}'. Please pick it up before "
         f"{donation.expiry_time.strftime('%d %b, %I:%M %p')}. 🚀"
     )
+    messages.success(request, msg)
+    if _is_ajax(request):
+        return JsonResponse({"ok": True, "message": msg, "new_status": "accepted"})
     return redirect("volunteer_dashboard")
 
 
@@ -621,11 +648,13 @@ def cancel_pickup(request, pk):
         notif_type="cancelled",
     )
 
-    messages.warning(
-        request,
+    msg = (
         f"You have cancelled the pickup for '{donation.food_name}'. "
         "The donation is now available to other volunteers."
     )
+    messages.warning(request, msg)
+    if _is_ajax(request):
+        return JsonResponse({"ok": True, "message": msg, "new_status": "available"})
     return redirect("volunteer_dashboard")
 
 
@@ -657,7 +686,10 @@ def mark_picked_up(request, pk):
         notif_type="picked_up",
     )
 
-    messages.success(request, f"'{donation.food_name}' marked as picked up. Safe travels! 🛵")
+    msg = f"'{donation.food_name}' marked as picked up. Safe travels! 🛵"
+    messages.success(request, msg)
+    if _is_ajax(request):
+        return JsonResponse({"ok": True, "message": msg, "new_status": "picked_up"})
     return redirect("volunteer_dashboard")
 
 
@@ -688,7 +720,10 @@ def mark_on_the_way(request, pk):
         notif_type="on_the_way",
     )
 
-    messages.success(request, f"Status updated — you are on the way with '{donation.food_name}'! 🗺️")
+    msg = f"Status updated — you are on the way with '{donation.food_name}'! 🗺️"
+    messages.success(request, msg)
+    if _is_ajax(request):
+        return JsonResponse({"ok": True, "message": msg, "new_status": "on_the_way"})
     return redirect("volunteer_dashboard")
 
 

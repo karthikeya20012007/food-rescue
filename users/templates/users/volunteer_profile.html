@@ -4,33 +4,49 @@
 <div class="max-w-2xl mx-auto px-4 sm:px-6 py-12">
   <a href="{% if profile.role == 'donor' %}{% url 'donor_dashboard' %}{% else %}{% url 'volunteer_dashboard' %}{% endif %}"
      class="back-link mb-8 au">
-    <svg class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+    </svg>
     Back to Dashboard
   </a>
 
   <div class="glow-card glass au1" style="border-radius:20px;overflow:hidden">
 
-    <!-- ── Banner (role emoji only, no text title — title moved below avatar) ── -->
+    <!-- Banner -->
     <div class="profile-banner shine" style="height:110px">
       <div class="profile-banner-dots"></div>
       <div class="profile-banner-fade"></div>
-      <div class="absolute top-4 right-6 text-4xl fy" style="opacity:.45">{% if profile.role == 'donor' %}🍱{% else %}🤝{% endif %}</div>
+      <div class="absolute top-4 right-6 text-4xl fy" style="opacity:.45">
+        {% if profile.role == 'donor' %}🍱{% else %}🤝{% endif %}
+      </div>
     </div>
 
-    <!-- ── Avatar + identity row (overlaps banner by -44px) ── -->
-    <div class="px-7 pb-0">
-      <div class="flex items-end gap-5" style="margin-top:-44px;margin-bottom:0">
-        <!-- Avatar -->
-        <div id="av-wrap" class="img-frame shrink-0" style="width:88px;height:88px;border-radius:14px;overflow:hidden;border:3px solid rgba(0,255,136,.4);box-shadow:0 0 24px rgba(0,255,136,.25),0 8px 24px rgba(0,0,0,.5);cursor:pointer;z-index:2">
+    <!-- Avatar + identity -->
+    <div class="px-7">
+      <div class="flex items-end gap-5" style="margin-top:-44px">
+        <!-- Avatar container -->
+        <div class="relative shrink-0" style="z-index:2">
+          <div id="av-wrap" class="img-frame" style="width:88px;height:88px;border-radius:14px;overflow:hidden;border:3px solid rgba(0,255,136,.4);box-shadow:0 0 24px rgba(0,255,136,.25),0 8px 24px rgba(0,0,0,.5)">
+            {% if profile.profile_image %}
+              <img id="av-img" src="{{ profile.profile_image.url }}" alt="{{ profile.full_name }}"/>
+            {% else %}
+              <div id="av-init" style="position:relative;z-index:1;width:100%;height:100%;background:linear-gradient(135deg,#00ff88,#00b868);display:flex;align-items:center;justify-content:center">
+                <span style="color:#041209;font-family:'Bebas Neue',sans-serif;font-size:2.5rem;letter-spacing:.05em">{{ profile.full_name|first|upper }}</span>
+              </div>
+            {% endif %}
+          </div>
+          <!-- Remove photo button — only shown when photo exists -->
           {% if profile.profile_image %}
-            <img id="av-img" src="{{ profile.profile_image.url }}" alt="{{ profile.full_name }}"/>
-          {% else %}
-            <div id="av-init" style="position:relative;z-index:1;width:100%;height:100%;background:linear-gradient(135deg,#00ff88,#00b868);display:flex;align-items:center;justify-content:center">
-              <span style="color:#041209;font-family:'Bebas Neue',sans-serif;font-size:2.5rem;letter-spacing:.05em">{{ profile.full_name|first|upper }}</span>
-            </div>
+          <button id="remove-photo-btn" type="button"
+            title="Remove photo"
+            style="position:absolute;top:-8px;right:-8px;width:22px;height:22px;border-radius:50%;background:#ef4444;border:2px solid var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.4);transition:background .15s">
+            <svg style="width:10px;height:10px;color:#fff" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
           {% endif %}
         </div>
-        <!-- Name + email — sits beside avatar, clears the banner -->
+        <!-- Name / email -->
         <div class="pb-1 min-w-0 flex-1" style="padding-top:48px">
           <h2 class="font-800 text-xl t1 truncate">{{ profile.full_name }}</h2>
           <div class="flex flex-wrap items-center gap-2 mt-1">
@@ -42,16 +58,19 @@
         </div>
       </div>
 
-      <!-- ── Title below avatar row ── -->
+      <!-- Title -->
       <div class="mt-5 mb-6 pb-5" style="border-bottom:1px solid var(--border)">
         <p class="f-display text-3xl tracking-widest tg">EDIT PROFILE</p>
         <p class="text-xs font-500 mt-1 ts">Your identity on FoodRescue</p>
       </div>
     </div>
 
-    <!-- ── Form ── -->
+    <!-- Form -->
     <div class="px-7 pb-8">
-      <form method="post" enctype="multipart/form-data" class="space-y-5" novalidate autocomplete="off">
+      <!-- Hidden field to signal photo removal -->
+      <input type="hidden" id="photo-removed" name="photo_removed" value="0"/>
+
+      <form method="post" enctype="multipart/form-data" class="space-y-5" novalidate autocomplete="off" id="profile-form">
         {% csrf_token %}
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -71,7 +90,7 @@
           </label>
           {{ form.full_name }}
           {% if form.full_name.errors %}
-            <p class="mt-1.5 text-xs" style="color:#f87171">{{ form.full_name.errors.0 }}</p>
+            <p class="mt-1.5 text-xs val-err">{{ form.full_name.errors.0 }}</p>
           {% endif %}
         </div>
 
@@ -80,7 +99,7 @@
             <label class="lbl mb-2 block">Phone</label>
             {{ form.phone }}
             {% if form.phone.errors %}
-              <p class="mt-1.5 text-xs" style="color:#f87171">{{ form.phone.errors.0 }}</p>
+              <p class="mt-1.5 text-xs val-err">{{ form.phone.errors.0 }}</p>
             {% endif %}
           </div>
           <div>
@@ -96,13 +115,12 @@
           {{ form.organization_name }}
         </div>
 
-        <!-- Profile photo with live preview -->
+        <!-- Profile photo upload + live preview -->
         <div>
           <label class="lbl mb-3 block">Profile Photo</label>
           <div class="rounded-xl overflow-hidden" style="border:1px solid var(--border)">
-            <!-- Preview strip -->
             <div class="flex items-center gap-4 px-4 py-4 tint-green" style="border-bottom:1px solid var(--border)">
-              <div id="mini-wrap" class="img-frame shrink-0" style="width:60px;height:60px;border-radius:12px;overflow:hidden;border:2px solid rgba(0,255,136,.35);box-shadow:0 0 12px rgba(0,255,136,.15)">
+              <div id="mini-wrap" class="img-frame shrink-0" style="width:56px;height:56px;border-radius:10px;overflow:hidden;border:2px solid rgba(0,255,136,.35);box-shadow:0 0 12px rgba(0,255,136,.15)">
                 {% if profile.profile_image %}
                   <img id="mini-img" src="{{ profile.profile_image.url }}" alt="Current photo"/>
                 {% else %}
@@ -111,23 +129,28 @@
                   </div>
                 {% endif %}
               </div>
-              <div>
-                <p class="text-sm font-700 t1 mb-0.5">
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-700 t1 mb-0.5" id="photo-status-text">
                   {% if profile.profile_image %}Current photo{% else %}No photo yet{% endif %}
                 </p>
-                <p class="text-xs t3">
-                  {% if profile.profile_image %}Choose a new file below to replace it{% else %}JPG or PNG · max 10 MB{% endif %}
-                </p>
+                <p class="text-xs t3">JPG or PNG · max 10 MB</p>
               </div>
+              {% if profile.profile_image %}
+              <button type="button" id="remove-photo-btn-2"
+                class="btn btn-danger !py-1.5 !px-3 shrink-0" style="font-size:.75rem">
+                🗑 Remove
+              </button>
+              {% endif %}
             </div>
-            <!-- File input -->
             <div class="p-4">
               {{ form.profile_image }}
+              <input type="hidden" name="clear_profile_image" id="clear-flag" value=""/>
             </div>
           </div>
         </div>
 
-        <div class="flex items-center gap-2 px-4 py-3 rounded-xl text-xs font-600 t3 tint-green" style="border:1px solid var(--border)">
+        <div class="flex items-center gap-2 px-4 py-3 rounded-xl text-xs font-600 t3 tint-green"
+             style="border:1px solid var(--border)">
           📅 Member since {{ profile.created_at|date:"F Y" }}
         </div>
 
@@ -144,6 +167,11 @@
 {% endblock %}
 {% block extra_js %}
 <script>
+const REMOVE_URL = "{% url 'remove_profile_image' %}";
+const CSRF = "{{ csrf_token }}";
+const INITIAL = "{{ profile.full_name|first|upper }}";
+
+/* ── Live file preview ──────────────────────────────────────────────────── */
 (function(){
   const inp = document.querySelector('input[type="file"][name="profile_image"]');
   if(!inp) return;
@@ -153,29 +181,71 @@
     const r = new FileReader();
     r.onload = function(e){
       const src = e.target.result;
-      // Update big avatar
-      const bigImg  = document.getElementById('av-img');
-      const bigInit = document.getElementById('av-init');
-      if(bigImg){ bigImg.src = src; }
-      else if(bigInit){
-        const img = document.createElement('img');
-        img.id = 'av-img'; img.src = src;
-        img.style.cssText = 'width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transform:translateZ(0)';
-        bigInit.replaceWith(img);
-      }
-      // Update mini preview
-      const miniImg  = document.getElementById('mini-img');
-      const miniInit = document.getElementById('mini-init');
-      if(miniImg){ miniImg.src = src; }
-      else if(miniInit){
-        const img = document.createElement('img');
-        img.id = 'mini-img'; img.src = src;
-        img.style.cssText = 'width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transform:translateZ(0)';
-        miniInit.replaceWith(img);
-      }
+      setPreview(src);
+      document.getElementById('photo-status-text').textContent = 'New photo selected';
     };
     r.readAsDataURL(f);
   });
 })();
+
+function setPreview(src){
+  /* big avatar */
+  const bigWrap = document.getElementById('av-wrap');
+  bigWrap.innerHTML = '';
+  const bigImg = document.createElement('img');
+  bigImg.id = 'av-img';
+  bigImg.src = src;
+  bigImg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:translateZ(0)';
+  bigWrap.appendChild(bigImg);
+  /* mini preview */
+  const miniWrap = document.getElementById('mini-wrap');
+  miniWrap.innerHTML = '';
+  const miniImg = document.createElement('img');
+  miniImg.id = 'mini-img';
+  miniImg.src = src;
+  miniImg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:translateZ(0)';
+  miniWrap.appendChild(miniImg);
+}
+
+function setInitials(){
+  const initHtml = `<div id="av-init" style="position:relative;z-index:1;width:100%;height:100%;background:linear-gradient(135deg,#00ff88,#00b868);display:flex;align-items:center;justify-content:center"><span style="color:#041209;font-family:'Bebas Neue',sans-serif;font-size:2.5rem;letter-spacing:.05em">${INITIAL}</span></div>`;
+  document.getElementById('av-wrap').innerHTML = initHtml;
+  const miniInitHtml = `<div id="mini-init" style="position:relative;z-index:1;width:100%;height:100%;background:linear-gradient(135deg,#00ff88,#00b868);display:flex;align-items:center;justify-content:center"><span style="color:#041209;font-weight:800;font-size:1rem">${INITIAL}</span></div>`;
+  document.getElementById('mini-wrap').innerHTML = miniInitHtml;
+  document.getElementById('photo-status-text').textContent = 'No photo';
+  /* hide remove buttons */
+  const rb1 = document.getElementById('remove-photo-btn');
+  if(rb1) rb1.style.display = 'none';
+  const rb2 = document.getElementById('remove-photo-btn-2');
+  if(rb2) rb2.style.display = 'none';
+}
+
+/* ── Remove photo handler ────────────────────────────────────────────────── */
+async function handleRemove(){
+  try {
+    const res = await fetch(REMOVE_URL, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CSRF, 'Accept': 'application/json' }
+    });
+    const data = await res.json();
+    if(data.ok){
+      setInitials();
+      /* set the clear flag so form save also clears it */
+      document.getElementById('clear-flag').value = '1';
+      /* clear the file input */
+      const inp = document.querySelector('input[type="file"][name="profile_image"]');
+      if(inp){ inp.value = ''; }
+    }
+  } catch(e){
+    console.error('Remove photo error:', e);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  const btn1 = document.getElementById('remove-photo-btn');
+  const btn2 = document.getElementById('remove-photo-btn-2');
+  if(btn1) btn1.addEventListener('click', handleRemove);
+  if(btn2) btn2.addEventListener('click', handleRemove);
+});
 </script>
 {% endblock %}

@@ -206,23 +206,24 @@ class UserLoginForm(AuthenticationForm):
 
     username = forms.EmailField(
         widget=forms.EmailInput(attrs={
-            "class":        TEXT_INPUT,
-            "placeholder":  "jane@example.com",
-            "autofocus":    True,
-            "autocomplete": "one-time-code",
+            "class":         TEXT_INPUT,
+            "placeholder":   "jane@example.com",
+            "autofocus":     True,
+            "autocomplete":  "off",
             "data-lpignore": "true",
-            "data-form-type": "other",
+            "data-form-type":"other",
+            "spellcheck":    "false",
         }),
         label="Email Address",
     )
 
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={
-            "class":        TEXT_INPUT,
-            "placeholder":  "Your password",
-            "autocomplete": "new-password",
+            "class":         TEXT_INPUT,
+            "placeholder":   "Your password",
+            "autocomplete":  "new-password",
             "data-lpignore": "true",
-            "data-form-type": "other",
+            "data-form-type":"other",
         }),
         label="Password",
     )

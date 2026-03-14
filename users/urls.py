@@ -17,7 +17,8 @@ urlpatterns = [
     path("notifications/read/", views.mark_notifications_read, name="mark_notifications_read"),
 
     # ── Profile ───────────────────────────────────────────────────────────────
-    path("profile/",            views.volunteer_profile, name="volunteer_profile"),
+    path("profile/",            views.volunteer_profile,    name="volunteer_profile"),
+    path("profile/remove-photo/", views.remove_profile_image, name="remove_profile_image"),
 
     # ── Donor ─────────────────────────────────────────────────────────────────
     path("donor/",                            views.donor_dashboard, name="donor_dashboard"),

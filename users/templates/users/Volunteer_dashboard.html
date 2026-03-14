@@ -371,20 +371,26 @@ async function handleAccept(btn){
   }
 }
 
-/* ── Bind event listeners ────────────────────────────────────────────────── */
-function bindActionButtons(root){
-  root.querySelectorAll('.ajax-action').forEach(btn=>{
-    btn.removeEventListener('click', btn._ajaxHandler);
-    btn._ajaxHandler = ()=>handleAction(btn);
-    btn.addEventListener('click', btn._ajaxHandler);
-  });
-  root.querySelectorAll('.ajax-accept').forEach(btn=>{
-    btn.removeEventListener('click', btn._acceptHandler);
-    btn._acceptHandler = ()=>handleAccept(btn);
-    btn.addEventListener('click', btn._acceptHandler);
-  });
-}
+/* ── Event delegation — catches ALL clicks including dynamically added buttons ── */
+document.addEventListener('click', function(e){
+  /* Find the closest .ajax-action ancestor */
+  const actionBtn = e.target.closest('.ajax-action');
+  if(actionBtn){
+    e.preventDefault();
+    e.stopPropagation();
+    handleAction(actionBtn);
+    return;
+  }
+  const acceptBtn = e.target.closest('.ajax-accept');
+  if(acceptBtn){
+    e.preventDefault();
+    e.stopPropagation();
+    handleAccept(acceptBtn);
+    return;
+  }
+});
 
-document.addEventListener('DOMContentLoaded', ()=>bindActionButtons(document));
+/* Keep bindActionButtons for compatibility but it's no longer needed for binding */
+function bindActionButtons(root){}
 </script>
 {% endblock %}

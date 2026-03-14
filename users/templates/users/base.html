@@ -49,10 +49,10 @@ html:not(.dark){--surface:rgba(255,255,255,0.88);--border:rgba(0,180,80,0.15);--
 }
 html:not(.dark) .bg-cosmos::before{
   background:
-    radial-gradient(ellipse 80% 50% at 15% 0%,   rgba(34,197,94,.25) 0%,transparent 55%),
-    radial-gradient(ellipse 60% 40% at 90% 10%,  rgba(14,165,233,.15)0%,transparent 50%),
-    radial-gradient(ellipse 70% 45% at 60% 100%, rgba(139,92,246,.12)0%,transparent 55%),
-    radial-gradient(ellipse 50% 35% at 5%  80%,  rgba(34,197,94,.1)  0%,transparent 45%);
+    radial-gradient(ellipse 80% 50% at 15% 0%,   rgba(34,197,94,.18) 0%,transparent 55%),
+    radial-gradient(ellipse 60% 40% at 90% 10%,  rgba(14,165,233,.12)0%,transparent 50%),
+    radial-gradient(ellipse 70% 45% at 60% 100%, rgba(139,92,246,.08)0%,transparent 55%),
+    radial-gradient(ellipse 50% 35% at 5%  80%,  rgba(34,197,94,.07) 0%,transparent 45%);
 }
 
 /* Floating orbs */
@@ -64,9 +64,9 @@ html:not(.dark) .bg-cosmos::before{
 .orb-1{width:600px;height:600px;top:-200px;left:-200px;background:radial-gradient(circle,rgba(0,255,136,.35),transparent 70%);--d:22s}
 .orb-2{width:500px;height:500px;top:30%;right:-180px;background:radial-gradient(circle,rgba(0,212,255,.25),transparent 70%);--d:18s;--delay:-8s}
 .orb-3{width:450px;height:450px;bottom:-150px;left:30%;background:radial-gradient(circle,rgba(124,58,237,.28),transparent 70%);--d:26s;--delay:-14s}
-html:not(.dark) .orb-1{background:radial-gradient(circle,rgba(34,197,94,.3),transparent 70%)}
-html:not(.dark) .orb-2{background:radial-gradient(circle,rgba(14,165,233,.2),transparent 70%)}
-html:not(.dark) .orb-3{background:radial-gradient(circle,rgba(139,92,246,.2),transparent 70%)}
+html:not(.dark) .orb-1{background:radial-gradient(circle,rgba(34,197,94,.12),transparent 70%)}
+html:not(.dark) .orb-2{background:radial-gradient(circle,rgba(14,165,233,.08),transparent 70%)}
+html:not(.dark) .orb-3{background:radial-gradient(circle,rgba(139,92,246,.08),transparent 70%)}
 @keyframes orbFloat{
   0%,100%{transform:translate(0,0) scale(1)}
   33%{transform:translate(30px,-40px) scale(1.06)}
@@ -542,13 +542,17 @@ html:not(.dark) .profile-banner-fade{
 
 /* ── HERO WORD — explicit text fill to prevent webkit clip inheritance ─── */
 .hero-word{
-  -webkit-text-fill-color:#e8f5ec;
-  color:#e8f5ec;
+  -webkit-text-fill-color:#e8f5ec !important;
+  color:#e8f5ec !important;
   display:inline;
+  /* Force own paint layer to escape webkit-background-clip inheritance */
+  -webkit-background-clip:unset !important;
+  background-clip:unset !important;
+  background-image:none !important;
 }
 html:not(.dark) .hero-word{
-  -webkit-text-fill-color:#081a0e;
-  color:#081a0e;
+  -webkit-text-fill-color:#0d1f12 !important;
+  color:#0d1f12 !important;
 }
 /* ── TG BLUE — blue-purple gradient ─────────────────────────────────────── */
 .tg-blue{
