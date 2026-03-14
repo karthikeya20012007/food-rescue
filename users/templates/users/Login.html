@@ -4,7 +4,6 @@
 <div class="min-h-[85vh] flex items-center justify-center px-4 py-12">
   <div class="w-full max-w-md au">
     <div class="glow-card glass lift" style="border-radius:20px;overflow:hidden">
-      <!-- Top neon bar -->
       <div style="height:2px;background:linear-gradient(90deg,transparent,#00ff88,#00d4ff,transparent)"></div>
       <div class="p-8 sm:p-10">
         <div class="text-center mb-9">
@@ -12,31 +11,69 @@
           <h1 class="f-display text-4xl tracking-widest tg mb-2">WELCOME BACK</h1>
           <p class="text-sm font-500 ts">Sign in to continue your food rescue journey</p>
         </div>
-        <form method="post" class="space-y-5" novalidate autocomplete="off">
+
+        <form method="post" id="login-form" class="space-y-5" novalidate
+              autocomplete="off"
+              onsubmit="prepareSubmit(this)">
           {% csrf_token %}
+
           <div>
             <label class="lbl mb-2 block">Email Address</label>
             {{ form.username }}
-            {% if form.username.errors %}<p class="mt-1.5 text-xs" style="color:#f87171">{{ form.username.errors.0 }}</p>{% endif %}
+            {% if form.username.errors %}<p class="mt-1.5 text-xs val-err">{{ form.username.errors.0 }}</p>{% endif %}
           </div>
           <div>
             <label class="lbl mb-2 block">Password</label>
             {{ form.password }}
-            {% if form.password.errors %}<p class="mt-1.5 text-xs" style="color:#f87171">{{ form.password.errors.0 }}</p>{% endif %}
+            {% if form.password.errors %}<p class="mt-1.5 text-xs val-err">{{ form.password.errors.0 }}</p>{% endif %}
           </div>
+
           {% if form.non_field_errors %}
-          <div class="flex items-center gap-2.5 px-4 py-3 rounded-xl glass text-sm font-600" style="border-color:rgba(248,113,113,.3);color:#f87171">❌ {{ form.non_field_errors.0 }}</div>
+          <div class="flex items-center gap-2.5 px-4 py-3 rounded-xl glass text-sm font-600 flash-err">
+            ❌ {{ form.non_field_errors.0 }}
+          </div>
           {% endif %}
+
           <label class="flex items-center gap-2.5 cursor-pointer">
             {{ form.remember_me }}
             <span class="text-sm font-500 ts">Remember me for 30 days</span>
           </label>
           <button type="submit" class="btn btn-solid w-full justify-center mt-2" style="padding:.875rem;font-size:1rem">Sign In →</button>
         </form>
-        <div class="flex items-center gap-3 my-7"><div class="divider flex-1"></div><span class="text-xs font-600 t3">NEW HERE?</span><div class="divider flex-1"></div></div>
+
+        <div class="flex items-center gap-3 my-7">
+          <div class="divider flex-1"></div>
+          <span class="text-xs font-600 t3">NEW HERE?</span>
+          <div class="divider flex-1"></div>
+        </div>
         <a href="{% url 'register' %}" class="btn btn-neon w-full justify-center" style="padding:.875rem">Create an Account</a>
       </div>
     </div>
   </div>
 </div>
+{% endblock %}
+{% block extra_js %}
+<script>
+/* Prevent browser from recognising this as a login form until submit */
+(function(){
+  /* Set all inputs to readonly on load — browser won't autofill readonly fields */
+  document.querySelectorAll('#login-form input:not([type=hidden]):not([type=checkbox])').forEach(function(inp){
+    inp.setAttribute('readonly', 'readonly');
+    /* Remove readonly on first interaction so user can type */
+    ['focus','click','keydown','touchstart'].forEach(function(ev){
+      inp.addEventListener(ev, function(){
+        inp.removeAttribute('readonly');
+      }, {once: true});
+    });
+  });
+})();
+
+function prepareSubmit(form){
+  /* Remove readonly before submit so values are sent */
+  form.querySelectorAll('[readonly]').forEach(function(el){
+    el.removeAttribute('readonly');
+  });
+  return true;
+}
+</script>
 {% endblock %}

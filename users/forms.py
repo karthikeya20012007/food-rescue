@@ -209,7 +209,9 @@ class UserLoginForm(AuthenticationForm):
             "class":        TEXT_INPUT,
             "placeholder":  "jane@example.com",
             "autofocus":    True,
-            "autocomplete": "off",
+            "autocomplete": "one-time-code",
+            "data-lpignore": "true",
+            "data-form-type": "other",
         }),
         label="Email Address",
     )
@@ -219,6 +221,8 @@ class UserLoginForm(AuthenticationForm):
             "class":        TEXT_INPUT,
             "placeholder":  "Your password",
             "autocomplete": "new-password",
+            "data-lpignore": "true",
+            "data-form-type": "other",
         }),
         label="Password",
     )
