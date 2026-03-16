@@ -15,7 +15,27 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 
 @receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    """Keep UserProfile in sync when User is saved."""
-    if hasattr(instance, "profile"):
-        instance.profile.save()
+def sync_user_profile_name(sender, instance, created, **kwargs):
+    """
+    Sync first_name / last_name changes from User → UserProfile.full_name.
+    Deliberately does NOT call profile.save() for the whole object — that
+    would overwrite profile_image with whatever value is currently in the
+    ORM cache, which may not have the newly-uploaded file yet.
+    Only runs on UPDATE (not on initial creation, which is handled above).
+    """
+    if created:
+        return  # handled by create_user_profile
+    try:
+        profile = instance.profile
+    except UserProfile.DoesNotExist:
+        return
+
+    # Only update full_name if it looks like a default/empty value
+    # (i.e. user changed their Django first/last name and we want to reflect it)
+    new_full = (
+        f"{instance.first_name} {instance.last_name}".strip()
+        or instance.username
+    )
+    if new_full and profile.full_name != new_full and not profile.full_name:
+        # Only auto-sync if profile.full_name is blank (user hasn't set a custom name)
+        UserProfile.objects.filter(pk=profile.pk).update(full_name=new_full)

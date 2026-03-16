@@ -82,7 +82,8 @@ function GPS(){
       if(!navigator.geolocation){this.msg='❌ GPS not supported';this.err=true;return}
       this.loading=true;this.msg='';
       navigator.geolocation.getCurrentPosition(async pos=>{
-        const lat=pos.coords.latitude,lng=pos.coords.longitude;
+        const lat=parseFloat(pos.coords.latitude.toFixed(6));
+        const lng=parseFloat(pos.coords.longitude.toFixed(6));
         document.querySelector('[name=latitude]').value=lat;
         document.querySelector('[name=longitude]').value=lng;
         try{

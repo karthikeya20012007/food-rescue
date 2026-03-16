@@ -954,8 +954,13 @@ html:not(.dark) [style*="height:2px;background:linear-gradient(90deg,#00d4ff"]{
         <div class="relative" x-data="{o:false}">
           <button @click="o=!o" @click.outside="o=false" class="profile-btn">
             <div class="img-frame" style="width:28px;height:28px;border-radius:8px;overflow:hidden;border:1.5px solid rgba(0,255,136,.4);box-shadow:0 0 8px rgba(0,255,136,.2);flex-shrink:0">
-              {% if user.profile.profile_image %}<img src="{{ user.profile.profile_image.url }}" alt=""/>
-              {% else %}<div style="width:100%;height:100%;background:linear-gradient(135deg,#00ff88,#00b868);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#041209">{{ user.profile.full_name|first|upper }}</div>{% endif %}
+              {% if user.profile.profile_image %}
+                <img src="{{ user.profile.profile_image.url }}" alt=""
+                     onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+                <div style="display:none;width:100%;height:100%;background:linear-gradient(135deg,#00ff88,#00b868);align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#041209">{{ user.profile.full_name|first|upper }}</div>
+              {% else %}
+                <div style="width:100%;height:100%;background:linear-gradient(135deg,#00ff88,#00b868);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#041209">{{ user.profile.full_name|first|upper }}</div>
+              {% endif %}
             </div>
             <span class="hidden sm:block profile-btn-name max-w-[80px] truncate">{{ user.profile.full_name|truncatechars:11 }}</span>
             <svg class="profile-btn-caret" :class="{'rotate-180':o}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
