@@ -116,13 +116,13 @@ class FoodDonation(models.Model):
     # Location
     pickup_address = models.TextField()
     latitude = models.DecimalField(
-        max_digits=9,
+        max_digits=11,   # up to ±999.999999 — covers all valid lat/lng
         decimal_places=6,
         blank=True,
         null=True,
     )
     longitude = models.DecimalField(
-        max_digits=9,
+        max_digits=11,
         decimal_places=6,
         blank=True,
         null=True,
@@ -148,6 +148,20 @@ class FoodDonation(models.Model):
 
     # Delivery proof
     delivery_location = models.TextField(blank=True)
+    delivery_latitude = models.DecimalField(
+        max_digits=11,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text="GPS latitude captured at delivery",
+    )
+    delivery_longitude = models.DecimalField(
+        max_digits=11,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text="GPS longitude captured at delivery",
+    )
     delivery_time = models.DateTimeField(null=True, blank=True)
     delivery_image = models.ImageField(
         upload_to=delivery_image_upload_path,
