@@ -1,3 +1,4 @@
+from decimal import Decimal, ROUND_HALF_UP
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
@@ -138,7 +139,6 @@ class UserRegistrationForm(forms.Form):
         widget=CleanFileInput(attrs={
             "class":  FILE_INPUT,
             "accept": "image/*",
-            "capture": "user",          # prefer front camera on mobile
         }),
         label="Profile Photo",
     )
@@ -285,7 +285,6 @@ class FoodDonationForm(forms.ModelForm):
             "image": CleanFileInput(attrs={
                 "class":   FILE_INPUT,
                 "accept":  "image/*",
-                "capture": "environment",   # prefer rear camera on mobile
             }),
             "expiry_time": forms.DateTimeInput(
                 format="%Y-%m-%dT%H:%M",
@@ -355,6 +354,27 @@ class FoodDonationForm(forms.ModelForm):
         lng     = cleaned.get("longitude")
         address = cleaned.get("pickup_address", "").strip()
 
+        # Quantize coordinates to exactly 6 decimal places using Decimal arithmetic.
+        # round(float, 6) is NOT sufficient — Python floats have binary noise that
+        # can survive rounding (e.g. 17.38504400000001 → 17.385044000000002).
+        # Decimal.quantize() truncates the string representation precisely.
+        SIX_DP = Decimal("0.000001")
+        if lat is not None:
+            try:
+                lat = Decimal(str(lat)).quantize(SIX_DP, rounding=ROUND_HALF_UP)
+                cleaned["latitude"] = lat
+            except Exception:
+                self.add_error("latitude", "Invalid latitude value.")
+                lat = None
+
+        if lng is not None:
+            try:
+                lng = Decimal(str(lng)).quantize(SIX_DP, rounding=ROUND_HALF_UP)
+                cleaned["longitude"] = lng
+            except Exception:
+                self.add_error("longitude", "Invalid longitude value.")
+                lng = None
+
         has_coords = lat is not None and lng is not None
 
         # Accept coords OR a typed address — at least one must be present
@@ -366,15 +386,15 @@ class FoodDonationForm(forms.ModelForm):
 
         # If GPS was used but address left blank, store coords as fallback text
         if not address and has_coords:
-            cleaned["pickup_address"] = f"GPS location: {float(lat):.5f}, {float(lng):.5f}"
+            cleaned["pickup_address"] = f"GPS location: {lat:.6f}, {lng:.6f}"
 
-        # Validate coordinate range
+        # Validate coordinate range (compare as float — Decimal supports this)
         if lat is not None:
-            if not (-90 <= float(lat) <= 90):
-                self.add_error("latitude", "Invalid latitude value.")
+            if not (Decimal("-90") <= lat <= Decimal("90")):
+                self.add_error("latitude", "Latitude must be between -90 and 90.")
         if lng is not None:
-            if not (-180 <= float(lng) <= 180):
-                self.add_error("longitude", "Invalid longitude value.")
+            if not (Decimal("-180") <= lng <= Decimal("180")):
+                self.add_error("longitude", "Longitude must be between -180 and 180.")
 
         return cleaned
 
@@ -439,7 +459,6 @@ class VolunteerProfileUpdateForm(forms.ModelForm):
             "profile_image": CleanFileInput(attrs={
                 "class":   FILE_INPUT,
                 "accept":  "image/*",
-                "capture": "user",
             }),
         }
         labels = {
@@ -478,13 +497,16 @@ class VolunteerProfileUpdateForm(forms.ModelForm):
 
     def save(self, commit=True):
         profile = super().save(commit=False)
+        if commit:
+            # Save profile FIRST (writes image file to disk before signal can fire)
+            profile.save()
         if self.user:
             self.user.first_name = self.cleaned_data.get("first_name", "")
             self.user.last_name  = self.cleaned_data.get("last_name", "")
             if commit:
+                # Save user AFTER profile so the signal's profile.save()
+                # doesn't overwrite the freshly-saved profile_image
                 self.user.save()
-        if commit:
-            profile.save()
         return profile
 
 
@@ -495,14 +517,27 @@ class VolunteerProfileUpdateForm(forms.ModelForm):
 class DeliveryConfirmationForm(forms.ModelForm):
     """
     Used by volunteers when marking a donation as Delivered.
-    Requires an upload photo as proof of delivery.
+    Requires a proof photo; GPS coordinates are captured automatically via
+    the browser Geolocation API and submitted as hidden form fields.
     """
+
+    # GPS hidden fields — populated by JavaScript, not model fields directly
+    delivery_latitude = forms.DecimalField(
+        required=False,
+        widget=forms.HiddenInput(attrs={"id": "delivery_latitude"}),
+    )
+    delivery_longitude = forms.DecimalField(
+        required=False,
+        widget=forms.HiddenInput(attrs={"id": "delivery_longitude"}),
+    )
 
     class Meta:
         model  = FoodDonation
         fields = [
             "delivery_location",
             "delivery_image",
+            "delivery_latitude",
+            "delivery_longitude",
         ]
         widgets = {
             "delivery_location": forms.Textarea(attrs={
@@ -513,12 +548,11 @@ class DeliveryConfirmationForm(forms.ModelForm):
             "delivery_image": CleanFileInput(attrs={
                 "class":   FILE_INPUT,
                 "accept":  "image/*",
-                "capture": "environment",   # open rear camera directly on mobile
             }),
         }
         labels = {
-            "delivery_location": "Delivery Location",
-            "delivery_image":    "Delivery Photo (proof)",
+            "delivery_location":  "Delivery Location",
+            "delivery_image":     "Delivery Proof Photo",
         }
         help_texts = {
             "delivery_image": "Take a photo of the food being handed over as proof of delivery.",
@@ -532,7 +566,6 @@ class DeliveryConfirmationForm(forms.ModelForm):
             raise forms.ValidationError(
                 "A delivery photo is required to confirm the delivery."
             )
-        # Guard against oversized uploads (max 8 MB)
         if hasattr(image, "size") and image.size > 8 * 1024 * 1024:
             raise forms.ValidationError("Image file is too large. Maximum size is 8 MB.")
         return image
@@ -545,12 +578,44 @@ class DeliveryConfirmationForm(forms.ModelForm):
             )
         return loc
 
+    def clean(self):
+        cleaned = super().clean()
+        SIX_DP = Decimal("0.000001")
+
+        lat = cleaned.get("delivery_latitude")
+        lng = cleaned.get("delivery_longitude")
+
+        # Quantize to exactly 6dp to avoid DecimalField digit-overflow
+        # from GPS floating-point noise (e.g. 17.38504400000001)
+        if lat is not None:
+            try:
+                lat = Decimal(str(lat)).quantize(SIX_DP, rounding=ROUND_HALF_UP)
+                cleaned["delivery_latitude"] = lat
+            except Exception:
+                cleaned["delivery_latitude"] = None
+
+        if lng is not None:
+            try:
+                lng = Decimal(str(lng)).quantize(SIX_DP, rounding=ROUND_HALF_UP)
+                cleaned["delivery_longitude"] = lng
+            except Exception:
+                cleaned["delivery_longitude"] = None
+
+        return cleaned
+
     # ── Save ─────────────────────────────────────────────────────────────────
 
     def save(self, commit=True):
         donation = super().save(commit=False)
-        donation.status        = "delivered"
-        donation.delivery_time = timezone.now()
+        donation.status           = "delivered"
+        donation.delivery_time    = timezone.now()
+        # Persist GPS coordinates if captured
+        lat = self.cleaned_data.get("delivery_latitude")
+        lng = self.cleaned_data.get("delivery_longitude")
+        if lat is not None:
+            donation.delivery_latitude  = lat
+        if lng is not None:
+            donation.delivery_longitude = lng
         if commit:
             donation.save()
         return donation
